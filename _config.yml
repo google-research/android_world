@@ -18,16 +18,21 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Your awesome title
+title: AndroidWorld
 email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Emerging computer control agents, which execute human tasks by controlling
+  computer interfaces with minimal human supervision, can enhance human productivity
+  and application accessibility. Yet, progress in this field will be driven by realistic 
+  and reproducible benchmarks. We present AndroidWorld, a fully-functioning Android environment 
+  that provides reward signals for 116 programmatic task workflows across 20 real-world 
+  Android apps. Unlike existing interactive environments which provide a static test set, AndroidWorld 
+  supports task workflows that can be parameterized and expressed in natural language in unlimited 
+  ways, thus enabling testing on a much larger and realistic suite of tasks. Reward signals are 
+  derived from the computer's system state, making them durable across task variations and also 
+  extensible across different applications. 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
 
 # Build settings
 theme: minima
