@@ -1,0 +1,803 @@
+[
+  {
+    "task_template": "AudioRecorderRecordAudio",
+    "difficulty": "easy",
+    "tags": ["requires_setup"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "AudioRecorderRecordAudioWithFileName",
+    "difficulty": "easy",
+    "tags": ["data_entry", "complex_ui_understanding", "parameterized"],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "BrowserDraw",
+    "difficulty": "easy",
+    "tags": ["game_playing", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "BrowserMaze",
+    "difficulty": "easy",
+    "tags": [
+      "game_playing",
+      "multi_app",
+      "complex_ui_understanding",
+      "memorization",
+      "parameterized"
+    ],
+    "optimal_steps": "9"
+  },
+  {
+    "task_template": "BrowserMultiply",
+    "difficulty": "hard",
+    "tags": ["math_counting", "memorization", "screen_reading"],
+    "optimal_steps": "11"
+  },
+  {
+    "task_template": "CameraTakePhoto",
+    "difficulty": "easy",
+    "tags": [""],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "CameraTakeVideo",
+    "difficulty": "medium",
+    "tags": [""],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "ClockStopWatchPausedVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "1"
+  },
+  {
+    "task_template": "ClockStopWatchRunning",
+    "difficulty": "easy",
+    "tags": [""],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "ClockTimerEntry",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "ContactsAddContact",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "ContactsNewContactDraft",
+    "difficulty": "easy",
+    "tags": ["screen_reading", "data_entry"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "ExpenseAddMultiple",
+    "difficulty": "medium",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "20"
+  },
+  {
+    "task_template": "ExpenseAddMultipleFromGallery",
+    "difficulty": "hard",
+    "tags": [
+      "multi_app",
+      "screen_reading",
+      "data_entry",
+      "information_retrieval",
+      "parameterized"
+    ],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "ExpenseAddMultipleFromMarkor",
+    "difficulty": "hard",
+    "tags": [
+      "transcription",
+      "repetition",
+      "multi_app",
+      "data_entry",
+      "memorization",
+      "parameterized"
+    ],
+    "optimal_steps": "15"
+  },
+  {
+    "task_template": "ExpenseAddSingle",
+    "difficulty": "easy",
+    "tags": ["parameterized", "data_entry", "search"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "ExpenseDeleteDuplicates",
+    "difficulty": "medium",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "ExpenseDeleteDuplicates2",
+    "difficulty": "medium",
+    "tags": ["data_edit", "requires_setup", "parameterized"],
+    "optimal_steps": "9"
+  },
+  {
+    "task_template": "ExpenseDeleteMultiple",
+    "difficulty": "easy",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "ExpenseDeleteMultiple2",
+    "difficulty": "hard",
+    "tags": ["screen_reading", "parameterized"],
+    "optimal_steps": "17"
+  },
+  {
+    "task_template": "ExpenseDeleteSingle",
+    "difficulty": "easy",
+    "tags": ["screen_reading", "parameterized"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "FilesDeleteFile",
+    "difficulty": "medium",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "FilesMoveFile",
+    "difficulty": "medium",
+    "tags": ["search", "screen_reading", "parameterized"],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "MarkorAddNoteHeader",
+    "difficulty": "medium",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "MarkorChangeNoteContent",
+    "difficulty": "medium",
+    "tags": ["data_entry", "requires_setup", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "MarkorCreateFolder",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "MarkorCreateNote",
+    "difficulty": "medium",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "8"
+  },
+  {
+    "task_template": "MarkorCreateNoteAndSms",
+    "difficulty": "hard",
+    "tags": ["multi_app", "data_entry", "parameterized"],
+    "optimal_steps": "9"
+  },
+  {
+    "task_template": "MarkorCreateNoteFromClipboard",
+    "difficulty": "medium",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "7"
+  },
+  {
+    "task_template": "MarkorDeleteAllNotes",
+    "difficulty": "easy",
+    "tags": ["data_edit", "repetition", "parameterized"],
+    "optimal_steps": "7"
+  },
+  {
+    "task_template": "MarkorDeleteNewestNote",
+    "difficulty": "easy",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "MarkorDeleteNote",
+    "difficulty": "easy",
+    "tags": ["data_edit", "requires_setup", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "MarkorEditNote",
+    "difficulty": "easy",
+    "tags": ["data_edit", "transcription", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "MarkorMergeNotes",
+    "difficulty": "hard",
+    "tags": ["data_edit", "data_entry", "parameterized"],
+    "optimal_steps": "39"
+  },
+  {
+    "task_template": "MarkorMoveNote",
+    "difficulty": "medium",
+    "tags": ["parameterized", "complex_ui_understanding"],
+    "optimal_steps": "7"
+  },
+  {
+    "task_template": "MarkorTranscribeReceipt",
+    "difficulty": "medium",
+    "tags": [
+      "transcription",
+      "data_entry",
+      "multi_app",
+      "screen_reading",
+      "memorization",
+      "parameterized"
+    ],
+    "optimal_steps": "9"
+  },
+  {
+    "task_template": "MarkorTranscribeVideo",
+    "difficulty": "hard",
+    "tags": [
+      "multi_app",
+      "transcription",
+      "requires_setup",
+      "memorization",
+      "screen_reading",
+      "parameterized"
+    ],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "NotesIsTodo",
+    "difficulty": "easy",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "NotesMeetingAttendeeCount",
+    "difficulty": "easy",
+    "tags": ["search", "parameterized"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "NotesRecipeIngredientCount",
+    "difficulty": "easy",
+    "tags": ["search", "parameterized"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "NotesTodoItemCount",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "math_counting", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "OpenAppTaskEval",
+    "difficulty": "easy",
+    "tags": ["parameterized"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "OsmAndFavorite",
+    "difficulty": "medium",
+    "tags": ["search", "complex_ui_understanding", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "OsmAndMarker",
+    "difficulty": "hard",
+    "tags": ["complex_ui_understanding", "search", "parameterized"],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "OsmAndTrack",
+    "difficulty": "hard",
+    "tags": [
+      "complex_ui_understanding",
+      "search",
+      "data_entry",
+      "repetition",
+      "parameterized"
+    ],
+    "optimal_steps": "60"
+  },
+  {
+    "task_template": "RecipeAddMultipleRecipes",
+    "difficulty": "medium",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "34"
+  },
+  {
+    "task_template": "RecipeAddMultipleRecipesFromImage",
+    "difficulty": "hard",
+    "tags": [
+      "transcription",
+      "screen_reading",
+      "data_entry",
+      "complex_ui_understanding",
+      "parameterized"
+    ],
+    "optimal_steps": "13"
+  },
+  {
+    "task_template": "RecipeAddMultipleRecipesFromMarkor",
+    "difficulty": "hard",
+    "tags": [
+      "data_entry",
+      "multi_app",
+      "screen_reading",
+      "memorization",
+      "parameterized"
+    ],
+    "optimal_steps": "24"
+  },
+  {
+    "task_template": "RecipeAddMultipleRecipesFromMarkor2",
+    "difficulty": "hard",
+    "tags": [
+      "parameterized",
+      "screen_reading",
+      "complex_ui_understanding",
+      "repetition",
+      "multi_app",
+      "data_entry",
+      "information_retrieval"
+    ],
+    "optimal_steps": "26"
+  },
+  {
+    "task_template": "RecipeAddSingleRecipe",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "12"
+  },
+  {
+    "task_template": "RecipeDeleteDuplicateRecipes",
+    "difficulty": "easy",
+    "tags": [
+      "search",
+      "data_edit",
+      "screen_reading",
+      "repetition",
+      "parameterized"
+    ],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "RecipeDeleteDuplicateRecipes2",
+    "difficulty": "medium",
+    "tags": ["repetition", "data_edit", "parameterized"],
+    "optimal_steps": "11"
+  },
+  {
+    "task_template": "RecipeDeleteDuplicateRecipes3",
+    "difficulty": "medium",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "16"
+  },
+  {
+    "task_template": "RecipeDeleteMultipleRecipes",
+    "difficulty": "easy",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "12"
+  },
+  {
+    "task_template": "RecipeDeleteMultipleRecipesWithConstraint",
+    "difficulty": "hard",
+    "tags": ["screen_reading", "repetition", "parameterized"],
+    "optimal_steps": "20"
+  },
+  {
+    "task_template": "RecipeDeleteMultipleRecipesWithNoise",
+    "difficulty": "medium",
+    "tags": [
+      "parameterized",
+      "search",
+      "complex_ui_understanding",
+      "repetition"
+    ],
+    "optimal_steps": "17"
+  },
+  {
+    "task_template": "RecipeDeleteSingleRecipe",
+    "difficulty": "easy",
+    "tags": ["data_edit", "search", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "RecipeDeleteSingleWithRecipeWithNoise",
+    "difficulty": "easy",
+    "tags": ["search", "screen_reading", "data_edit", "parameterized"],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "RetroCreatePlaylist",
+    "difficulty": "medium",
+    "tags": ["data_entry", "repetition", "parameterized"],
+    "optimal_steps": "12"
+  },
+  {
+    "task_template": "RetroPlayingQueue",
+    "difficulty": "easy",
+    "tags": ["parameterized"],
+    "optimal_steps": "16"
+  },
+  {
+    "task_template": "RetroPlaylistDuration",
+    "difficulty": "medium",
+    "tags": [
+      "math_counting",
+      "complex_ui_understanding",
+      "repetition",
+      "parameterized"
+    ],
+    "optimal_steps": "15"
+  },
+  {
+    "task_template": "RetroSavePlaylist",
+    "difficulty": "hard",
+    "tags": ["search", "repetition", "parameterized"],
+    "optimal_steps": "25"
+  },
+  {
+    "task_template": "SaveCopyOfReceiptTaskEval",
+    "difficulty": "hard",
+    "tags": ["parameterized", "complex_ui_understanding"],
+    "optimal_steps": "8"
+  },
+  {
+    "task_template": "SimpleCalendarAddOneEvent",
+    "difficulty": "hard",
+    "tags": ["data_entry", "complex_ui_understanding", "parameterized"],
+    "optimal_steps": "17"
+  },
+  {
+    "task_template": "SimpleCalendarAddOneEventInTwoWeeks",
+    "difficulty": "medium",
+    "tags": ["data_entry", "math_counting", "parameterized"],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "SimpleCalendarAddOneEventRelativeDay",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "17"
+  },
+  {
+    "task_template": "SimpleCalendarAddOneEventTomorrow",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "13"
+  },
+  {
+    "task_template": "SimpleCalendarAddRepeatingEvent",
+    "difficulty": "easy",
+    "tags": ["data_entry", "complex_ui_understanding", "parameterized"],
+    "optimal_steps": "14"
+  },
+  {
+    "task_template": "SimpleCalendarAnyEventsOnDate",
+    "difficulty": "easy",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "SimpleCalendarDeleteEvents",
+    "difficulty": "easy",
+    "tags": ["parameterized", "data_edit"],
+    "optimal_steps": "7"
+  },
+  {
+    "task_template": "SimpleCalendarDeleteEventsOnRelativeDay",
+    "difficulty": "medium",
+    "tags": ["data_edit", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "SimpleCalendarDeleteOneEvent",
+    "difficulty": "easy",
+    "tags": ["data_edit", "complex_ui_understanding", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "SimpleCalendarEventOnDateAtTime",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SimpleCalendarEventsInNextWeek",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SimpleCalendarEventsInTimeRange",
+    "difficulty": "easy",
+    "tags": [
+      "complex_ui_understanding",
+      "screen_reading",
+      "search",
+      "transcription",
+      "information_retrieval",
+      "parameterized"
+    ],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SimpleCalendarEventsOnDate",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "SimpleCalendarFirstEventAfterStartTime",
+    "difficulty": "easy",
+    "tags": ["parameterized", "screen_reading"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SimpleCalendarLocationOfEvent",
+    "difficulty": "easy",
+    "tags": ["search", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "SimpleCalendarNextEvent",
+    "difficulty": "easy",
+    "tags": [
+      "complex_ui_understanding",
+      "screen_reading",
+      "information_retrieval",
+      "parameterized"
+    ],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "SimpleCalendarNextMeetingWithPerson",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "SimpleDrawProCreateDrawing",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "9"
+  },
+  {
+    "task_template": "SimpleSmsReply",
+    "difficulty": "easy",
+    "tags": ["search", "data_entry", "parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "SimpleSmsReplyMostRecent",
+    "difficulty": "medium",
+    "tags": ["parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "SimpleSmsResend",
+    "difficulty": "medium",
+    "tags": ["parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "SimpleSmsSend",
+    "difficulty": "medium",
+    "tags": ["parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "SimpleSmsSendClipboardContent",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "SimpleSmsSendReceivedAddress",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "9"
+  },
+  {
+    "task_template": "SportsTrackerActivitiesCountForWeek",
+    "difficulty": "easy",
+    "tags": ["search", "requires_setup", "parameterized"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SportsTrackerActivitiesOnDate",
+    "difficulty": "hard",
+    "tags": [
+      "search",
+      "complex_ui_understanding",
+      "screen_reading",
+      "information_retrieval",
+      "transcription",
+      "parameterized"
+    ],
+    "optimal_steps": "10"
+  },
+  {
+    "task_template": "SportsTrackerActivityDuration",
+    "difficulty": "easy",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "SportsTrackerLongestDistanceActivity",
+    "difficulty": "easy",
+    "tags": [
+      "parameterized",
+      "screen_reading",
+      "information_retrieval",
+      "math_counting"
+    ],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SportsTrackerTotalDistanceForCategoryOverInterval",
+    "difficulty": "hard",
+    "tags": ["search", "parameterized", "math_counting"],
+    "optimal_steps": "11"
+  },
+  {
+    "task_template": "SportsTrackerTotalDurationForCategoryThisWeek",
+    "difficulty": "hard",
+    "tags": ["math_counting", "search", "parameterized"],
+    "optimal_steps": "8"
+  },
+  {
+    "task_template": "SystemBluetoothTurnOff",
+    "difficulty": "easy",
+    "tags": [""],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SystemBluetoothTurnOffVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SystemBluetoothTurnOn",
+    "difficulty": "easy",
+    "tags": ["screen_reading"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SystemBluetoothTurnOnVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SystemBrightnessMax",
+    "difficulty": "easy",
+    "tags": [""],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SystemBrightnessMaxVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SystemBrightnessMin",
+    "difficulty": "easy",
+    "tags": [""],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SystemBrightnessMinVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SystemCopyToClipboard",
+    "difficulty": "easy",
+    "tags": ["data_entry", "parameterized"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "SystemWifiTurnOff",
+    "difficulty": "easy",
+    "tags": ["screen_reading"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SystemWifiTurnOffVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SystemWifiTurnOn",
+    "difficulty": "easy",
+    "tags": ["screen_reading"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "SystemWifiTurnOnVerify",
+    "difficulty": "easy",
+    "tags": ["verification"],
+    "optimal_steps": "3"
+  },
+  {
+    "task_template": "TasksCompletedTasksForDate",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "search", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "TasksDueNextWeek",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "parameterized"],
+    "optimal_steps": "6"
+  },
+  {
+    "task_template": "TasksDueOnDate",
+    "difficulty": "easy",
+    "tags": ["search", "parameterized"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "TasksHighPriorityTasks",
+    "difficulty": "medium",
+    "tags": [
+      "complex_ui_understanding",
+      "search",
+      "information_retrieval",
+      "transcription",
+      "parameterized"
+    ],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "TasksHighPriorityTasksDueOnDate",
+    "difficulty": "medium",
+    "tags": ["information_retrieval", "screen_reading", "parameterized"],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "TasksIncompleteTasksOnDate",
+    "difficulty": "easy",
+    "tags": ["parameterized", "screen_reading", "information_retrieval"],
+    "optimal_steps": "2"
+  },
+  {
+    "task_template": "TurnOffWifiAndTurnOnBluetooth",
+    "difficulty": "medium",
+    "tags": [""],
+    "optimal_steps": "5"
+  },
+  {
+    "task_template": "TurnOnWifiAndOpenApp",
+    "difficulty": "easy",
+    "tags": ["parameterized"],
+    "optimal_steps": "4"
+  },
+  {
+    "task_template": "VlcCreatePlaylist",
+    "difficulty": "medium",
+    "tags": ["data_edit", "repetition", "parameterized"],
+    "optimal_steps": "14"
+  },
+  {
+    "task_template": "VlcCreateTwoPlaylists",
+    "difficulty": "medium",
+    "tags": ["data_entry", "requires_setup", "parameterized"],
+    "optimal_steps": "24"
+  }
+]
