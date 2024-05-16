@@ -241,7 +241,8 @@ class AsyncAndroidEnv(AsyncEnv):
   def execute_action(self, action: json_action.JSONAction) -> None:
     if action.action_type == json_action.ANSWER:
       self.interaction_cache = action.text
-      self.display_message(action.text, header='Agent answered:')
+      if action.text:
+        self.display_message(action.text, header='Agent answered:')
       return
     state = self.get_state(wait_to_stabilize=False)
     actuation.execute_adb_action(
