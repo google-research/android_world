@@ -281,6 +281,7 @@ def _run_task_suite(
     env: interface.AsyncEnv,
     checkpointer: checkpointer_lib.Checkpointer = checkpointer_lib.NullCheckpointer(),
     demo_mode: bool = False,
+    agent_name: str = '',
 ) -> list[dict[str, Any]]:
   """Runs e2e system on suite.
 
@@ -290,6 +291,7 @@ def _run_task_suite(
     env: The environment e2e system runs on.
     checkpointer: See docstring from `run`.
     demo_mode: Whether to display the scoreboard.
+    agent_name: The name of the agent.
 
   Returns:
     A list of dict data for each episode, including the scripted reward.
@@ -309,6 +311,7 @@ def _run_task_suite(
     task_episodes = []
     for instance in instances:
       episode = _run_task(instance, run_episode, env, demo_mode=demo_mode)
+      episode[constants.EpisodeConstants.AGENT_NAME] = agent_name
       task_episodes.append(episode)
       checkpointer.save_episodes(task_episodes, name)
       all_episodes.append(episode)
@@ -378,9 +381,9 @@ def run(
       agent.env,
       checkpointer=checkpointer,
       demo_mode=demo_mode,
+      agent_name=agent.name,
   )
-  for r in results:
-    r['agent_name'] = agent.name
+
   return results
 
 

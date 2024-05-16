@@ -349,10 +349,10 @@ class SuiteUtilsTest(parameterized.TestCase):
       mock_agent,
       mock_run_suite,
   ):
-    # Mocks.
     mock_run_suite.return_value = [{
         'goal': 'Goal',
         'is_successful': 1.0,
+        'agent_name': 'AnAgent',
     }] * 2
     mock_agent.name = 'AnAgent'
     mock_agent.env = test_utils.FakeAsyncEnv()
@@ -366,7 +366,6 @@ class SuiteUtilsTest(parameterized.TestCase):
 
     results = suite_utils.run(suite, agent=mock_agent, demo_mode=False)
 
-    # Verify
     mock_run_suite.assert_called_once()
     self.assertLen(results, 2)
     for result in results:
