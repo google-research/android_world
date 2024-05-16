@@ -22,7 +22,7 @@ Chris Rawles, Yifan Chang, Jonathan Waltz, Gabrielle Lau, Robert Berry, Wei Li, 
 
 ## Dataset
 
-<video width='100%' autoplay muted loop playsinline>
+<video height='30%' width='30%' autoplay muted loop playsinline controls>
 <source src="assets/videos/AudioRecorderRecordAudioWithFileName_2x.mp4" type="video/mp4">
 </video>
 
