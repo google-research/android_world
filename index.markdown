@@ -21,11 +21,84 @@ Chris Rawles, Yifan Chang, Jonathan Waltz, Gabrielle Lau, Robert Berry, Wei Li, 
 
 
 ## Dataset
-
-<video height='30%' width='30%' autoplay muted loop playsinline controls>
-<source src="assets/videos/AudioRecorderRecordAudioWithFileName_2x.mp4" type="video/mp4">
-</video>
-
+<div class="video-row">
+  <div class="video-content">
+    <div class="overlay">
+      <p>(a) Record an audio and save it</p>
+    </div>
+    <video height='80%' width='80%' autoplay muted loop playsinline controls>
+      <source src="assets/videos/AudioRecorderRecordAudioWithFileName.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-content">
+    <div class="overlay">
+      <p>(b) Add multiple expenses.</p>
+    </div>
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/ExpenseAddMultiple.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-content">
+    <div class="overlay">
+      <p>(c) Create a marker in a map app</p>
+    </div>
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/OsmAndMarker.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+<div class="video-row">
+  <div class="video-content">
+    <div class="overlay">
+      <p>(a) Create multiple recipes.</p>
+    </div>
+    <video height='80%' width='80%' autoplay muted loop playsinline controls>
+      <source src="assets/videos/RecipeAddMultipleRecipes.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-content">
+    <div class="overlay">
+      <p>(b) Add a calendar event.</p>
+    </div>
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/SimpleCalendarAddOneEventRelativeDay_2x.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-content">
+    <div class="overlay">
+      <p>(c) Retrieve sports tracking stats.</p>
+    </div>
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/SportsTrackerTotalDistanceForCategoryOverInterval_2x.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+<div class="video-row">
+  <div class="video-content">
+    <div class="overlay">
+      <p>(a) Send received address to contact.</p>
+    </div>
+    <video height='80%' width='80%' autoplay muted loop playsinline controls>
+      <source src="assets/videos/SimpleSmsSendReceivedAddress.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-content">
+    <div class="overlay">
+      <p>(b) Create a playlist in VLC.</p>
+    </div>
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/VlcCreatePlaylist_2x.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-content">
+    <div class="overlay">
+      <p>(c) Retrieve high priority tasks due on date.</p>
+    </div>
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/TasksHighPriorityTasksDueOnDate_2x.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
 ### Dataset Contents
 
 
