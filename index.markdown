@@ -9,7 +9,7 @@ title: AndroidWorld
 Chris Rawles, Yifan Chang, Jonathan Waltz, Gabrielle Lau, Robert Berry, Wei Li, Will Bishop, Alice Li, Folawiyo Campbell-Ajala, Divya Tyam, Daniel Toyama, Timothy Lillicrap, Oriana Riva
 </p>
 <p align="center">
-<a href="#Dataset"><b>Dataset</b></a> •
+<a href="#dataset"><b>Dataset</b></a> •
 <a href=""><b>Paper</b></a> •
 <a href="#download-data"><b>Download Data</b></a> •
 <a href="#license--contact"><b>License & Contact</b></a>
