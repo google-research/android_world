@@ -29,7 +29,8 @@ class InferTest(absltest.TestCase):
     super().setUp()
     self.mock_post = mock.patch.object(requests, "post").start()
     self.mock_sleep = mock.patch.object(time, "sleep").start()
-    os.environ["API_KEY"] = "fake_api_key"
+    os.environ["OPENAI_API_KEY"] = "fake_api_key"
+    os.environ["GCP_API_KEY"] = "fake_api_key"
 
   @mock.patch.object(genai.GenerativeModel, "generate_content")
   def test_gemini_gcp(self, mock_generate_content):
