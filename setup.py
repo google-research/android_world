@@ -18,9 +18,7 @@ import os
 
 import pkg_resources
 import setuptools
-from setuptools.command import build_ext
 from setuptools.command import build_py
-
 
 _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 _PACKAGE_PROTOS = (
@@ -63,35 +61,19 @@ class _GenerateProtoFiles(setuptools.Command):
         raise RuntimeError('ERROR: {}'.format(proto_args))
 
 
-class _BuildExt(build_ext.build_ext):
-  """Generate protobuf bindings in build_ext stage."""
-
-  def run(self):
-    self.run_command('generate_protos')
-    build_ext.run(self)
-
-
 class _BuildPy(build_py.build_py):
-  """Generate protobuf bindings in build_py stage."""
+  """Generate protobuf bindings during the build_py stage."""
 
   def run(self):
     self.run_command('generate_protos')
-    build_py.run(self)
-
-
-def parse_requirements(filename):
-  """Load requirements from a pip requirements file."""
-  with open(filename, 'r') as file:
-    return file.read().splitlines()
+    super().run()
 
 
 setuptools.setup(
     name='android_world',
     package_data={'': ['proto/*.proto']},  # Copy protobuf files.
     packages=setuptools.find_packages(),
-    install_requires=parse_requirements('requirements.txt'),
     cmdclass={
-        'build_ext': _BuildExt,
         'build_py': _BuildPy,
         'generate_protos': _GenerateProtoFiles,
     },
