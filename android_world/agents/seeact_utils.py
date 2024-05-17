@@ -308,7 +308,7 @@ def execute_openai_request(
   Returns:
     The response from the OpenAI API.
   """
-  openai.api_key = os.environ["API_KEY"]
+  openai.api_key = os.environ["OPENAI_API_KEY"]
 
   response = openai.ChatCompletion.create(
       model=model,

@@ -420,6 +420,7 @@ def _clear_external_downloads(env: interface.AsyncEnv) -> None:
   adb_utils.issue_generic_request(
       "shell content delete --uri content://media/external/downloads",
       env.base_env,
+      timeout_sec=10,  # This can sometimes take longer than 5s.
   )
 
 

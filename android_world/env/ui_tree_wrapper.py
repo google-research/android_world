@@ -79,6 +79,7 @@ def get_a11y_tree(
         'Airplane mode is on -- cannot retrieve a11y tree via gRPC. Turning'
         ' it off...'
     )
+    logging.info('Enabling networking...')
     env.attempt_enable_networking()
     time.sleep(1.0)
 
