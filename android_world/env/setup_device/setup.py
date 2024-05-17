@@ -30,12 +30,9 @@ from android_world.env.setup_device import apps
 from android_world.utils import app_snapshot
 from android_world.utils import file_utils
 
-# APKs are stored here.
-apps.APP_DATA = "./app_data"
-
-
 # APKs required for Android World.
 _APPS = (
+    # keep-sorted start
     apps.AndroidWorldApp,
     apps.AudioRecorder,
     apps.CameraApp,
@@ -60,14 +57,16 @@ _APPS = (
     apps.SimpleSMSMessengerApp,
     apps.TasksApp,
     apps.VlcApp,
+    # keep-sorted end
 )
 
 
-def _install_apk(apk: str, env: env_interface.AndroidEnvInterface) -> None:
+def _download_and_install_apk(
+    apk: str, env: env_interface.AndroidEnvInterface
+) -> None:
   """Downloads all APKs from remote location and installs them."""
-  full_path = os.path.join(apps.APP_DATA, apk)
-  apps.validate_app_data(full_path)
-  adb_utils.install_apk(full_path, env)
+  path = apps.download_app_data(apk)
+  adb_utils.install_apk(path, env)
 
 
 def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
@@ -81,9 +80,15 @@ def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
   adb_utils.press_home_button(env)
   adb_utils.issue_generic_request(["root"], env)
 
+  logging.info(
+      "Downloading app data and installing %d apps. This make take a few"
+      " minutes.",
+      len(_APPS),
+  )
   for app in _APPS:
     if app.apk_name:  # Ignore 1p apps that don't have an APK.
-      _install_apk(app.apk_name, env)
+      _download_and_install_apk(app.apk_name, env)
+
   print(
       "Setting up applications on Android device. Please do not interact with"
       " device while installation is running."

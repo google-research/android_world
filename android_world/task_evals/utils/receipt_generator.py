@@ -22,7 +22,18 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 
-_DEFAULT_FONT_PATH = "arial.ttf"
+_FONT_PATHS = ["arial.ttf", "Arial Unicode.ttf", "Roboto-Regular.ttf"]
+
+
+def _get_font_path() -> str:
+  """Get the font path, falling back to a default system font if necessary."""
+  for font_name in _FONT_PATHS:
+    try:
+      font_path = ImageFont.truetype(font_name, 16).path
+      return font_path
+    except IOError:
+      continue
+  raise FileNotFoundError("No suitable font found.")
 
 
 def _random_date():
@@ -84,9 +95,10 @@ def create_receipt(num_transactions: int = 1) -> tuple[Image.Image, str]:
   img = Image.new("RGB", (500, img_height), color=(255, 255, 255))
   d = ImageDraw.Draw(img)
 
-  font = ImageFont.truetype(_DEFAULT_FONT_PATH, 16)
-  header_font = ImageFont.truetype(_DEFAULT_FONT_PATH, 20)
-  footer_font = ImageFont.truetype(_DEFAULT_FONT_PATH, 12)
+  font_path = _get_font_path()
+  font = ImageFont.truetype(font_path, 16)
+  header_font = ImageFont.truetype(font_path, 20)
+  footer_font = ImageFont.truetype(font_path, 12)
 
   # Add company name and slogan
   y_text = 100

@@ -45,7 +45,7 @@ class SetupTest(absltest.TestCase):
 
     tmp_apk_file = '/tmp/example.apk'
     mock_tmp_file_from_cns.return_value.__enter__.return_value = tmp_apk_file
-    setup._install_apk(apk, env)
+    setup._download_and_install_apk(apk, env)
 
     mock_tmp_file_from_cns.assert_called_once_with(
         os.path.join(apps.APP_DATA, apk),
@@ -53,7 +53,7 @@ class SetupTest(absltest.TestCase):
     mock_install_apk.assert_called_once_with(tmp_apk_file, env)
 
   @mock.patch.object(tools, 'AndroidToolController')
-  @mock.patch.object(setup, '_install_apk')
+  @mock.patch.object(setup, '_download_and_install_apk')
   @mock.patch.object(app_snapshot, 'save_snapshot')
   def test_setup_apps(self, mock_save_snapshot, mock_install_apk, unused_tools):
     env = mock.create_autospec(env_interface.AndroidEnvInterface)

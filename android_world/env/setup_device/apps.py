@@ -29,21 +29,34 @@ from android_world.env import adb_utils
 from android_world.env import tools
 from android_world.task_evals.information_retrieval import joplin_app_utils
 from android_world.utils import file_utils
+import requests
 
 
 APP_DATA = os.path.join(os.path.dirname(__file__), 'app_data')
 
 
-def validate_app_data(path: str):
-  """Validates that the app data file exists."""
-  if not os.path.exists(path):
-    raise FileNotFoundError(
-        f"The required app data file '{os.path.basename(path)}' does not"
-        " exist.\nPlease download the app APKs and data files and place them"
-        " in the 'android_world/env/setup_device/app_data' directory.\nRefer"
-        " to the project documentation for instructions on how to obtain the"
-        " necessary files."
-    )
+def download_app_data(file_name: str) -> str:
+  """Downloads file from a GCS bucket, if not cached, and installs it."""
+  cache_dir = "/tmp/android_world/app_data"
+  remote_url = (
+      f"https://storage.googleapis.com/gresearch/android_world/{file_name}"
+  )
+  full_path = os.path.join(cache_dir, file_name)
+  os.makedirs(cache_dir, exist_ok=True)
+  if not os.path.isfile(full_path):
+    logging.info("Downloading file_name %s to cache %s", file_name, cache_dir)
+    response = requests.get(remote_url)
+    if response.status_code == 200:
+      with open(full_path, "wb") as file:
+        file.write(response.content)
+    else:
+      raise RuntimeError(
+          f"Failed to download file_name from {remote_url}, status code:"
+          f" {response.status_code}"
+      )
+  else:
+    logging.info("File already %s exists in cache %s", file_name, cache_dir)
+  return full_path
 
 
 class AppSetup(abc.ABC):
@@ -91,8 +104,7 @@ class AppSetup(abc.ABC):
           f"Failed to copy {device_path} to device.",
       )
 
-      full_path = os.path.join(apps.APP_DATA, file)
-      validate_app_data(full_path)
+      full_path = download_app_data(file)
       copy_to_device(full_path)
 
 
