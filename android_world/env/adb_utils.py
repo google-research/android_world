@@ -176,7 +176,7 @@ def start_activity(
   Returns:
     The adb response received after issuing the request.
   """
-  logging.info('Attemting to launch %r', activity)
+  logging.info('Attempting to launch %r', activity)
   response = env.execute_adb_call(
       adb_pb2.AdbRequest(
           start_activity=adb_pb2.AdbRequest.StartActivity(
