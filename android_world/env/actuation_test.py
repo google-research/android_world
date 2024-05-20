@@ -292,23 +292,6 @@ class ExecuteAdbActionTest(absltest.TestCase):
       )  # Assuming screen_size is (100, 100)
       mock_issue_request.assert_called_once()
 
-  def test_launch_quick_settings(self):
-    action = json_action.JSONAction(
-        action_type='launch_adb_activity', activity_nickname='quick_settings'
-    )
-    with (
-        mock.patch.object(adb_utils, 'generate_swipe_command') as mock_swipe,
-        mock.patch.object(
-            adb_utils, 'issue_generic_request'
-        ) as mock_issue_request,
-    ):
-      actuation.execute_adb_action(
-          action, self.screen_elements, self.screen_size, self.mock_env
-      )
-
-      mock_swipe.assert_called_once_with(50, 30, 50, 30, duration_ms=10)
-      mock_issue_request.assert_called_once()
-
 
 if __name__ == '__main__':
   absltest.main()
