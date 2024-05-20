@@ -31,8 +31,11 @@ from android_world.env import representation_utils
 from IPython import display
 from matplotlib.pylab import plt
 import numpy as np
-import openai
 import PIL
+import requests
+
+# OpenAI model used for these experiments.
+_GPT_TURBO = "gpt-4-turbo-2024-04-09"
 
 VALID_ACTIONS = {
     "CLICK",
@@ -293,10 +296,10 @@ def display_prompt(
 
 def execute_openai_request(
     messages_payload: list[dict[str, Any]],
-    model: str = "gpt-4-vision-preview",
+    model: str = _GPT_TURBO,
     temperature: float = 0.0,
     max_tokens: int = 4096,
-) -> openai.ChatCompletion:
+) -> dict[str, Any]:
   """Executes a request to the OpenAI API with the given JSON input.
 
   Args:
@@ -306,18 +309,27 @@ def execute_openai_request(
     max_tokens: Max number of output tokens.
 
   Returns:
-    The response from the OpenAI API.
+    The response from the OpenAI API as a dictionary.
   """
-  openai.api_key = os.environ["OPENAI_API_KEY"]
+  api_key = os.environ["OPENAI_API_KEY"]
+  headers = {
+      "Content-Type": "application/json",
+      "Authorization": f"Bearer {api_key}",
+  }
+  payload = {
+      "model": model,
+      "messages": messages_payload,
+      "temperature": temperature,
+      "max_tokens": max_tokens,
+  }
 
-  response = openai.ChatCompletion.create(
-      model=model,
-      messages=messages_payload,
-      temperature=temperature,
-      max_tokens=max_tokens,
+  response = requests.post(
+      "https://api.openai.com/v1/chat/completions",
+      headers=headers,
+      json=payload,
   )
 
-  return response
+  return response.json()
 
 
 @dataclasses.dataclass(frozen=True)

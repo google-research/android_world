@@ -7,7 +7,6 @@ immutabledict==2.0.0
 jsonschema==4.17.3
 matplotlib==3.6.1
 numpy==1.26.3
-openai
 opencv-python
 pandas==2.1.4
 pydub
