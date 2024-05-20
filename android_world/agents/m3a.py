@@ -421,14 +421,7 @@ class M3A(base_agent.EnvironmentInteractingAgent):
     )
 
     if not raw_response:
-      step_data['summary'] = (
-          'Some error occurred calling LLM during action selection phase.'
-      )
-      self.history.append(step_data)
-      return base_agent.AgentInteractionResult(
-          False,
-          step_data,
-      )
+      raise RuntimeError('Error calling LLM in action selection phase.')
     step_data['action_output'] = action_output
     step_data['action_raw_response'] = raw_response
 

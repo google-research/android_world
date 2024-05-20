@@ -343,15 +343,7 @@ class T3A(base_agent.EnvironmentInteractingAgent):
         action_prompt,
     )
     if not raw_response:
-      print('Error calling LLM in action selection phase.')
-      step_data['summary'] = (
-          'Error calling LLM in action selection phase.'
-      )
-      self.history.append(step_data)
-      return base_agent.AgentInteractionResult(
-          False,
-          step_data,
-      )
+      raise RuntimeError('Error calling LLM in action selection phase.')
 
     step_data['action_output'] = action_output
     step_data['action_raw_response'] = raw_response

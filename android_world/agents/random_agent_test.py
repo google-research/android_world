@@ -14,7 +14,6 @@
 
 from unittest import mock
 from absl.testing import absltest
-from android_world import constants
 from android_world.agents import random_agent
 from android_world.env import actuation
 from android_world.utils import test_utils
@@ -37,7 +36,6 @@ class TestGenerateRandomAction(absltest.TestCase):
             'swipe',
             'navigate_home',
             'navigate_back',
-            'press_enter',
             'wait',
             'input_text',
         ],
@@ -81,10 +79,8 @@ class RandomAgentInteractionTest(absltest.TestCase):
     goal = 'do something'
     step_data = agent.step(goal)
 
-    self.assertIn(constants.StepConstants.SCREENSHOT, step_data.data)
-    self.assertIn(constants.StepConstants.GROUNDER_OUTPUT, step_data.data)
-    self.assertIn(constants.StepConstants.GROUNDER_UI_ELEMENTS, step_data.data)
-    self.assertIn(constants.StepConstants.ADB_ACTIVITY, step_data.data)
+    self.assertIn('raw_screenshot', step_data.data)
+    self.assertIn('ui_elements', step_data.data)
 
 
 if __name__ == '__main__':

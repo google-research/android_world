@@ -16,7 +16,6 @@
 
 import random
 import string
-from android_world import constants
 from android_world.agents import base_agent
 from android_world.env import interface
 from android_world.env import json_action
@@ -44,7 +43,7 @@ def _generate_random_action(
       json_action.SWIPE: 0.05,
       json_action.NAVIGATE_HOME: 0.05,
       json_action.NAVIGATE_BACK: 0.05,
-      json_action.PRESS_ENTER: 0.05,
+      json_action.KEYBOARD_ENTER: 0.05,
       json_action.WAIT: 0.05,
       json_action.INPUT_TEXT: 0.05,
   }
@@ -102,10 +101,8 @@ class RandomAgent(base_agent.EnvironmentInteractingAgent):
     if self._verbose:
       print(action)
     step_data = {
-        constants.StepConstants.SCREENSHOT: state.pixels,
-        constants.StepConstants.GROUNDER_OUTPUT: action,
-        constants.StepConstants.GROUNDER_UI_ELEMENTS: state.ui_elements,
-        constants.StepConstants.ADB_ACTIVITY: self.env.foreground_activity_name,
+        'raw_screenshot': state.pixels,
+        'ui_elements': state.ui_elements,
     }
     done = False
     return base_agent.AgentInteractionResult(
