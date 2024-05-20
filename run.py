@@ -25,6 +25,7 @@ import os
 
 from absl import app
 from absl import flags
+from absl import logging
 from android_world import checkpointer as checkpointer_lib
 from android_world import registry
 from android_world import suite_utils
@@ -54,6 +55,12 @@ def _find_adb_directory() -> str:
       ' already installed, point to the installed location.'
   )
 
+_LOG_LEVEL = flags.DEFINE_enum(
+    'log_level',
+    'ERROR',
+    ['FATAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
+    'Log level.',
+)
 
 _ADB_PATH = flags.DEFINE_string(
     'adb_path',
@@ -190,6 +197,8 @@ def _get_agent(
 
 def _main() -> None:
   """Runs eval suite and gets rewards back."""
+  logging.set_verbosity(_LOG_LEVEL.value)
+
   env = env_launcher.load_and_setup_env(
       console_port=_DEVICE_CONSOLE_PORT.value,
       emulator_setup=_EMULATOR_SETUP.value,
