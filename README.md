@@ -1,90 +1,87 @@
 # AndroidWorld
 
-**AndroidWorld** is an environment for building autonomous computer control agents.
 
-It runs on a live Android emulator, consisting of a highly reproducible task suite with 116 hand-crafted tasks across 20 apps, which are dynamically instantiated with randomly-generated parameters to create millions of unique task variations.
+**AndroidWorld** is an environment for building and benchmarking autonomous computer control agents.
+
+It runs on a live Android emulator and contains a highly reproducible benchmark of 116 hand-crafted tasks across 20 apps, which are dynamically instantiated with randomly-generated parameters to create millions of unique task variations.
 
 In addition to the built-in tasks, AndroidWorld also supports the popular web benchmark, MiniWoB++ from [Liu et al.](http://arxiv.org/abs/1802.08802).
 
 Key features of AndroidWorld include:
 
-* Open environment with access to millions of Android apps and websites
-* 116 diverse tasks across 20 real-world apps
-* Dynamic task instantiation for millions of unique variations
-* Durable reward signals for reliable evaluation
-* Lightweight footprint (2 GB memory, 8 GB disk)
-* Extensible design to easily add new tasks and benchmarks
-* Integration with MiniWoB++ web-based tasks
-
-Watch a demo of an agent interacting with AndroidWorld [here](todo).
+* 📝 **116 diverse tasks** across 20 real-world apps
+* 🎲 **Dynamic task instantiation** for millions of unique variations
+* 🏆 **Durable reward signals** for reliable evaluation
+* 🌐 **Open environment** with access to millions of Android apps and websites
+* 💾 **Lightweight footprint** (2 GB memory, 8 GB disk)
+* 🔧 **Extensible design** to easily add new tasks and benchmarks
+* 🖥️ **Integration with MiniWoB++** web-based tasks
 
 ## Installation
 
 1. Set up the Android Emulator
- 1. Download Android Studio [here](https://developer.android.com/studio?gad_source=1&gclid=Cj0KCQjw3ZayBhDRARIsAPWzx8oLcadBD0vAq8xmUutaunLGSzhgEtLz4xVZ_SpV4G0xJazS7LxQkDsaAuveEALw_wcB&gclsrc=aw.ds)
- 2. Create an Android Virtual Device (AVD) by following these instructions. For hardware select **Pixel 6**, for System Image select **Tiramisu, API Level 33**, and choose AVD name as **AndroidWorldAvd**.
+   1. Download Android Studio [here](https://developer.android.com/studio?gad_source=1&gclid=Cj0KCQjw3ZayBhDRARIsAPWzx8oLcadBD0vAq8xmUutaunLGSzhgEtLz4xVZ_SpV4G0xJazS7LxQkDsaAuveEALw_wcB&gclsrc=aw.ds)
+   2. Create an Android Virtual Device (AVD) by following these instructions. For hardware select **Pixel 6**, for System Image select **Tiramisu, API Level 33**, and choose AVD name as **AndroidWorldAvd**. ![Watch the setup video.](assets/setup_avd.mp4)
 
-2. Launch the Android Emulator from the command line
+1. Launch the Android Emulator from the command line
 
-  ```bash
-  # Typically it's located in ~/Android/Sdk/emulator/emulator or
-  # ~/Library/Android/sdk/emulator/emulator
-  EMULATOR_NAME=AndroidWorldAvd # From previous step
-  ~/Library/Android/sdk/emulator/emulator -avd $EMULATOR_NAME -no-snapshot -grpc 8554
-  ```
+    Launch the emulator from the command line, not using the Android Studio UI, with the `-grpc 8554` flag which is needed communication with accessibility forwarding app.
+
+    ```bash
+    # Typically it's located in ~/Android/Sdk/emulator/emulator or
+    # ~/Library/Android/sdk/emulator/emulator
+    EMULATOR_NAME=AndroidWorldAvd # From previous step
+    ~/Library/Android/sdk/emulator/emulator -avd $EMULATOR_NAME -no-snapshot -grpc 8554
+    ```
+
+1. [Optional] It's recommended to use `conda`, which you can download [here](https://docs.anaconda.com/free/miniconda/miniconda-install/).
+
+    ```
+    conda create -n android_world python=3.11.8
+    conda activate android_world
+    ```
 
 1. Install the latest [AndroidEnv](https://github.com/google-deepmind/android_env):
 
-  ```python
-  git clone https://github.com/google_deepmind/android_env
-  cd android_env
-  python setup.py install
-  ```
+    ```python
+    git clone https://github.com/google-deepmind/android_env.git
+    cd android_env
+    python setup.py install
+    ```
 
-3. Install AndroidWorld
+1. Install AndroidWorld. *Note: Python 3.11 or above is required.*
 
- [Optional] It's recommended to use `conda`, which you can download [here](https://docs.anaconda.com/free/miniconda/miniconda-install/).
+    ```python
+    git clone https://github.com/google-research/android_world.git
+    cd ./android_world
+    pip install -r requirements.txt
+    python setup.py install
+    ```
 
-  ```
-  conda create -n android_world python=3.11.8
-  conda activate android_world
-  ```
-  Install AndroidWorld:
+1. Add model provider APIs as environment variables.
 
-  ```python
-  git clone https://github.com/google-research/android_world.git
-  cd ./android_world
-  python setup.py install
-  ```
-
-4. Add model provider APIs as environment variables.
-
-  ```bash
-  # Add to .bashrc.
-  export OPENAI_API_KEY=your-key
-  export GCP_API_KEY=your-key
-  ```
+    ```bash
+    # Add to .bashrc.
+    export OPENAI_API_KEY=your-key
+    export GCP_API_KEY=your-key
+    ```
 
 
 ## Run the benchmark
 
 ```bash
-python run.py \
-  --suite_family=android_world \
-  --agent_name=t3a \
-  --tasks=ClockStopWatchPausedVerify  # Just run on one task for testing.
-  --perform_emulator_setup \  # First time only.
+python run.py --suite_family=android_world --agent_name=t3a_gpt4 --tasks=ContactsAddContact --perform_emulator_setup -v=-2
 ```
 
 The first time you run this script, you must install the necessary apps and set permissions by specifying `--perform_emulator_setup`. This is a one-time setup.
 
-The `n_task_combinations` argument specifies how many parameter permutations to use for each task. For example, for an SMS task, it would correspond to different phone number/message combinations for each run.
+Above we specify the optional `--tasks` flag to run on a subset of tasks. Leave it empty to run on the entire AndroidWorld suite.
 
-You can specify an optional `--tasks` flag to run on a subset of tasks.
+The `n_task_combinations` argument specifies how many parameter permutations to use for each task. For example, for an SMS task, it would correspond to different phone number/message combinations for each run.
 
 If a run fails partway through, you can resume it by re-running the script with the `--checkpoint_dir` flag pointing to the output directory from the original run.
 
-TODO: Please see tasks.txt for a full list of available tasks.
+You can control verbosity with `-v`. The -2 verbosity level is equivalent to `DEBUG`.
 
 ## Running MiniWoB++ tasks
 
@@ -95,7 +92,7 @@ A key advantage of running MiniWoB++ tasks is that common input elements are
 rendered as native, commonly used Android UI widgets, rather than as HTML. Thus agents must learn to use universal
 widgets such as time- and date-pickers:
 
-![Android Widget](imgs/miniwob.png){style="display:block;margin:auto; width:10rem;"}
+![Android Widget](assets/miniwob.png){style="display:block;margin:auto; width:10rem;"}
 
 
 *This is not an officially supported Google product.*
