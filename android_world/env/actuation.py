@@ -28,7 +28,7 @@ from android_world.env import ui_tree_wrapper
 
 def execute_adb_action(
     action: json_action.JSONAction,
-    screen_elements: list[Any],
+    screen_elements: list[Any],  # list[UIElement]
     screen_size: tuple[int, int],
     env: env_interface.AndroidEnvInterface,
 ) -> None:

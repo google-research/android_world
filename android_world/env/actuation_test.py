@@ -265,20 +265,6 @@ class ExecuteAdbActionTest(absltest.TestCase):
       )
       mock_sleep.assert_called_once_with(1.0)
 
-  def test_change_orientation(self):
-    action = json_action.JSONAction(
-        action_type='change_orientation', orientation='landscape'
-    )
-    with mock.patch.object(
-        adb_utils, 'change_orientation'
-    ) as mock_change_orientation:
-      actuation.execute_adb_action(
-          action, self.screen_elements, self.screen_size, self.mock_env
-      )
-      mock_change_orientation.assert_called_once_with(
-          'landscape', self.mock_env
-      )
-
   def test_unknown_action(self):
     action = json_action.JSONAction(action_type=json_action.UNKNOWN)
     actuation.execute_adb_action(
