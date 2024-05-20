@@ -20,17 +20,17 @@ from android_world.task_evals.single import expense
 from android_world.task_evals.utils import sqlite_schema_utils
 
 
-class TestingExpenseDeleteMultiple(expense._ExpenseDeleteMultiple):
+class TestingExpenseDeleteMultipleForTest(expense._ExpenseDeleteMultiple):
   n_rows = 2
   n_rows_noise = 3
 
 
-class TestingExpenseDeleteDuplicateExpenses2(expense.ExpenseDeleteDuplicates2):
+class ExpenseDeleteDuplicateExpenses2ForTest(expense.ExpenseDeleteDuplicates2):
   n_rows = 1
   n_rows_noise = 4
 
 
-class TestingExpenseAddMultiple(expense._ExpenseAddMultiple):
+class ExpenseAddMultipleForTest(expense._ExpenseAddMultiple):
   n_rows = 2
   n_rows_noise = 3
 
@@ -51,7 +51,7 @@ class ExpenseDeleteMultipleTest(absltest.TestCase):
         sqlite_schema_utils.Expense("expense_5", amount=40),
     ]
 
-    self.params = TestingExpenseDeleteMultiple.generate_random_params()
+    self.params = TestingExpenseDeleteMultipleForTest.generate_random_params()
 
     self.assertEqual(
         self.params[sqlite_validators.ROW_OBJECTS],
@@ -93,7 +93,7 @@ class ExpenseDeleteDuplicateExpenses2Test(absltest.TestCase):
     mock_sample.return_value = [52, 100, 101]
 
     self.params = (
-        TestingExpenseDeleteDuplicateExpenses2.generate_random_params()
+        ExpenseDeleteDuplicateExpenses2ForTest.generate_random_params()
     )
 
     self.assertEqual(
@@ -142,7 +142,7 @@ class ExpenseAddMultipleTest(absltest.TestCase):
         sqlite_schema_utils.Expense("expense_5", amount=40),
     ]
 
-    self.params = TestingExpenseAddMultiple.generate_random_params()
+    self.params = ExpenseAddMultipleForTest.generate_random_params()
 
     self.assertEqual(
         self.params[sqlite_validators.ROW_OBJECTS],

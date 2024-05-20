@@ -25,7 +25,7 @@ from android_world.task_evals.information_retrieval.proto import state_pb2
 from android_world.task_evals.information_retrieval.proto import task_pb2
 
 
-class TestableInformationRetrievalTask(
+class InformationRetrievalTaskForTest(
     information_retrieval.InformationRetrieval
 ):
 
@@ -137,8 +137,8 @@ class InformationRetrievalTest(absltest.TestCase):
     super().setUp()
     self.mock_env = mock.create_autospec(interface.AsyncEnv)
     self.params = {"task_name": "test_task"}
-    self.mock_task = TestableInformationRetrievalTask(
-        TestableInformationRetrievalTask.generate_random_params()
+    self.mock_task = InformationRetrievalTaskForTest(
+        InformationRetrievalTaskForTest.generate_random_params()
     )
     self.mock_initialize_task = mock.patch.object(
         task_eval.TaskEval, "initialize_task"

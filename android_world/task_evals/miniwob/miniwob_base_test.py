@@ -95,7 +95,7 @@ class Testintents(absltest.TestCase):
       miniwob_base.get_episode_reward(mock_env)
 
 
-class TestableMiniWoBTask(miniwob_base.MiniWoBTask):
+class TestableMiniWoBTaskForTest(miniwob_base.MiniWoBTask):
 
   @classmethod
   def generate_random_params(cls):
@@ -111,8 +111,8 @@ class TestMiniWoBTask(absltest.TestCase):
     super().setUp()
     self.mock_env = mock.create_autospec(interface.AsyncEnv)
     self.params = {"task_name": "test_task"}
-    self.mock_task = TestableMiniWoBTask(
-        TestableMiniWoBTask.generate_random_params()
+    self.mock_task = TestableMiniWoBTaskForTest(
+        TestableMiniWoBTaskForTest.generate_random_params()
     )
 
   def test_initialize_task(

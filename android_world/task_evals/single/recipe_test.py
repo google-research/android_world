@@ -387,7 +387,7 @@ class TestRecipeDeleteMultipleRecipesWithConstraint(parameterized.TestCase):
     )
 
 
-class TestingAddMultipleRecipes(recipe._RecipeAddMultipleRecipes):
+class AddMultipleRecipesForTest(recipe._RecipeAddMultipleRecipes):
   n_rows = 2
   n_rows_noise = 2
 
@@ -409,7 +409,7 @@ class TestRecipeAddMultipleRecipes(absltest.TestCase):
     ]
     mock_generate_random_recipe.side_effect = target_rows + noise_rows
 
-    params = TestingAddMultipleRecipes.generate_random_params()
+    params = AddMultipleRecipesForTest.generate_random_params()
 
     mock_choice.assert_called_with(['csv', 'text_block'])
 
@@ -418,7 +418,7 @@ class TestRecipeAddMultipleRecipes(absltest.TestCase):
     self.assertEqual(params[recipe._TEXT_REPRESENTATION_TYPE], 'text_block')
 
 
-class TestingRecipeAddMultipleRecipesFromMarkor2(
+class RecipeAddMultipleRecipesFromMarkor2ForTest(
     recipe.RecipeAddMultipleRecipesFromMarkor2
 ):
   n_rows = 2
@@ -448,7 +448,7 @@ class TestRecipeAddMultipleRecipesFromMarkor2(absltest.TestCase):
     ]
     mock_choice.side_effect = ['10 mins', 'text_block']
 
-    params = TestingRecipeAddMultipleRecipesFromMarkor2.generate_random_params()
+    params = RecipeAddMultipleRecipesFromMarkor2ForTest.generate_random_params()
 
     mock_choice.assert_called_with(['csv', 'text_block'])
 
