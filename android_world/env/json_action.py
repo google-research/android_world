@@ -85,9 +85,6 @@ class JSONAction:
     goal_status: If the status is a 'status' type, indicates the status of the
       goal.
     app_name: The app name to launch, if the action type is 'open_app'.
-    activity_nickname: The nickname of the activity to launch. Currently
-      'app_drawer' and 'quick_settings' are supported.
-    orientation: Change the phone orientation (e.g., portrait, landscape).
   """
 
   action_type: Optional[str] = None
@@ -98,7 +95,18 @@ class JSONAction:
   direction: Optional[str] = None
   goal_status: Optional[str] = None
   app_name: Optional[str] = None
-  activity_nickname: Optional[str] = None
+
+  def __post_init__(self):
+    if self.action_type not in _ACTION_TYPES:
+      raise ValueError(f'Invalid action type: {self.action_type}')
+    if self.index is not None:
+      self.index = int(self.index)
+      if self.x is not None or self.y is not None:
+        raise ValueError('Either an index or a <x, y> should be provided.')
+    if self.direction and self.direction not in _SCROLL_DIRECTIONS:
+      raise ValueError(f'Invalid scroll direction: {self.direction}')
+    if self.text is not None and not isinstance(self.text, str):
+      self.text = str(self.text)
 
   def __repr__(self) -> str:
     properties = []
@@ -156,5 +164,4 @@ def _compare_actions(a: JSONAction, b: JSONAction) -> bool:
       and a.y == b.y
       and a.direction == b.direction
       and a.goal_status == b.goal_status
-      and a.orientation == b.orientation
   )
