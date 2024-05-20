@@ -33,6 +33,10 @@ class FilesTest(parameterized.TestCase):
     ).start()
     self.mock_env = mock.MagicMock()
 
+  def tearDown(self):
+    super().tearDown()
+    mock.patch.stopall()
+
   def test_check_directory_exists(self):
     self.mock_issue_generic_request.return_value.generic.output.decode.return_value = (
         'Exists'

@@ -50,14 +50,23 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
             autospec=True,
         )
     )
-    self.mock_receipt_generator = mock.patch.object(
-        receipt_generator,
-        "create_receipt",
-        return_value=(mock.create_autospec(Image.Image), "receipt_test.jpg"),
+    self.mock_receipt_generator = self.enter_context(
+        mock.patch.object(
+            receipt_generator,
+            "create_receipt",
+            return_value=(
+                mock.create_autospec(Image.Image),
+                "receipt_test.jpg",
+            ),
+        )
     )
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, "restore_snapshot"
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(
+            app_snapshot,
+            "restore_snapshot",
+            autospec=True,
+        )
+    )
 
   def assertInitializes(
       self,
