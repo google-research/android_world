@@ -519,6 +519,7 @@ class RecipeAddMultipleRecipesFromMarkor2(RecipeAddMultipleRecipesFromMarkor):
 class RecipeAddMultipleRecipesFromImage(_RecipeAddMultipleRecipes):
   """Task to add multiple recipes from an image file to Broccoli Recipe App."""
 
+  app_names = (_APP_NAME, 'simple gallery pro')
   complexity = 4
   n_rows = 3
   n_rows_noise = 10

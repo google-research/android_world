@@ -190,19 +190,19 @@ class AdbTypingTest(AdbTestSetup):
           mock.call(
               adb_pb2.AdbRequest(
                   input_text=adb_pb2.AdbRequest.InputText(text='Type'),
-                  timeout_sec=5,
+                  timeout_sec=adb_utils._DEFAULT_TIMEOUT_SECS,
               )
           ),
           mock.call(
               adb_pb2.AdbRequest(
                   input_text=adb_pb2.AdbRequest.InputText(text='%s'),
-                  timeout_sec=5,
+                  timeout_sec=adb_utils._DEFAULT_TIMEOUT_SECS,
               )
           ),
           mock.call(
               adb_pb2.AdbRequest(
                   input_text=adb_pb2.AdbRequest.InputText(text='some'),
-                  timeout_sec=5,
+                  timeout_sec=adb_utils._DEFAULT_TIMEOUT_SECS,
               )
           ),
           mock.call(
@@ -210,13 +210,13 @@ class AdbTypingTest(AdbTestSetup):
                   press_button=adb_pb2.AdbRequest.PressButton(
                       button=adb_pb2.AdbRequest.PressButton.ENTER
                   ),
-                  timeout_sec=5,
+                  timeout_sec=adb_utils._DEFAULT_TIMEOUT_SECS,
               )
           ),
           mock.call(
               adb_pb2.AdbRequest(
                   input_text=adb_pb2.AdbRequest.InputText(text='text'),
-                  timeout_sec=5,
+                  timeout_sec=adb_utils._DEFAULT_TIMEOUT_SECS,
               )
           ),
       ]

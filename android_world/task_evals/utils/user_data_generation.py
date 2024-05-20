@@ -31,6 +31,20 @@ from PIL import ImageDraw
 from PIL import ImageFont
 import pydub
 
+_FONT_PATHS = ["arial.ttf", "Arial Unicode.ttf", "Roboto-Regular.ttf"]
+
+
+def get_font_path() -> str:
+  """Get the font path, falling back to a default system font if necessary."""
+  for font_name in _FONT_PATHS:
+    try:
+      font_path = ImageFont.truetype(font_name, 16).path
+      return font_path
+    except IOError:
+      continue
+  raise FileNotFoundError("No suitable font found.")
+
+
 _TMP = "/tmp"
 
 
@@ -140,7 +154,7 @@ def write_to_gallery(
     env: The environment to write to.
   """
 
-  image = draw_text(data)
+  image = _draw_text(data)
   temp_storage_location = os.path.join(_TMP, file_name)
   image.save(temp_storage_location)
   file_utils.copy_data_to_device(
@@ -370,14 +384,11 @@ def generate_apartments() -> dict[str, tuple[str, str]]:
   }
 
 
-def draw_text(
-    text: str, font_path: str = "arial.ttf", font_size: int = 24
-) -> Image.Image:
+def _draw_text(text: str, font_size: int = 24) -> Image.Image:
   """Create an image with the given text drawn on it.
 
   Args:
       text: The text to draw on the image.
-      font_path: Path to the font file.
       font_size: Size of the font.
 
   Returns:
@@ -396,7 +407,7 @@ def draw_text(
   d = ImageDraw.Draw(img)
 
   # Load a font
-  font = ImageFont.truetype(font_path, font_size)
+  font = ImageFont.truetype(get_font_path(), font_size)
 
   # Initial Y position
   y_text = 10

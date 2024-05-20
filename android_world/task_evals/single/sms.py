@@ -35,6 +35,12 @@ class SimpleSmsSend(sms_validators.SimpleSMSSendSms):
 
 
 class SimpleSmsSendAfterCall(sms_validators.SimpleSMSSendSms):
+  """Task for checking an SMS was sent after a missed call.
+
+  NOTE: This is currently disabled due to emulator flakiness with phone calls.
+  """
+
+  app_names = ("simple sms messenger", "phone")
   template = (
       "Send a text message using Simple SMS Messenger to the number I just"
       " missed a call from with message: {message}"

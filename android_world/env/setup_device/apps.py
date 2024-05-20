@@ -677,9 +677,6 @@ class JoplinApp(AppSetup):
   @classmethod
   def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
     super().setup(env)
-    adb_utils.launch_app(cls.app_name, env)
-    time.sleep(2.0)
-    adb_utils.close_app(cls.app_name, env)
 
     # Grant permissions for joplin app.
     joplin_package = adb_utils.extract_package_name(
@@ -695,6 +692,10 @@ class JoplinApp(AppSetup):
         "android.permission.ACCESS_FINE_LOCATION",
         env,
     )
+
+    adb_utils.launch_app(cls.app_name, env)
+    time.sleep(2.0)
+    adb_utils.close_app(cls.app_name, env)
 
     # Calling clear_dbs() without having added a note seems to make
     # the sqlite table inaccessible. Every subsequent call to clear_dbs()

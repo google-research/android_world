@@ -362,6 +362,8 @@ class ExpenseAddMultipleFromGallery(_ExpenseAddMultiple):
   n_rows = 3
   n_rows_noise = 10
 
+  app_names = (_APP_NAME, 'simple gallery pro')
+
   @property
   def goal(self) -> str:
     return (

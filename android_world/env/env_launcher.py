@@ -14,7 +14,9 @@
 
 """Launches the environment used in the benchmark."""
 
+import resource
 
+from absl import logging
 from android_world.env import adb_utils
 from android_world.env import interface
 from android_world.env import ui_tree_wrapper
@@ -41,6 +43,35 @@ def verify_api_level(env: interface.AsyncEnv) -> None:
         f'Emulator API level must be {_ANDROID_WORLD_API_LEVEL}, but found'
         f' {level}.'
     )
+
+
+def _increase_file_descriptor_limit(limit: int = 32768):
+  """Increases the file descriptor limit to the given limit.
+
+  This helps with different platforms having different limits, which can result
+  from too many open files, sockets, or pipes, resulting in "OSError: [Errno 24]
+  Too many open files".
+
+  Args:
+    limit: The new file descriptor limit. The default value was determined
+      experimentally to not raise too many open files error.
+  """
+  try:
+    _, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    if limit > hard:
+      logging.warning(
+          (
+              "Requested limit %d exceeds the system's hard limit %d. Setting"
+              ' to the maximum allowed value.'
+          ),
+          limit,
+          hard,
+      )
+      limit = hard
+    resource.setrlimit(resource.RLIMIT_NOFILE, (limit, hard))
+    logging.info('File descriptor limit set to %d.', limit)
+  except ValueError as e:
+    logging.exception('Failed to set file descriptor limit: %s', e)
 
 
 def load_and_setup_env(
@@ -70,6 +101,7 @@ def load_and_setup_env(
   Returns:
     An interactable Android environment.
   """
+  _increase_file_descriptor_limit()
   env = _get_env(console_port, adb_path)
   if emulator_setup:
     setup.setup_apps(env.base_env)

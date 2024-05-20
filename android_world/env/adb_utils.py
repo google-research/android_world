@@ -27,7 +27,7 @@ import immutabledict
 
 T = TypeVar('T')
 
-_DEFAULT_TIMEOUT_SECS = 5
+_DEFAULT_TIMEOUT_SECS = 10
 
 # Maps app names to the activity that should be launched to open the app.
 _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
@@ -431,7 +431,7 @@ def _split_words_and_newlines(text: str) -> Iterable[str]:
 def type_text(
     text: str,
     env: env_interface.AndroidEnvInterface,
-    timeout_sec: Optional[float] = 5,
+    timeout_sec: Optional[float] = _DEFAULT_TIMEOUT_SECS,
 ) -> None:
   """Issues an AdbRequest to type the specified text string word-by-word.
 
@@ -928,7 +928,7 @@ def install_apk(
   """
   if not os.path.exists(apk_location):
     raise ValueError('APK does not exist.')
-  issue_generic_request(['install', apk_location], env, timeout_sec=15.0)
+  issue_generic_request(['install', apk_location], env, timeout_sec=30.0)
 
 
 def check_airplane_mode(env: env_interface.AndroidEnvInterface) -> bool:

@@ -131,7 +131,6 @@ _NAMES = [
     # 'chase-circle',
     # Too hard to click in emulator.
     # 'moving-items',
-    #
     # These tasks break or are much harder due to HTML rendering on Android
     # webview. Comments for each task:
     # Technically possible, but unnecessarily harder due to touch interface.
