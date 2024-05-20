@@ -116,7 +116,7 @@ _CHECKPOINT_DIR = flags.DEFINE_string(
 )
 _OUTPUT_PATH = flags.DEFINE_string(
     'output_path',
-    '~/android_world/output',
+    os.path.expanduser('~/android_world/runs'),
     'The path to save results to if not resuming from a checkpoint is not'
     ' provided.',
 )
@@ -151,23 +151,25 @@ def _get_agent(
   """Gets agent."""
   print('Initializing agent...')
   agent = None
-  if _AGENT_NAME.value == 'human':
-    agent = human_agent.HumanAgent(env, _AGENT_NAME.value)
-  elif _AGENT_NAME.value == 'random':
-    agent = random_agent.RandomAgent(env, _AGENT_NAME.value)
-  elif _AGENT_NAME.value == 'm3a_gpt4v':
-    agent = m3a.M3A(env, infer.Gpt4Wrapper('gpt-4-turbo-2024-04-09'))
+  if _AGENT_NAME.value == 'human_agent':
+    agent = human_agent.HumanAgent(env)
+  elif _AGENT_NAME.value == 'random_agent':
+    agent = random_agent.RandomAgent(env)
+  # Gemini.
   elif _AGENT_NAME.value == 'm3a_gemini_gcp':
     agent = m3a.M3A(
-        env,
-        infer.GeminiGcpWrapper(
-            multimodal=True, model_name='gemini-1.5-pro-latest'
-        ),
+        env, infer.GeminiGcpWrapper(model_name='gemini-1.5-pro-latest')
     )
+  elif _AGENT_NAME.value == 't3a_gemini_gcp':
+    agent = t3a.T3A(
+        env, infer.GeminiGcpWrapper(model_name='gemini-1.5-pro-latest')
+    )
+  # GPT.
   elif _AGENT_NAME.value == 't3a_gpt4':
     agent = t3a.T3A(env, infer.Gpt4Wrapper('gpt-4-turbo-2024-04-09'))
-  elif _AGENT_NAME.value == 't3a_gemini_gcp':
-    agent = t3a.T3A(env, infer.GeminiGcpWrapper(multimodal=False))
+  elif _AGENT_NAME.value == 'm3a_gpt4v':
+    agent = m3a.M3A(env, infer.Gpt4Wrapper('gpt-4-turbo-2024-04-09'))
+  # SeeAct.
   elif _AGENT_NAME.value == 'seeact':
     agent = seeact.SeeAct(env)
 
@@ -181,6 +183,8 @@ def _get_agent(
       and hasattr(agent, 'set_task_guidelines')
   ):
     agent.set_task_guidelines(_MINIWOB_ADDITIONAL_GUIDELINES)
+  agent.name = _AGENT_NAME.value
+
   return agent
 
 
@@ -223,19 +227,19 @@ def _main() -> None:
   else:
     checkpoint_dir = checkpointer_lib.create_run_directory(_OUTPUT_PATH.value)
 
-  print(f'Starting eval and writing to {checkpoint_dir}.')
-  task_data = suite_utils.run(
+  print(
+      f'Starting eval with agent {_AGENT_NAME.value} and writing to'
+      f' {checkpoint_dir}'
+  )
+  suite_utils.run(
       suite,
       agent,
       checkpointer=checkpointer_lib.IncrementalCheckpointer(checkpoint_dir),
       demo_mode=False,
   )
-
-  # If print_summary is true, table will be printed.
-  _ = suite_utils.process_episodes(task_data, print_summary=True)
   print(
-      'Finished!\n',
-      '\nClosing env...',
+      f'Finished running agent {_AGENT_NAME.value} on {_SUITE_FAMILY.value}'
+      f' family. Wrote to {checkpoint_dir}.'
   )
   env.close()
 

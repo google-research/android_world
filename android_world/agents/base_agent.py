@@ -47,7 +47,7 @@ class EnvironmentInteractingAgent(abc.ABC):
   def __init__(
       self,
       env: interface.AsyncEnv,
-      name: str,
+      name: str = '',
       transition_pause: float | None = 1.0,
   ):
     """Initializes the agent.
@@ -126,3 +126,7 @@ class EnvironmentInteractingAgent(abc.ABC):
   @property
   def name(self) -> str:
     return self._name
+
+  @name.setter
+  def name(self, name: str) -> None:
+    self._name = name

@@ -86,7 +86,6 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
 
   def __init__(
       self,
-      multimodal: bool = False,
       model_name: str | None = None,
       max_retry: int = 3,
       temperature: float = 0.0,
@@ -95,12 +94,6 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
     if 'GCP_API_KEY' not in os.environ:
       raise RuntimeError('GCP API key not set.')
     genai.configure(api_key=os.environ['GCP_API_KEY'])
-    if model_name is None:
-      model_name = (
-          'gemini-1.0-pro-vision-latest'
-          if multimodal
-          else 'gemini-1.0-pro-latest'
-      )
     self.llm = genai.GenerativeModel(
         model_name,
         generation_config=generation_types.GenerationConfig(
@@ -111,7 +104,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       max_retry = 3
       print('Max_retry must be positive. Reset it to 3')
     self.max_retry = min(max_retry, 5)
-    self.time_since_last_request = time.time() - self.TIME_BETWEEN_REQUESTS
+    self.time_of_last_request = time.time() - self.TIME_BETWEEN_REQUESTS
 
   def predict(
       self,
@@ -123,20 +116,24 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       self, text_prompt: str, images: list[np.ndarray]
   ) -> tuple[str, Any]:
     counter = self.max_retry
+    retry_delay = self.TIME_BETWEEN_REQUESTS
     while counter > 0:
       try:
-        time_since_last_request = time.time() - self.time_since_last_request
+        time_since_last_request = time.time() - self.time_of_last_request
         if time_since_last_request < self.TIME_BETWEEN_REQUESTS:
           time.sleep(self.TIME_BETWEEN_REQUESTS - time_since_last_request)
+        self.time_of_last_request = time.time()
         output = self.llm.generate_content(
             [text_prompt] + [Image.fromarray(image) for image in images]
         )
-        self.time_since_last_request = time.time()
         return output.text, output
       except Exception as e:  # pylint: disable=broad-exception-caught
         counter -= 1
-        print('Error calling LLM, will retry soon...')
+        print('Error calling LLM, will retry in {retry_delay} seconds')
         print(e)
+        if counter > 0:
+          time.sleep(retry_delay)
+          retry_delay *= 2
     return ERROR_CALLING_LLM, None
 
 

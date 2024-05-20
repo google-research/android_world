@@ -43,7 +43,7 @@ class InferTest(absltest.TestCase):
             })
         )
     )
-    llm = infer.GeminiGcpWrapper(multimodal=True)
+    llm = infer.GeminiGcpWrapper(model_name="some_gemini_model")
     text_output, _ = llm.predict_mm("fake prompt", [])
     self.assertEqual(text_output, "fake response")
 
