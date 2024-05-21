@@ -11,8 +11,8 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
 <p align="center">
 <a href="#dataset"><b>Dataset</b></a> •
 <a href=""><b>Paper</b></a> •
-<a href="#download-data"><b>Download Data</b></a> •
-<a href="#license--contact"><b>License & Contact</b></a>
+<a href="#run-benchmark"><b>Run Benchmark</b></a> •
+<a href="#citation"><b>Citation</b></a>
 </p>
 
 </div>
@@ -132,9 +132,18 @@ Key Features:
 ## Paper
 AndroidWorld is described in [http://arxiv.org/TODO](our publication (PDF)).
 
-## Download Data
-See our <a href="https://github.com/google-research/android_world">github repository</a> for instructions on downloading data.
+## Run Benchmark
+See our <a href="https://github.com/google-research/android_world">github repository</a> for instructions on running the benchmark.
 
-## License & Contact
+## Citation
+<pre>
+@misc{androidworld,
+  title={AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents},
+  author={Chris Rawles and Yifan Chang and Sarah Clinckemaillie and Jonathan Waltz and Gabrielle Lau and Robert Berry and Wei Li and Will Bishop and Alice Li and Folawiyo Campbell-Ajala and Divya Tyam and Daniel Toyama and Timothy Lillicrap and Oriana Riva},
+  archivePrefix={arXiv},
+  eprint={},
+  year={2024}
+}
+</pre>
 
 
