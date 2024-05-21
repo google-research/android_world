@@ -49,7 +49,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
       <source src="assets/videos/RecipeAddMultipleRecipes.mp4" type="video/mp4">
     </video>
     <div class="overlay">
-      <p>(e) Create multiple recipes.</p>
+      <p>(d) Create multiple recipes.</p>
     </div>
   </div>
   <div class="video-content">
@@ -57,7 +57,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
       <source src="assets/videos/SimpleCalendarAddOneEventRelativeDay-Fail.mp4" type="video/mp4">
     </video>
     <div class="overlay">
-      <p>(f) Add a calendar event.</p>
+      <p>(e) Add a calendar event.</p>
     </div>
   </div>
     <div class="video-content">
@@ -65,7 +65,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
       <source src="assets/videos/VlcCreatePlaylist_2x.mp4" type="video/mp4">
     </video>
     <div class="overlay">
-      <p>(g) Create a playlist in VLC.</p>
+      <p>(f) Create a playlist in VLC.</p>
     </div>
   </div>
 </div>
@@ -75,7 +75,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
       <source src="assets/videos/SimpleSmsSendReceivedAddress.mp4" type="video/mp4">
     </video>
     <div class="overlay">
-      <p>(h) Send received address to contact.</p>
+      <p>(g) Send received address to contact.</p>
     </div>
   </div>
   <div class="video-content">
