@@ -125,6 +125,9 @@ These tasks span a broad spectrum of app domains, below are a few examples:
   </div>
 </div>
 
+### Comparison to other datasets
+<img src="assets/images/dataset_comparison.png" alt="Table comparing AndroidWorld to other datasets">
+
 
 ## Paper
 AndroidWorld is described in [http://arxiv.org/TODO](our publication (PDF)).
