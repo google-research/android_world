@@ -25,6 +25,7 @@ import os
 
 from absl import logging
 from android_env import env_interface
+from android_env.components import errors
 from android_world.env import adb_utils
 from android_world.env.setup_device import apps
 from android_world.utils import app_snapshot
@@ -69,25 +70,42 @@ def _download_and_install_apk(
   adb_utils.install_apk(path, env)
 
 
+def _install_all_apks(env: env_interface.AndroidEnvInterface) -> None:
+  """Installs all APKs for Android World."""
+  print("Downloading app data and installing apps. This make take a few mins.")
+  for app in _APPS:
+    if not app.apk_names:  # Ignore 1p apps that don't have an APK.
+      continue
+    apk_installed = False
+    for apk_name in app.apk_names:
+      try:
+        _download_and_install_apk(apk_name, env)
+        apk_installed = True
+        break
+      except errors.AdbControllerError:
+        # Try apk compiled for a different architecture, e.g., Mac M1.
+        continue
+    if not apk_installed:
+      raise RuntimeError(
+          f"Failed to download and install APK for {app.app_name}"
+      )
+
+
 def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
   """Sets up apps for Android World.
 
   Args:
     env: The Android environment.
+
+  Raises:
+    RuntimeError: If cannot install APK.
   """
   # Make sure quick-settings are not displayed, which can override foreground
   # apps, and impede UI navigation required for setting up.
   adb_utils.press_home_button(env)
   adb_utils.issue_generic_request(["root"], env)
 
-  logging.info(
-      "Downloading app data and installing %d apps. This make take a few"
-      " minutes.",
-      len(_APPS),
-  )
-  for app in _APPS:
-    if app.apk_name:  # Ignore 1p apps that don't have an APK.
-      _download_and_install_apk(app.apk_name, env)
+  _install_all_apks(env)
 
   print(
       "Setting up applications on Android device. Please do not interact with"
@@ -95,13 +113,13 @@ def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
   )
   for app in _APPS:
     try:
-      logging.info("Setting up app %s", app.apk_name)
+      logging.info("Setting up app %s", app.app_name)
       app.setup(env)
     except ValueError as e:
       logging.warning(
           "Failed to automatically setup app %s: %s.\n\nYou will need to"
           " manually setup the app.",
-          app.apk_name,
+          app.app_name,
           e,
       )
     app_snapshot.save_snapshot(app.app_name, env)

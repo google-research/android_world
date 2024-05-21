@@ -64,8 +64,10 @@ class AppSetup(abc.ABC):
 
   # The APK name of the app. This will assumed to be downloaded in setup.py and
   # each instance of an AppSetup will be referenced using the `apk` name as the
-  # key for downloading.
-  apk_name = ""
+  # key for downloading. Some apps contain multiple APK names since different
+  # versions are distributed depending on the architecture. E.g., M1 Macs
+  # require different APKs for some apps.
+  apk_names = ""
 
   # The short name of the app, as used by adb_utils.
   app_name = ""
@@ -224,7 +226,7 @@ class SettingsApp(AppSetup):
 class MarkorApp(AppSetup):
   """Class for setting up Markor app."""
 
-  apk_name = "net.gsantner.markor_146.apk"
+  apk_names = ("net.gsantner.markor_146.apk",)
   app_name = "markor"
 
   @classmethod
@@ -255,9 +257,12 @@ class MarkorApp(AppSetup):
 
 
 class AndroidWorldApp(AppSetup):
-  """Class for setting up Android World app."""
+  """Class for setting up Android World app.
 
-  apk_name = "androidworld.apk"
+  AndroidWorld app provides on-screen visualization of tasks and rewards.
+  """
+
+  apk_names = ("androidworld.apk",)
   app_name = "android world"
 
   @classmethod
@@ -283,7 +288,7 @@ class AndroidWorldApp(AppSetup):
 class ClipperApp(AppSetup):
   """Class for setting up clipper app."""
 
-  apk_name = "clipper.apk"
+  apk_names = ("clipper.apk",)
   app_name = "clipper"
 
   @classmethod
@@ -303,7 +308,7 @@ class ClipperApp(AppSetup):
 class SimpleCalendarProApp(AppSetup):
   """Class for setting up simple calendar pro app."""
 
-  apk_name = "com.simplemobiletools.calendar.pro_238.apk"
+  apk_names = ("com.simplemobiletools.calendar.pro_238.apk",)
   app_name = "simple calendar pro"
 
   @classmethod
@@ -336,7 +341,7 @@ class SimpleCalendarProApp(AppSetup):
 class TasksApp(AppSetup):
   """Class for setting up Tasks app."""
 
-  apk_name = "org.tasks_130605.apk"
+  apk_names = ("org.tasks_130605.apk",)
   app_name = "tasks"
 
   @classmethod
@@ -349,7 +354,7 @@ class TasksApp(AppSetup):
 class SimpleDrawProApp(AppSetup):
   """Class for setting up simple draw pro app."""
 
-  apk_name = "com.simplemobiletools.draw.pro_79.apk"
+  apk_names = ("com.simplemobiletools.draw.pro_79.apk",)
   app_name = "simple draw pro"
 
 
@@ -364,7 +369,7 @@ class SimpleGalleryProApp(AppSetup):
       "android.permission.POST_NOTIFICATIONS",
   )
 
-  apk_name = "com.simplemobiletools.gallery.pro_396.apk"
+  apk_names = ("com.simplemobiletools.gallery.pro_396.apk",)
   app_name = "simple gallery pro"
 
   @classmethod
@@ -392,7 +397,7 @@ class SimpleGalleryProApp(AppSetup):
 class SimpleSMSMessengerApp(AppSetup):
   """Class for setting up Simple SMS Messenger app."""
 
-  apk_name = "com.simplemobiletools.smsmessenger_85.apk"
+  apk_names = ("com.simplemobiletools.smsmessenger_85.apk",)
   app_name = "simple sms messenger"
 
   @classmethod
@@ -422,7 +427,7 @@ class SimpleSMSMessengerApp(AppSetup):
 class AudioRecorder(AppSetup):
   """Class for setting up Audio Recorder app."""
 
-  apk_name = "com.dimowner.audiorecorder_926.apk"
+  apk_names = ("com.dimowner.audiorecorder_926.apk",)
   app_name = "audio recorder"
 
   @classmethod
@@ -456,14 +461,14 @@ class AudioRecorder(AppSetup):
 class MiniWobApp(AppSetup):
   """Class for setting up MiniWoB app."""
 
-  apk_name = "miniwobapp.apk"
+  apk_names = ("miniwobapp.apk",)
   app_name = "miniwob"
 
 
 class ExpenseApp(AppSetup):
   """Class for setting up Arduia Pro Expense app."""
 
-  apk_name = "com.arduia.expense_11.apk"
+  apk_names = ("com.arduia.expense_11.apk",)
   app_name = "pro expense"
 
   @classmethod
@@ -484,7 +489,7 @@ class ExpenseApp(AppSetup):
 class RecipeApp(AppSetup):
   """Class for setting up Broccoli Recipe app."""
 
-  apk_name = "com.flauschcode.broccoli_1020600.apk"
+  apk_names = ("com.flauschcode.broccoli_1020600.apk",)
   app_name = "broccoli"
 
   @classmethod
@@ -535,7 +540,7 @@ class OsmAndApp(AppSetup):
 
   MAP_NAMES = ("Liechtenstein_europe.obf",)
 
-  apk_name = "net.osmand-4.6.13.apk"
+  apk_names = ("net.osmand-4.6.13.apk",)
   app_name = "osmand"
 
   @classmethod
@@ -585,7 +590,7 @@ class OsmAndApp(AppSetup):
 class OpenTracksApp(AppSetup):
   """Class for setting up OpenTracks app."""
 
-  apk_name = "de.dennisguse.opentracks_5705.apk"
+  apk_names = ("de.dennisguse.opentracks_5705.apk",)
   app_name = "activity tracker"
 
   @classmethod
@@ -624,7 +629,10 @@ class VlcApp(AppSetup):
   """Class for setting up VLC app."""
 
   videos_path = "/storage/emulated/0/VLCVideos"  # Store videos here.
-  apk_name = "org.videolan.vlc_13050408.apk"
+  apk_names = (
+      "org.videolan.vlc_13050408.apk",
+      "org.videolan.vlc_13050407.apk",  # Arch86 for Mac M1/M2/etc.
+  )
   app_name = "vlc"
 
   @classmethod
@@ -671,7 +679,7 @@ class VlcApp(AppSetup):
 class JoplinApp(AppSetup):
   """Class for setting up Joplin app."""
 
-  apk_name = "net.cozic.joplin_2097740.apk"
+  apk_names = ("net.cozic.joplin_2097740.apk",)
   app_name = "joplin"
 
   @classmethod
@@ -718,7 +726,7 @@ class RetroMusicApp(AppSetup):
       "android.permission.POST_NOTIFICATIONS",
   )
 
-  apk_name = "code.name.monkey.retromusic_10603.apk"
+  apk_names = ("code.name.monkey.retromusic_10603.apk",)
   app_name = "retro music"
 
   @classmethod

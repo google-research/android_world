@@ -16,8 +16,10 @@ from unittest import mock
 
 from absl.testing import absltest
 from android_env import env_interface
+from android_env.components import errors
 from android_world.env import adb_utils
 from android_world.env import tools
+from android_world.env.setup_device import apps
 from android_world.env.setup_device import setup
 from android_world.utils import app_snapshot
 
@@ -27,27 +29,78 @@ class SetupTest(absltest.TestCase):
   def setUp(self):
     super().setUp()
     self.mock_issue_generic_request = self.enter_context(
-        mock.patch.object(adb_utils, 'issue_generic_request')
+        mock.patch.object(adb_utils, "issue_generic_request")
     )
 
-  @mock.patch.object(tools, 'AndroidToolController')
-  @mock.patch.object(setup, '_download_and_install_apk')
-  @mock.patch.object(app_snapshot, 'save_snapshot')
+  @mock.patch.object(tools, "AndroidToolController")
+  @mock.patch.object(setup, "_download_and_install_apk")
+  @mock.patch.object(app_snapshot, "save_snapshot")
   def test_setup_apps(self, mock_save_snapshot, mock_install_apk, unused_tools):
     env = mock.create_autospec(env_interface.AndroidEnvInterface)
     mock_app_setups = {
-        app_class: mock.patch.object(app_class, 'setup').start()
+        app_class: mock.patch.object(app_class, "setup").start()
         for app_class in setup._APPS
     }
 
     setup.setup_apps(env)
 
     for app_class in setup._APPS:
-      if app_class.apk_name:  # 1P apps do not have APKs.
-        mock_install_apk.assert_any_call(app_class.apk_name, env)
+      if app_class.apk_names:  # 1P apps do not have APKs.
+        mock_install_apk.assert_any_call(app_class.apk_names[0], env)
       mock_app_setups[app_class].assert_any_call(env)
       mock_save_snapshot.assert_any_call(app_class.app_name, env)
 
 
-if __name__ == '__main__':
+class _App(apps.AppSetup):
+
+  def __init__(self, apk_names, app_name):
+    self.apk_names = apk_names
+    self.app_name = app_name
+
+
+class InstallApksTest(absltest.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    self.env = mock.create_autospec(env_interface.AndroidEnvInterface)
+    self.mock_download_and_install_apk = self.enter_context(
+        mock.patch.object(setup, "_download_and_install_apk")
+    )
+    self.apps = [
+        _App(apk_names=["apk1", "apk2"], app_name="App1"),
+        _App(apk_names=[], app_name="App2"),  # No APKs
+        _App(apk_names=["apk3"], app_name="App3"),
+    ]
+    setup._APPS = self.apps
+
+  def test_install_all_apks_success(self):
+    self.mock_download_and_install_apk.return_value = None
+
+    setup._install_all_apks(self.env)
+
+    expected_calls = [mock.call("apk1", self.env), mock.call("apk3", self.env)]
+    self.mock_download_and_install_apk.assert_has_calls(
+        expected_calls, any_order=True
+    )
+
+  def test_install_all_apks_success_with_fallback(self):
+    def side_effect(apk_name, env):
+      del env
+      if apk_name == "apk1":
+        raise errors.AdbControllerError
+      return None
+
+    self.mock_download_and_install_apk.side_effect = side_effect
+
+    setup._install_all_apks(self.env)
+
+    expected_calls = [
+        mock.call("apk1", self.env),
+        mock.call("apk2", self.env),
+        mock.call("apk3", self.env),
+    ]
+    self.mock_download_and_install_apk.assert_has_calls(expected_calls)
+
+
+if __name__ == "__main__":
   absltest.main()
