@@ -21,7 +21,7 @@ Key features of AndroidWorld include:
 
 1. Set up the Android Emulator
    1. Download Android Studio [here](https://developer.android.com/studio?gad_source=1&gclid=Cj0KCQjw3ZayBhDRARIsAPWzx8oLcadBD0vAq8xmUutaunLGSzhgEtLz4xVZ_SpV4G0xJazS7LxQkDsaAuveEALw_wcB&gclsrc=aw.ds)
-   2. Create an Android Virtual Device (AVD) by following these instructions. For hardware select **Pixel 6**, for System Image select **Tiramisu, API Level 33**, and choose AVD name as **AndroidWorldAvd**. ![Watch the setup video.](assets/setup_avd.mp4)
+   2. Create an Android Virtual Device (AVD) by following these instructions. For hardware select **Pixel 6**, for System Image select **Tiramisu, API Level 33**, and choose AVD name as **AndroidWorldAvd**. [Watch the setup video.](https://github.com/google-research/android_world/assets/162379927/efc33980-8b36-44be-bb2b-a92d4c334a50)
 
 1. Launch the Android Emulator from the command line
 
@@ -92,7 +92,9 @@ A key advantage of running MiniWoB++ tasks is that common input elements are
 rendered as native, commonly used Android UI widgets, rather than as HTML. Thus agents must learn to use universal
 widgets such as time- and date-pickers:
 
-![Android Widget](assets/miniwob.png){style="display:block;margin:auto; width:10rem;"}
+<p align="center">
+   <img src="assets/miniwob.png" style="width:30%">
+</p>
 
 
 *This is not an officially supported Google product.*
