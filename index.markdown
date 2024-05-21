@@ -17,6 +17,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
 
 </div>
 
+## Abstract
 {% include_relative abstract.md %}
 
 
@@ -27,6 +28,7 @@ Key Features:
  - All tasks are parametrized, adding variety and making it more difficult for agents to just memorize each task.
  - Task success is determined by the outcome state, and is thus independent of the path the agent took to complete it.
  - Tasks assess an agent across a wide variety of agent capabilities and task complexity.
+ - Includes both tasks that change the device state and information retrieval tasks.
 
 ### Dataset Statistics
 
@@ -84,7 +86,7 @@ These tasks span a broad spectrum of app domains, below are a few examples:
       <p>(f) Add a calendar event.</p>
     </div>
     <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/SimpleCalendarAddOneEventRelativeDay_2x.mp4" type="video/mp4">
+      <source src="assets/videos/SimpleCalendarAddOneEventRelativeDay-Fail.mp4" type="video/mp4">
     </video>
   </div>
     <div class="video-content">
