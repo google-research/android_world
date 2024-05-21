@@ -83,7 +83,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
       <source src="assets/videos/TasksHighPriorityTasksDueOnDate_2x.mp4" type="video/mp4">
     </video>
     <div class="overlay">
-      <p>(i) Retrieve high priority tasks due on date.</p>
+      <p>(h) Retrieve high priority tasks due on date.</p>
     </div>
   </div>
   <div class="video-content">
@@ -91,7 +91,7 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
       <source src="assets/videos/SportsTrackerTotalDistanceForCategoryOverInterval_2x.mp4" type="video/mp4">
     </video>
     <div class="overlay">
-      <p>(j) Retrieve sports tracking stats.</p>
+      <p>(i) Retrieve sports tracking stats.</p>
     </div>
   </div>
 </div>
