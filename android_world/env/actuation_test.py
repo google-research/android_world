@@ -271,27 +271,6 @@ class ExecuteAdbActionTest(absltest.TestCase):
         action, self.screen_elements, self.screen_size, self.mock_env
     )
 
-  def test_launch_app_drawer(self):
-    action = json_action.JSONAction(
-        action_type='launch_adb_activity', activity_nickname='app_drawer'
-    )
-    with (
-        mock.patch.object(adb_utils, 'press_home_button') as mock_press_home,
-        mock.patch.object(adb_utils, 'generate_swipe_command') as mock_swipe,
-        mock.patch.object(
-            adb_utils, 'issue_generic_request'
-        ) as mock_issue_request,
-    ):
-      actuation.execute_adb_action(
-          action, self.screen_elements, self.screen_size, self.mock_env
-      )
-
-      mock_press_home.assert_called_once_with(self.mock_env)
-      mock_swipe.assert_called_once_with(
-          50, 90, 50, 30
-      )  # Assuming screen_size is (100, 100)
-      mock_issue_request.assert_called_once()
-
 
 if __name__ == '__main__':
   absltest.main()

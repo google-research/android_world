@@ -69,9 +69,9 @@ class CalendarEventTestSetup(parameterized.TestCase):
     self.mock_clear_db = mock.patch.object(
         sqlite_validators.SQLiteApp, "_clear_db"
     ).start()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, "restore_snapshot"
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, "restore_snapshot")
+    )
 
   def tearDown(self):
     super().tearDown()

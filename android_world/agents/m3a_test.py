@@ -53,6 +53,10 @@ class M3AInteractionTest(absltest.TestCase):
         'get_physical_frame_boundary',
     ).start()
 
+  def tearDown(self):
+    super().tearDown()
+    mock.patch.stopall()
+
   def test_step_method_with_completion(self):
     env = test_utils.FakeAsyncEnv()
     llm = MockMultimodalLlmWrapper([(

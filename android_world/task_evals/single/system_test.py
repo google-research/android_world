@@ -25,9 +25,9 @@ class SystemWifiTurnOnTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, 'restore_snapshot'
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, 'restore_snapshot')
+    )
 
   def test_is_successful_returns_1_if_wifi_enabled(self):
     eval_task = system.SystemWifiTurnOn(params={'on_or_off': 'on'})
@@ -54,9 +54,9 @@ class SystemWifiTurnOffTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, 'restore_snapshot'
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, 'restore_snapshot')
+    )
 
   def test_is_successful_returns_1_if_wifi_disabled(self):
     eval_task = system.SystemWifiTurnOn(params={'on_or_off': 'off'})
@@ -148,9 +148,9 @@ class SystemTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, 'restore_snapshot'
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, 'restore_snapshot')
+    )
 
   def test_parse_component_name_normalizes_components(self):
     absolute_component_name = system.parse_component_name(

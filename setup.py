@@ -73,6 +73,7 @@ setuptools.setup(
     name='android_world',
     package_data={'': ['proto/*.proto']},  # Copy protobuf files.
     packages=setuptools.find_packages(),
+    setup_requires=['grpcio-tools'],
     cmdclass={
         'build_py': _BuildPy,
         'generate_protos': _GenerateProtoFiles,

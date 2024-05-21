@@ -43,12 +43,20 @@ class RecipeTestBase(absltest.TestCase):
     )
     self.mock_env = mock.create_autospec(interface.AsyncEnv)
 
+  def tearDown(self):
+    super().tearDown()
+    self.mock_env.stop()
+
 
 class RecipeDeleteMultipleRecipesTest(RecipeTestBase):
 
   def setUp(self):
     super().setUp()
     self.mock_env = mock.MagicMock()
+
+  def tearDown(self):
+    super().tearDown()
+    self.mock_env.stop()
 
   def test_goal_generation(self):
     params = recipe._RecipeDeleteMultipleRecipes.generate_random_params()
@@ -109,27 +117,30 @@ class RecipeDeleteDuplicateRecipesTest(parameterized.TestCase):
     self.mock_env.base_env = mock.create_autospec(
         env_interface.AndroidEnvInterface
     )
-    self.mock_list_rows = mock.patch.object(
-        sqlite_validators.SQLiteApp, 'list_rows', return_value=[]
-    ).start()
-    self.mock_add_rows = mock.patch.object(
-        sqlite_validators.SQLiteApp, 'add_rows'
-    ).start()
-    self.mock_tmp_directory_from_device = mock.patch.object(
-        file_utils, 'tmp_directory_from_device'
-    ).start()
-    self.mock_issue_generic_request = mock.patch.object(
-        adb_utils, 'issue_generic_request'
-    ).start()
-    self.mock_remove_files = mock.patch.object(
-        file_utils, 'clear_directory'
-    ).start()
-    self.mock_clear_db = mock.patch.object(
-        sqlite_validators.SQLiteApp, '_clear_db'
-    ).start()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, 'restore_snapshot'
-    ).start()
+    # enter context
+    self.mock_list_rows = self.enter_context(
+        mock.patch.object(
+            sqlite_validators.SQLiteApp, 'list_rows', return_value=[]
+        )
+    )
+    self.mock_add_rows = self.enter_context(
+        mock.patch.object(sqlite_validators.SQLiteApp, 'add_rows')
+    )
+    self.mock_tmp_directory_from_device = self.enter_context(
+        mock.patch.object(file_utils, 'tmp_directory_from_device')
+    )
+    self.mock_issue_generic_request = self.enter_context(
+        mock.patch.object(adb_utils, 'issue_generic_request')
+    )
+    self.mock_remove_files = self.enter_context(
+        mock.patch.object(file_utils, 'clear_directory')
+    )
+    self.mock_clear_db = self.enter_context(
+        mock.patch.object(sqlite_validators.SQLiteApp, '_clear_db')
+    )
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, 'restore_snapshot')
+    )
 
     self.params = {
         sqlite_validators.NOISE_ROW_OBJECTS: [
@@ -145,6 +156,10 @@ class RecipeDeleteDuplicateRecipesTest(parameterized.TestCase):
         ],
     }
     self.instance = recipe.RecipeDeleteDuplicateRecipes(self.params)
+
+  def tearDown(self):
+    super().tearDown()
+    mock.patch.stopall()
 
   def test_initialize_task(self):
     """Test initialization of the task with proper setup of duplicate rows."""

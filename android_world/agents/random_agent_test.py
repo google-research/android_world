@@ -38,6 +38,7 @@ class TestGenerateRandomAction(absltest.TestCase):
             'navigate_back',
             'wait',
             'input_text',
+            'keyboard_enter',
         ],
     )
 

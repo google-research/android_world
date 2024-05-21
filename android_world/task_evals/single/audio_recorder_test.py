@@ -34,6 +34,10 @@ class AudioRecorderTest(test_utils.AdbEvalTestBase):
     ).start()
     self.mock_env = mock.MagicMock(spec=interface.AsyncEnv)
 
+  def tearDown(self):
+    super().tearDown()
+    mock.patch.stopall()
+
   def test_audio_recorder_is_successful(self):
     file1 = file_utils.FileWithMetadata(
         file_name="file_name1",

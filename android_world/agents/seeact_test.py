@@ -37,6 +37,10 @@ class TestSeeAct(absltest.TestCase):
     ).start()
     mock.patch.object(actuation, 'execute_adb_action').start()
 
+  def tearDown(self):
+    super().tearDown()
+    mock.patch.stopall()
+
   def test_step(self):
     mock_action_gen_response_1 = {
         'choices': [{'message': {'content': 'Generated action 1'}}]

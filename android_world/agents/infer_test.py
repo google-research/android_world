@@ -32,6 +32,10 @@ class InferTest(absltest.TestCase):
     os.environ["OPENAI_API_KEY"] = "fake_api_key"
     os.environ["GCP_API_KEY"] = "fake_api_key"
 
+  def tearDown(self):
+    super().tearDown()
+    mock.patch.stopall()
+
   @mock.patch.object(genai.GenerativeModel, "generate_content")
   def test_gemini_gcp(self, mock_generate_content):
     mock_generate_content.return_value = (

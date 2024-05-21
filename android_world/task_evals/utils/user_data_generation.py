@@ -31,18 +31,27 @@ from PIL import ImageDraw
 from PIL import ImageFont
 import pydub
 
-_FONT_PATHS = ["arial.ttf", "Arial Unicode.ttf", "Roboto-Regular.ttf"]
+_FONT_PATHS = [
+    "arial.ttf",
+    "Arial Unicode.ttf",
+    "Roboto-Regular.ttf",
+    "DejaVuSans-Bold.ttf",
+    "LiberationSans-Regular.ttf",
+]
 
 
 def get_font_path() -> str:
   """Get the font path, falling back to a default system font if necessary."""
   for font_name in _FONT_PATHS:
     try:
-      font_path = ImageFont.truetype(font_name, 16).path
+      font_path = ImageFont.truetype(font_name).path
       return font_path
     except IOError:
       continue
-  raise FileNotFoundError("No suitable font found.")
+  try:
+    return ImageFont.truetype().path
+  except IOError as exc:
+    raise RuntimeError("No suitable font found.") from exc
 
 
 _TMP = "/tmp"

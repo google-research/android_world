@@ -64,7 +64,6 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
         mock.patch.object(
             app_snapshot,
             "restore_snapshot",
-            autospec=True,
         )
     )
 

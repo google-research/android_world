@@ -37,7 +37,7 @@ class EnvLauncherTest(absltest.TestCase):
     mock_android_env = mock.create_autospec(env_interface.AndroidEnvInterface)
     mock_loader.return_value = mock_android_env
 
-    env_launcher._get_env(5556, "{adb_path}/adb")
+    env_launcher._get_env(5556, "some_adb_path")
 
     mock_loader.assert_called_with(
         config=config_classes.AndroidEnvConfig(
@@ -47,6 +47,9 @@ class EnvLauncherTest(absltest.TestCase):
             simulator=config_classes.EmulatorConfig(
                 emulator_launcher=config_classes.EmulatorLauncherConfig(
                     emulator_console_port=5556, adb_port=5557, grpc_port=8554
+                ),
+                adb_controller=config_classes.AdbControllerConfig(
+                    adb_path="some_adb_path"
                 ),
             ),
         )

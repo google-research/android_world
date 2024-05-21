@@ -25,9 +25,9 @@ class TurnOnWifiAndOpenAppTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, "restore_snapshot"
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, "restore_snapshot").start()
+    )
 
   def test_generate_random_params(self):
     params = system.TurnOnWifiAndOpenApp.generate_random_params()
@@ -93,9 +93,9 @@ class TurnOffWifiAndTurnOnBluetoothTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, "restore_snapshot"
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, "restore_snapshot")
+    )
 
   def test_is_successful_returns_0_if_wifi_is_on_and_bluetooth_is_off(self):
     env = mock.create_autospec(interface.AsyncEnv)

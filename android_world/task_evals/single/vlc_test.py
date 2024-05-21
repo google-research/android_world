@@ -102,9 +102,9 @@ class VlcTestBase(parameterized.TestCase):
             side_effect=file_test_utils.mock_copy_data_to_device,
         )
     )
-    self.mock_restore_snapshot = mock.patch.object(
-        app_snapshot, 'restore_snapshot'
-    ).start()
+    self.mock_restore_snapshot = self.enter_context(
+        mock.patch.object(app_snapshot, 'restore_snapshot')
+    )
 
   def tearDown(self):
     super().tearDown()
