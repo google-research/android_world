@@ -16,19 +16,99 @@ Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, 
 </p>
 
 </div>
+<br>
+<div class="video-row">
+  <div class="video-content">
+    <video height='80%' width='80%' autoplay muted loop playsinline controls>
+      <source src="assets/videos/AudioRecorderRecordAudioWithFileName.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(a) Record an audio and save it</p>
+    </div>
+  </div>
+  <div class="video-content">
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/ExpenseAddMultiple.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(b) Add multiple expenses.</p>
+    </div>
+  </div>
+  <div class="video-content">
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/OsmAndMarker.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(c) Create a marker in a map app</p>
+    </div>
+  </div>
+</div>
+<div class="video-row">
+  <div class="video-content">
+    <video height='80%' width='80%' autoplay muted loop playsinline controls>
+      <source src="assets/videos/RecipeAddMultipleRecipes.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(e) Create multiple recipes.</p>
+    </div>
+  </div>
+  <div class="video-content">
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/SimpleCalendarAddOneEventRelativeDay-Fail.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(f) Add a calendar event.</p>
+    </div>
+  </div>
+    <div class="video-content">
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/VlcCreatePlaylist_2x.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(g) Create a playlist in VLC.</p>
+    </div>
+  </div>
+</div>
+<div class="video-row">
+  <div class="video-content">
+    <video height='80%' width='80%' autoplay muted loop playsinline controls>
+      <source src="assets/videos/SimpleSmsSendReceivedAddress.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(h) Send received address to contact.</p>
+    </div>
+  </div>
+  <div class="video-content">
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/TasksHighPriorityTasksDueOnDate_2x.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(i) Retrieve high priority tasks due on date.</p>
+    </div>
+  </div>
+  <div class="video-content">
+    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
+      <source src="assets/videos/SportsTrackerTotalDistanceForCategoryOverInterval_2x.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <p>(j) Retrieve sports tracking stats.</p>
+    </div>
+  </div>
+</div>
+
 
 ## Abstract
 {% include_relative abstract.md %}
 
-
 ## Dataset
 Key Features:
- - 116 manually created tasks across 20 open source apps.
- - Benchmark is using a real world environment running on an Android emulator.
- - All tasks are parametrized, adding variety and making it more difficult for agents to just memorize each task.
- - Task success is determined by the outcome state, and is thus independent of the path the agent took to complete it.
- - Tasks assess an agent across a wide variety of agent capabilities and task complexity.
- - Includes both tasks that change the device state and information retrieval tasks.
+* 📝 116 diverse tasks across 20 real-world apps
+*  🎲 Dynamic task instantiation for millions of unique variations
+*  🏆 Durable reward signals for reliable evaluation
+*  🌐 Open environment with access to millions of Android apps and websites
+*  💾 Lightweight footprint (2 GB memory, 8 GB disk)
+*  🔧 Extensible design to easily add new tasks and benchmarks
+ * 🖥️ Integration with MiniWoB++ web-based tasks
 
 ### Dataset Statistics
 
@@ -43,87 +123,7 @@ Key Features:
   </div>
 </div>
 
-### Dataset Contents
-These tasks span a broad spectrum of app domains, below are a few examples:
 
-<div class="video-row">
-  <div class="video-content">
-    <div class="overlay">
-      <p>(a) Record an audio and save it</p>
-    </div>
-    <video height='80%' width='80%' autoplay muted loop playsinline controls>
-      <source src="assets/videos/AudioRecorderRecordAudioWithFileName.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="video-content">
-    <div class="overlay">
-      <p>(b) Add multiple expenses.</p>
-    </div>
-    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/ExpenseAddMultiple.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="video-content">
-    <div class="overlay">
-      <p>(c) Create a marker in a map app</p>
-    </div>
-    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/OsmAndMarker.mp4" type="video/mp4">
-    </video>
-  </div>
-</div>
-<div class="video-row">
-  <div class="video-content">
-    <div class="overlay">
-      <p>(e) Create multiple recipes.</p>
-    </div>
-    <video height='80%' width='80%' autoplay muted loop playsinline controls>
-      <source src="assets/videos/RecipeAddMultipleRecipes.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="video-content">
-    <div class="overlay">
-      <p>(f) Add a calendar event.</p>
-    </div>
-    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/SimpleCalendarAddOneEventRelativeDay-Fail.mp4" type="video/mp4">
-    </video>
-  </div>
-    <div class="video-content">
-    <div class="overlay">
-      <p>(g) Create a playlist in VLC.</p>
-    </div>
-    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/VlcCreatePlaylist_2x.mp4" type="video/mp4">
-    </video>
-  </div>
-</div>
-<div class="video-row">
-  <div class="video-content">
-    <div class="overlay">
-      <p>(h) Send received address to contact.</p>
-    </div>
-    <video height='80%' width='80%' autoplay muted loop playsinline controls>
-      <source src="assets/videos/SimpleSmsSendReceivedAddress.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="video-content">
-    <div class="overlay">
-      <p>(i) Retrieve high priority tasks due on date.</p>
-    </div>
-    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/TasksHighPriorityTasksDueOnDate_2x.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="video-content">
-    <div class="overlay">
-      <p>(j) Retrieve sports tracking stats.</p>
-    </div>
-    <video height='80%' width='80%' class="video" controls autoplay playsinline muted loop>
-      <source src="assets/videos/SportsTrackerTotalDistanceForCategoryOverInterval_2x.mp4" type="video/mp4">
-    </video>
-  </div>
-</div>
 
 ### Comparison to other datasets
 <img src="assets/images/dataset_comparison.png" alt="Table comparing AndroidWorld to other datasets">
