@@ -701,7 +701,18 @@ class JoplinApp(AppSetup):
         env,
     )
 
-    adb_utils.launch_app(cls.app_name, env)
+    # Launch the app, similar to how user launches it from App Drawer.
+    adb_utils.issue_generic_request(
+        [
+            "shell",
+            "monkey",
+            "-p",
+            joplin_package,
+            "-candroid.intent.category.LAUNCHER",
+            "1",
+        ],
+        env,
+    )
     time.sleep(2.0)
     adb_utils.close_app(cls.app_name, env)
 
