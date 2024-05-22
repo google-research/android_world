@@ -6,13 +6,16 @@ title: AndroidWorld
 
 <div align="center">
 <p align="center" style="font-size:20px">
-Chris Rawles, Yifan Chang, Sarah Clinckemaillie, Jonathan Waltz, Gabrielle Lau, Robert Berry, Wei Li, Will Bishop, Alice Li, Folawiyo Campbell-Ajala, Divya Tyam, Daniel Toyama, Timothy Lillicrap, Oriana Riva
+Chris Rawles<sup  style="font-size:10px">1</sup>, Yifan Chang<sup style="font-size:10px">2</sup>, Sarah Clinckemaillie<sup style="font-size:10px">2</sup>, Jonathan Waltz<sup style="font-size:10px">2</sup>, Gabrielle Lau<sup style="font-size:10px">2</sup>, Marybeth Fair<sup style="font-size:10px">2</sup>, Robert Berry<sup style="font-size:10px">1</sup>, Wei Li<sup style="font-size:10px">1</sup>, Will Bishop<sup style="font-size:10px">1</sup>, Alice Li<sup style="font-size:10px">1</sup>, Folawiyo Campbell-Ajala<sup style="font-size:10px">1</sup>, Divya Tyam<sup style="font-size:10px">2</sup>, Daniel Toyama<sup style="font-size:10px">1</sup>, Timothy Lillicrap<sup style="font-size:10px">1</sup>, Oriana Riva<sup style="font-size:10px">1</sup>
+</p>
+<p align="center" style="font-size:20px">
+<sup style="font-size:10px">1 </sup>Google DeepMind
+<sup style="font-size:10px">2 </sup>Google Research
 </p>
 <p align="center">
-<a href="#dataset"><b>Dataset</b></a> •
 <a href=""><b>Paper</b></a> •
-<a href="#run-benchmark"><b>Run Benchmark</b></a> •
-<a href="#citation"><b>Citation</b></a>
+<a href="https://github.com/google-research/android_world"><b>Code</b></a> •
+<a href="https://github.com/google-research/android_world/blob/main/android_world/task_metadata.json"><b>Data</b></a>
 </p>
 
 </div>
@@ -139,7 +142,7 @@ See our <a href="https://github.com/google-research/android_world">github reposi
 <pre>
 @misc{androidworld,
   title={AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents},
-  author={Chris Rawles and Yifan Chang and Sarah Clinckemaillie and Jonathan Waltz and Gabrielle Lau and Robert Berry and Wei Li and Will Bishop and Alice Li and Folawiyo Campbell-Ajala and Divya Tyam and Daniel Toyama and Timothy Lillicrap and Oriana Riva},
+  author={Chris Rawles and Yifan Chang and Sarah Clinckemaillie and Jonathan Waltz and Gabrielle Lau and Marybeth Fair and Robert Berry and Wei Li and Will Bishop and Alice Li and Folawiyo Campbell-Ajala and Divya Tyam and Daniel Toyama and Timothy Lillicrap and Oriana Riva},
   archivePrefix={arXiv},
   eprint={},
   year={2024}
