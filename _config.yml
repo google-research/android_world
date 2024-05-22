@@ -23,7 +23,7 @@ title: AndroidWorld
 description: >- # this means to ignore newlines until "baseurl:"
   AndroidWorld: A benchmark for evaluating agents on Android.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://google-research.github.io/android_world" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 theme: minima
