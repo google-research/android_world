@@ -38,6 +38,7 @@ import pandas as pd
 # A fixed seed to use when use identical parameters but seed is not set.
 _FIXED_SEED = 123
 _TASK_TEMPLATE_COLUMN = 'task_template'
+_TASK_PROMPT_COLUMN = 'task_prompt'
 
 
 class Suite(dict[str, list[task_eval.TaskEval]]):
@@ -489,6 +490,8 @@ def _extract_task_metadata() -> pd.DataFrame:
   name = 'task_metadata.json'
   filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
   df = pd.read_json(filepath)
+  df.rename(columns={_TASK_TEMPLATE_COLUMN: _TASK_PROMPT_COLUMN}, inplace=True)
+  df.rename(columns={'task_name': _TASK_TEMPLATE_COLUMN}, inplace=True)
   return df.set_index(_TASK_TEMPLATE_COLUMN)[
       ['difficulty', 'optimal_steps', 'tags']
   ]
