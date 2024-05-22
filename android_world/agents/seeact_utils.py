@@ -704,6 +704,7 @@ def convert_seeact_action_to_json_action(
     app_name = action.value
   elif action_type == json_action.ANSWER:
     text = action.value
+    goal_status = "task_complete"
   elif action_type == json_action.STATUS:
     goal_status = "task_complete"
 
@@ -768,13 +769,13 @@ def plot_to_html_img(figure) -> str:
   # Encode the image in base64 to embed in HTML
   image_base64 = base64.b64encode(buf.read()).decode("utf-8")
   buf.close()
-  return f'<img src="data:image/png;base64,{image_base64}" width="800" />'
+  return f'<img src="data:image/png;base64,{image_base64}" width="400" />'
 
 
 def _generate_episode_html(episode: dict[str, Any], num: int) -> str:
   """Generate an HTML report from screenshot data and action descriptions for a single episode."""
   data = episode["episode_data"]
-  title = episode["task_template"] + " - " + episode["goal"]
+  title = "TASK: " + episode["task_template"] + " - " + episode["goal"]
   success_text = (
       "<span style='color:green;'>SUCCESS</span>"
       if episode["is_successful"]
@@ -792,7 +793,7 @@ def _generate_episode_html(episode: dict[str, Any], num: int) -> str:
     fig, ax = plt.subplots()
     ax.imshow(screenshot)
     ax.axis("off")  # Turn off axis
-    ax.set_title(f"TASK {i}: {description}", fontsize=12, color="blue")
+    ax.set_title(f"STEP {i}: {description}", fontsize=12, color="blue")
     html_str += "<div>" + plot_to_html_img(fig) + "</div>"
     plt.close(fig)  # Close the plot to free up memory
 
