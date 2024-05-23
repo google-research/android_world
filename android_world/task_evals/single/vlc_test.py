@@ -15,6 +15,7 @@
 import dataclasses
 import os
 import sqlite3
+import tempfile
 from unittest import mock
 
 from absl.testing import absltest
@@ -37,7 +38,6 @@ class Playlist:
 
 def _set_state_of_db(test_db_path: str, playlists: list[Playlist]):
   """Inserts playlists and their media files into the mock database."""
-  os.makedirs('/tmp/test_databases', exist_ok=True)
 
   if os.path.exists(test_db_path):
     os.remove(test_db_path)
@@ -82,8 +82,12 @@ class VlcTestBase(parameterized.TestCase):
     """Set up the test environment and mock database."""
     super().setUp()
     self.env_mock = mock.create_autospec(interface.AsyncAndroidEnv)
-    self.test_db_path = '/tmp/fake_remote_path/app_db/vlc_media.db'
-    os.makedirs('/tmp/fake_remote_path/app_db', exist_ok=True)
+    temp_dir = tempfile.mkdtemp()
+    self.test_db_path = os.path.join(temp_dir, 'app_db/vlc_media.db')
+    os.makedirs(
+        os.path.join(os.path.dirname(self.test_db_path), 'app_db'),
+        exist_ok=True,
+    )
 
     vlc._DB_PATH = self.test_db_path
 

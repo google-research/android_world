@@ -25,8 +25,7 @@ from android_world.task_evals.utils import sqlite_schema_utils
 def setup_test_db() -> str:
   """Setup test database."""
   # Create a temporary directory
-  os.makedirs('/tmp/test_databases', exist_ok=True)
-  temp_dir = tempfile.mkdtemp(dir='/tmp/test_databases')
+  temp_dir = tempfile.mkdtemp()
 
   # Path for the new database
   db_path = os.path.join(temp_dir, 'events.db')

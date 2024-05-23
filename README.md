@@ -1,5 +1,13 @@
 # AndroidWorld
 
+[![Unittests](https://github.com/google-research/android_world/actions/workflows/pytest.yml/badge.svg)](https://github.com/google-research/android_world/actions/workflows/pytest.yml)
+
+<p align="center">
+<a href="https://google-research.github.io/android_world/">Website</a> •
+<a href="https://arxiv.org/abs/">Paper</a>
+</p>
+
+![Overview](assets/overview.png)
 
 **AndroidWorld** is an environment for building and benchmarking autonomous computer control agents.
 
@@ -16,6 +24,8 @@ Key features of AndroidWorld include:
 * 💾 **Lightweight footprint** (2 GB memory, 8 GB disk)
 * 🔧 **Extensible design** to easily add new tasks and benchmarks
 * 🖥️ **Integration with MiniWoB++** web-based tasks
+
+See demo videos on our [website](https://google-research.github.io/android_world/).
 
 ## Installation
 

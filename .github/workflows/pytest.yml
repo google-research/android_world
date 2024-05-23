@@ -38,6 +38,11 @@ jobs:
       run: |
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
+    # Set TMPDIR
+    - name: Set TMPDIR
+      run: |
+        echo "TMPDIR=/tmp/" >> $GITHUB_ENV
+
     # Install additional dependencies
     - name: Install additional dependencies
       run: |

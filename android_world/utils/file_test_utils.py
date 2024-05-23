@@ -17,6 +17,7 @@
 import contextlib
 import os
 import shutil
+import tempfile
 
 from android_env import env_interface
 
@@ -29,15 +30,16 @@ def mock_tmp_directory_from_device(
 ):
   """Mocks `file_utils.tmp_directory_from_device` for unit testing."""
   del env, timeout_sec
-  parent_dir = os.path.join(
-      '/tmp/mocks/', os.path.split(os.path.split(device_path)[0])[1]
-  )
-  try:
-    shutil.copytree(device_path, parent_dir)
-    yield parent_dir
+  with tempfile.TemporaryDirectory() as tmp_dir:
+    parent_dir = os.path.join(
+        tmp_dir, os.path.split(os.path.split(device_path)[0])[1]
+    )
+    try:
+      shutil.copytree(device_path, parent_dir)
+      yield parent_dir
 
-  finally:
-    shutil.rmtree(parent_dir)
+    finally:
+      shutil.rmtree(parent_dir)
 
 
 def mock_copy_data_to_device(
