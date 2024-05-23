@@ -19,7 +19,7 @@ title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
   color: #fff;
 }
 a, a:visited, a:hover, a:active {
-  color: #0000ff;
+  color: #fff;
 }
 span.icon {
     padding-right: 10px;
@@ -156,10 +156,10 @@ Key Features:
 
 
 ## Paper
-AndroidWorld is described in [http://arxiv.org/TODO](our publication (PDF)).
+AndroidWorld is described in our <a href="https://github.com/google-research/android_world" style="blue">publication</a>.
 
 ## Run Benchmark
-See our <a href="https://github.com/google-research/android_world">github repository</a> for instructions on running the benchmark.
+See our <a href="https://github.com/google-research/android_world" style="blue">GitHub repository</a> for instructions on running the benchmark.
 
 ## Citation
 <pre>
