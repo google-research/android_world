@@ -21,10 +21,6 @@ title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
 a, a:visited, a:hover, a:active {
   color: #fff;
 }
-
-a.text-link, a.text-link:visited, a.text-link:hover, a.text-link:active {
-    color: #1a0dab;
-}
   
 span.icon {
     padding-right: 10px;
@@ -155,16 +151,9 @@ Key Features:
 </div>
 
 
-
 ### Comparison to other datasets
 <img src="assets/images/dataset_comparison.png" alt="Table comparing AndroidWorld to other datasets">
 
-
-## Paper
-AndroidWorld is described in our <a href="https://github.com/google-research/android_world" style="blue">publication</a>.
-
-## Run Benchmark
-See our [GitHub repository](https://github.com/google-research/android_world){: .specific-link } for instructions on running the benchmark.
 
 ## Citation
 <pre>
