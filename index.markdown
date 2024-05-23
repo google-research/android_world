@@ -4,18 +4,41 @@ layout: home
 title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
 ---
 
+
+
 <div align="center">
+<style>
+  .rounded-button {
+  border-radius: 290486px;
+  padding-left: 1.25em;
+  padding-right: 1.25em;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: #151313;
+  border-color: transparent;
+  color: #fff;
+}
+a, a:visited, a:hover, a:active {
+  color: #fff;
+}
+span.icon {
+    padding-right: 10px;
+}
+  </style>
 <p align="center" style="font-size:20px">
 Chris Rawles<sup  style="font-size:10px">*1</sup>, Yifan Chang<sup style="font-size:10px">†2</sup>, Sarah Clinckemaillie<sup style="font-size:10px">†2</sup>, Jonathan Waltz<sup style="font-size:10px">2</sup>, Gabrielle Lau<sup style="font-size:10px">2</sup>, Marybeth Fair<sup style="font-size:10px">2</sup>, Robert Berry<sup style="font-size:10px">1</sup>, Wei Li<sup style="font-size:10px">1</sup>, Will Bishop<sup style="font-size:10px">1</sup>, Alice Li<sup style="font-size:10px">1</sup>, Folawiyo Campbell-Ajala<sup style="font-size:10px">1</sup>, Divya Tyamagundlu<sup style="font-size:10px">2</sup>, Daniel Toyama<sup style="font-size:10px">1</sup>, Timothy Lillicrap<sup style="font-size:10px">1</sup>, Oriana Riva<sup style="font-size:10px">1</sup>
 </p>
-<p align="center" style="font-size:20px">
+<p align="center" style="font-size:16px">
 <sup style="font-size:10px">1 </sup>Google DeepMind
 <sup style="font-size:10px">2 </sup>Google Research
+<br>
+<sup style="font-size:10px">*</sup>Lead contributors
+<sup style="font-size:10px"> +</sup>Equal contribution 
 </p>
 <p align="center">
-<a href=""><b>Paper</b></a> •
-<a href="https://github.com/google-research/android_world"><b>Code</b></a> •
-<a href="https://github.com/google-research/android_world/blob/main/android_world/task_metadata.json"><b>Data</b></a>
+<a class="rounded-button" href=""><span class="icon"><i class="ai ai-arxiv"></i></span><span>Paper</span></a>
+<a class="rounded-button" href="https://github.com/google-research/android_world"><span class="icon"><i class="fa-brands fa-github"></i></span><span>Code</span></a>
+<a class="rounded-button" href="https://github.com/google-research/android_world/blob/main/android_world/task_metadata.json"><span class="icon"><i class="fa-regular fa-images"></i></span><span>Data</span></a>
 </p>
 
 <img src="assets/images/aw_graph.png" alt="Overview of AndroidWorld ">
