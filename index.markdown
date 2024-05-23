@@ -19,7 +19,7 @@ title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
   color: #fff;
 }
 a, a:visited, a:hover, a:active {
-  color: #fff;
+  color: #0000ff;
 }
 span.icon {
     padding-right: 10px;
@@ -30,10 +30,10 @@ Chris Rawles<sup  style="font-size:10px">*1</sup>, Yifan Chang<sup style="font-s
 </p>
 <p align="center" style="font-size:16px">
 <sup style="font-size:10px">1 </sup>Google DeepMind
-<sup style="font-size:10px">2 </sup>Google Research
+<sup style="font-size:10px">2 </sup>Google
 <br>
-<sup style="font-size:10px">*</sup>Lead contributors
-<sup style="font-size:10px"> +</sup>Equal contribution 
+<sup style="font-size:10px">*</sup>Lead contributor
+<sup style="font-size:10px"> †</sup>Equal contribution 
 </p>
 <p align="center">
 <a class="rounded-button" href=""><span class="icon"><i class="ai ai-arxiv"></i></span><span>Paper</span></a>
