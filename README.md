@@ -1,5 +1,6 @@
 # AndroidWorld
 
+
 **AndroidWorld** is an environment for building and benchmarking autonomous computer control agents.
 
 It runs on a live Android emulator and contains a highly reproducible benchmark of 116 hand-crafted tasks across 20 apps, which are dynamically instantiated with randomly-generated parameters to create millions of unique task variations.
@@ -15,8 +16,6 @@ Key features of AndroidWorld include:
 * 💾 **Lightweight footprint** (2 GB memory, 8 GB disk)
 * 🔧 **Extensible design** to easily add new tasks and benchmarks
 * 🖥️ **Integration with MiniWoB++** web-based tasks
-
-See demo videos on our [website](https://google-research.github.io/android_world/).
 
 ## Installation
 
