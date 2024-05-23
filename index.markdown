@@ -1,7 +1,7 @@
 ---
 permalink: /
 layout: home
-title: AndroidWorld
+title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
 ---
 
 <div align="center">

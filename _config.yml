@@ -21,7 +21,7 @@
 title: AndroidWorld
 
 description: >- # this means to ignore newlines until "baseurl:"
-  AndroidWorld: A benchmark for evaluating agents on Android.
+  A Dynamic Benchmarking Environment for Autonomous Agents
 baseurl: "/android_world" # the subpath of your site, e.g. /blog
 url: "https://google-research.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
