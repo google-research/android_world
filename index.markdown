@@ -4,8 +4,6 @@ layout: home
 title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
 ---
 
-
-
 <div align="center">
 <style>
   .rounded-button {
@@ -18,7 +16,7 @@ title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
   border-color: transparent;
   color: #fff;
 }
-a, a:visited, a:hover, a:active {
+a.rounded-button, a.rounded-button:visited, a.rounded-button:hover, a.rounded-button:active {
   color: #fff;
 }
   
@@ -154,14 +152,13 @@ Key Features:
 ### Comparison to other datasets
 <img src="assets/images/dataset_comparison.png" alt="Table comparing AndroidWorld to other datasets">
 
-
 ## Citation
 <pre>
 @misc{androidworld,
   title={AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents},
   author={Chris Rawles and Yifan Chang and Sarah Clinckemaillie and Jonathan Waltz and Gabrielle Lau and Marybeth Fair and Robert Berry and Wei Li and Will Bishop and Alice Li and Folawiyo Campbell-Ajala and Divya Tyamagundlu and Daniel Toyama and Timothy Lillicrap and Oriana Riva},
   archivePrefix={arXiv},
-  eprint={},
+  eprint={2405.14573},
   year={2024}
 }
 </pre>
