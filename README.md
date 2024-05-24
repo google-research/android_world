@@ -4,7 +4,7 @@
 
 <p align="center">
 <a href="https://google-research.github.io/android_world/">Website</a> •
-<a href="https://arxiv.org/abs/">Paper</a>
+<a href="https://arxiv.org/pdf/2405.14573">Paper</a>
 </p>
 
 ![Overview](assets/overview.png)
