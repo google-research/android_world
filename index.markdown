@@ -37,7 +37,7 @@ Chris Rawles<sup  style="font-size:10px">*1</sup>, Yifan Chang<sup style="font-s
 <p align="center">
 <a class="rounded-button" href="https://arxiv.org/pdf/2405.14573"><span class="icon"><i class="ai ai-arxiv"></i></span><span>Paper</span></a>
 <a class="rounded-button" href="https://github.com/google-research/android_world"><span class="icon"><i class="fa-brands fa-github"></i></span><span>Code</span></a>
-<a class="rounded-button" href="https://github.com/google-research/android_world/blob/main/android_world/task_metadata.json"><span class="icon"><i class="fa-regular fa-images"></i></span><span>Data</span></a>
+<a class="rounded-button" href="{{ '/task_list.html' | relative_url }}"><span class="icon"><i class="fa-regular fa-images"></i></span><span>Data</span></a>
 </p>
 
 <img src="assets/images/aw_graph.png" alt="Overview of AndroidWorld ">

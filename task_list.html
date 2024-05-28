@@ -1,0 +1,39 @@
+---
+layout: default  # or your desired layout
+title: Task List 
+---
+
+<h2>Task List</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Task Name</th>
+      <th>Template</th>
+      <th>Difficulty</th>
+      <th>Tags</th>
+      <th>Optimal Steps</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task in site.data.task_metadata %}
+      <tr>
+        <td>{{ task.task_name }}</td>
+        <td>{{ task.task_template }}</td>
+        <td>{{ task.difficulty }}</td>
+        <td>
+          {% for tag in task.tags %}
+            <span class="tag">{{ tag }}</span>
+          {% endfor %}
+        </td>
+        <td>{{ task.optimal_steps }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<style>
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ddd; padding: 8px; }
+  .tag { background-color: #f0f0f0; padding: 4px; border-radius: 4px; }
+</style>
