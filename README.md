@@ -76,11 +76,24 @@ See demo videos on our [website](https://google-research.github.io/android_world
     export GCP_API_KEY=your-key
     ```
 
+## Quickstart
+
+Run the `minimal_task_runner.py` script to see the basic mechanics of AndroidWorld components. It initializes the environment, sets up a task, and runs the default agent, M3A, on it.
+```bash
+python minimal_task_runner.py --task=ContactsAddContact
+```
+
+If you don't specify a task, a random task will be selected. *NOTE: If you want to try open-source apps, i.e not included with Android OS, please run `--perform_emulator_setup` in the script below.*
 
 ## Run the benchmark
 
 ```bash
-python run.py --suite_family=android_world --agent_name=t3a_gpt4 --tasks=ContactsAddContact --perform_emulator_setup -v=-2
+python run.py \
+  --suite_family=android_world \
+  --agent_name=t3a_gpt4 \
+  --perform_emulator_setup \
+  --tasks=ContactsAddContact,ClockStopWatchRunning \  # Optional: Just run on a subset.
+  -v=-2 \
 ```
 
 The first time you run this script, you must install the necessary apps and set permissions by specifying `--perform_emulator_setup`. This is a one-time setup.
@@ -89,7 +102,7 @@ Above we specify the optional `--tasks` flag to run on a subset of tasks. Leave 
 
 The `n_task_combinations` argument specifies how many parameter permutations to use for each task. For example, for an SMS task, it would correspond to different phone number/message combinations for each run.
 
-If a run fails partway through, you can resume it by re-running the script with the `--checkpoint_dir` flag pointing to the output directory from the original run.
+If a run fails part-way through, you can resume it by re-running the script with the `--checkpoint_dir` flag pointing to the output directory from the original run.
 
 You can control verbosity with `-v`. The -2 verbosity level is equivalent to `DEBUG`.
 
