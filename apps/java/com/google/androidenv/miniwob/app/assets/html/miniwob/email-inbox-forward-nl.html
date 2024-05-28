@@ -441,20 +441,6 @@ var displayQuery = function(expectedDetails){
   };
 }
 
-// Override by wrapping the original getUtterance
-core.getUtterance = (function (origGetUtterance) {
-  return function () {
-    if (WOB_DATA_MODE == 'test') {
-      return origGetUtterance();
-    } else {
-      return {
-        'utterance': origGetUtterance(),
-        'fields': core.currentFields,
-      };
-    }
-  };
-})(core.getUtterance);
-
 var bindClickEvents = function(expectedDetails, emails){
   $('#main .email-actions span.star').on('click', function(){
     var name = $(this).parents('.email-thread').find('.email-sender').text();
