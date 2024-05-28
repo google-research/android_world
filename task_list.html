@@ -1,9 +1,28 @@
 ---
-layout: default  # or your desired layout
+layout: default  
 title: Task List 
 ---
 
+
+
 <h2>Task List</h2>
+<div class="filters">
+  <div class="dropdown">
+    <button id="filterDropdownBtn">Filter by Tag</button>
+    <div id="tagCheckboxContainer" class="dropdown-content">
+      {% assign tags = site.data.task_metadata | map: 'tags' | flatten | uniq %}
+      {% for tag in tags %}
+        {% unless tag == empty %}
+
+        <label class="checkbox-label">
+          <input type="checkbox" class="tag-checkbox" value="{{ tag }}">
+          {{ tag }}
+        </label>
+        {% endunless %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
 
 <table>
   <thead>
@@ -15,9 +34,9 @@ title: Task List
       <th>Optimal Steps</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="taskTableBody">
     {% for task in site.data.task_metadata %}
-      <tr>
+      <tr data-tags="{% for tag in task.tags %}{{ tag }} {% endfor %}">
         <td>{{ task.task_name }}</td>
         <td>{{ task.task_template }}</td>
         <td>{{ task.difficulty }}</td>
@@ -36,4 +55,76 @@ title: Task List
   table { width: 100%; border-collapse: collapse; }
   th, td { border: 1px solid #ddd; padding: 8px; }
   .tag { background-color: #f0f0f0; padding: 4px; border-radius: 4px; }
+  .filters a {
+    display: inline-block;
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none; /* Remove default link underline */
+  }
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block; /* Show on hover */
+  }
+  .dropdown button { /* Style the dropdown button */
+    background-color: #007BFF; /* Blue background */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease; /* Smooth transition effect on hover */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dropdown button:hover { /* Hover effect */
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  .dropdown-content { /* Style the dropdown content */
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: max-content; 
+    max-width: 300px;  
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .dropdown-content .checkbox-label { /* Style the checkbox labels */
+    display: block; 
+    margin-bottom: 5px;
+  }
 </style>
+<script>
+  const dropdownBtn = document.getElementById('filterDropdownBtn');
+  const tagCheckboxContainer = document.getElementById('tagCheckboxContainer');
+  const checkboxes = document.querySelectorAll('.tag-checkbox');
+  const taskTableBody = document.getElementById('taskTableBody');
+
+  function filterTasks() {
+    const selectedTags = Array.from(checkboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value.toLowerCase());
+
+    taskTableBody.querySelectorAll('tr').forEach(row => {
+      const rowTags = row.getAttribute('data-tags').toLowerCase().split(' ');
+      const matchesFilter = selectedTags.length === 0 || selectedTags.every(tag => rowTags.includes(tag));
+      row.style.display = matchesFilter ? '' : 'none';
+    });
+  }
+
+  dropdownBtn.addEventListener('click', () => {
+    tagCheckboxContainer.style.display = tagCheckboxContainer.style.display === 'block' ? 'none' : 'block';
+  });
+
+  checkboxes.forEach(checkbox => checkbox.addEventListener('change', filterTasks));
+</script>
