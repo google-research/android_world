@@ -22,8 +22,6 @@ from android_world.task_evals.composite import markor_sms
 from android_world.task_evals.composite import system as system_composite
 from android_world.task_evals.information_retrieval import information_retrieval_registry
 from android_world.task_evals.miniwob import miniwob_registry
-from android_world.task_evals.robustness_study import goal_template_variation
-from android_world.task_evals.robustness_study import screen_variation
 from android_world.task_evals.single import audio_recorder
 from android_world.task_evals.single import browser
 from android_world.task_evals.single import camera
@@ -235,56 +233,6 @@ _ANDROID_TASKS_SUBSET = (
     sms.SimpleSmsSendReceivedAddress,
     system_composite.TurnOnWifiAndOpenApp,
 )
-
-
-def _create_task_for_goal_variation(
-    new_class_name: str,
-    base_task: Any,
-    template: str,
-    params: dict[str, Any],
-) -> type[task_eval.TaskEval]:
-  return type(
-      new_class_name,
-      (base_task,),
-      {
-          'generate_random_params': lambda: params,
-          'template': template,
-      },
-  )
-
-
-# Register tasks for goal variation robustness experiments.
-for task in _ANDROID_TASKS_SUBSET:
-  fixed_params = task.generate_random_params()
-
-  for wrapper_name, wrapper_config in screen_variation.SCREEN_MODIFIERS.items():
-    temp_task_name = task.__name__ + '_' + wrapper_name
-
-    VARY_SCREEN_REGISTRY[temp_task_name] = (
-        screen_variation.generate_screen_variation_wrapper(
-            task,
-            wrapper_config['width'],
-            wrapper_config['height'],
-            wrapper_config['orientation'],
-            fixed_params,
-            wrapper_name,
-        )
-    )
-
-  if task.__name__ not in goal_template_variation.ADDITIONAL_TASK_TEMPLATES:
-    continue
-
-  for i, new_template in enumerate(
-      [task.template]
-      + goal_template_variation.ADDITIONAL_TASK_TEMPLATES[task.__name__]
-  ):
-    temp_task_name = task.__name__ + '_' + str(i)
-
-    temp_task = _create_task_for_goal_variation(
-        temp_task_name, task, new_template, fixed_params
-    )
-
-    VARY_TEMPLATE_REGISTRY[temp_task_name] = temp_task
 
 # Add names with "." notation for autocomplete in Colab.
 names = types.SimpleNamespace(**{
