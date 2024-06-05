@@ -239,7 +239,7 @@ def _run_task(
   else:
     agent_successful = task_successful if interaction_results.done else 0.0
     print(
-        f'{"Task Successful ✅" if agent_successful else "Task Failed ❌"};'
+        f'{"Task Successful ✅" if agent_successful > 0.5 else "Task Failed ❌"};'
         f' {task.goal}'
     )
 
