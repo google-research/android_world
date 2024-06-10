@@ -29,7 +29,7 @@ from android_world.task_evals.utils import sqlite_schema_utils
 from android_world.utils import datetime_utils
 
 TIME_FORMAT = '%H:%M'
-_DEFAULT_DURATION_S = 1800  # 30 minutes
+DEFAULT_DURATION_S = 1800  # 30 minutes
 
 
 def parse_duration(duration: str) -> int:
@@ -60,7 +60,7 @@ def create_event_from_proto(
   start_unix_ts = convert_datetime_to_unix_ts(
       event.start_date, event.start_time
   )
-  duration = _DEFAULT_DURATION_S
+  duration = DEFAULT_DURATION_S
   if event.HasField('duration'):
     duration = parse_duration(event.duration)
   end_ts = start_unix_ts + duration
@@ -73,8 +73,8 @@ def create_event_from_proto(
   )
 
 
-def convert_datetime_to_unix_ts(date_str: str, time_str: str) -> int:
-  """Converts a date string and a time string to a UNIX timestamp.
+def convert_str_to_datetime(date_str: str, time_str: str) -> datetime.datetime:
+  """Converts a date string and a time string to a datetime.
 
   Handles the following formats for date_str:
     <month name> <day> <year>
@@ -89,7 +89,7 @@ def convert_datetime_to_unix_ts(date_str: str, time_str: str) -> int:
     time_str: The time string to convert.
 
   Returns:
-    The UNIX timestamp corresponding to the input date string.
+    The datetime corresponding to the input date string.
   """
   dt = datetime_utils_ir.get_date(date_str)
 
@@ -109,8 +109,22 @@ def convert_datetime_to_unix_ts(date_str: str, time_str: str) -> int:
       minute,
       tzinfo=zoneinfo.ZoneInfo(device_constants.TIMEZONE),
   )
-  result = int(localized_dt.timestamp())
-  return result
+  return localized_dt
+
+
+def convert_datetime_to_unix_ts(date_str: str, time_str: str) -> int:
+  """Converts a date string and a time string to a datetime.
+
+  See convert_str_to_datetime for supported string formats.
+
+  Args:
+    date_str: The date string to convert.
+    time_str: The time string to convert.
+
+  Returns:
+    The UNIX timestamp corresponding to the input date and time strings.
+  """
+  return int(convert_str_to_datetime(date_str, time_str).timestamp())
 
 
 def setup_task_state(
