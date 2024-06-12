@@ -21,61 +21,80 @@ we dynamically create a new task with the name of the task in the class name.
 
 import os
 import random
-from typing import Any
+from typing import Any, Generic, Type, TypeVar
 from android_world.task_evals.information_retrieval import information_retrieval
 from android_world.task_evals.information_retrieval.proto import task_pb2
 from google.protobuf import text_format
 
-TASK_REGISTRY = {}
+TaskType = TypeVar('TaskType', bound=information_retrieval.InformationRetrieval)
 
 
-def _read_tasks() -> task_pb2.Tasks:
-  proto = task_pb2.Tasks()
-  script_dir = os.path.dirname(os.path.abspath(__file__))
-  local_path = os.path.join(script_dir, 'proto', 'tasks.textproto')
-  with open(local_path, 'r') as f:
-    textproto_content = f.read()
-  text_format.Merge(textproto_content, proto)
-  return proto
+class InformationRetrievalRegistry(Generic[TaskType]):
+  """Information retrieval registry; it dynamically creates tasks."""
 
-_RAW_TASKS = _read_tasks()
-
-
-def _build_task_class(
-    task_proto: task_pb2.Task,
-) -> information_retrieval.InformationRetrieval:
-  """Dynamically builds and returns a new subclass of InformationRetrieval.
-
-  This function creates a subclass of InformationRetrieval from the task.
-
-  Args:
-    task_proto: The task proto defining the class to be created.
-
-  Returns:
-    A subclass of InformationRetrieval that is dynamically created.
-  """
-
-  @classmethod
-  def generate_random_params(cls) -> dict[str, Any]:  # pylint:disable=unused-argument
-    params = {}
-    for task_param in task_proto.task_params:
-      params[task_param.name] = random.choice(list(task_param.possible_values))
-    return params
+  TASK_REGISTRY: dict[str, TaskType] = {}
 
   @property
-  def task_template(self) -> task_pb2.Task:  # pylint:disable=unused-argument
-    return task_proto
+  def registry(
+      self,
+  ) -> dict[str, TaskType]:
+    return self.TASK_REGISTRY
 
-  return type(
-      task_proto.name,
-      (information_retrieval.InformationRetrieval,),
-      {
-          'generate_random_params': generate_random_params,
-          'task_template': task_template,
-      },
-  )
+  def _read_tasks(self) -> task_pb2.Tasks:
+    proto = task_pb2.Tasks()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    local_path = os.path.join(script_dir, 'proto', 'tasks.textproto')
+    with open(local_path, 'r') as f:
+      textproto_content = f.read()
+    text_format.Merge(textproto_content, proto)
+    return proto
 
+  def __init__(
+      self,
+      filename: str | None = None,
+      task_type: Type[TaskType] = information_retrieval.InformationRetrieval,
+  ):
+    self.filename = filename
+    self.task_type = task_type
+    raw_tasks = self._read_tasks()
+    for raw_task in raw_tasks.tasks:
+      task_class = self._build_task_class(raw_task)
+      self.TASK_REGISTRY[raw_task.name] = task_class
 
-for raw_task in _RAW_TASKS.tasks:
-  task_class = _build_task_class(raw_task)
-  TASK_REGISTRY[raw_task.name] = task_class
+  def _build_task_class(
+      self,
+      task_proto: task_pb2.Task,
+  ) -> TaskType:
+    """Dynamically builds and returns a new subclass of InformationRetrieval.
+
+    This function creates a subclass of InformationRetrieval from the task.
+
+    Args:
+      task_proto: The task proto defining the class to be created.
+
+    Returns:
+      A subclass of InformationRetrieval that is dynamically created.
+    """
+
+    @classmethod
+    def generate_random_params(cls) -> dict[str, Any]:  # pylint:disable=unused-argument
+      params = {}
+      for task_param in task_proto.task_params:
+        params[task_param.name] = random.choice(
+            list(task_param.possible_values)
+        )
+      return params
+
+    @property
+    def task_template(self) -> task_pb2.Task:  # pylint:disable=unused-argument
+      return task_proto
+
+    return type(
+        task_proto.name,
+        (self.task_type,),
+        {
+            'generate_random_params': generate_random_params,
+            'task_template': task_template,
+        },
+    )
+

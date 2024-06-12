@@ -14,7 +14,6 @@
 
 """Tests for suite utils."""
 
-
 import copy
 import time
 from typing import Any
@@ -49,7 +48,7 @@ class TestCreateSuite(parameterized.TestCase):
   )
   def test_create_suite(self, family: str):
     suite_utils.create_suite(
-        registry.get_registry(family), n_task_combinations=2
+        registry.TaskRegistry().get_registry(family), n_task_combinations=2
     )
 
 
@@ -57,7 +56,10 @@ class TestSuite(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.original_registry = copy.deepcopy(registry.ANDROID_TASK_REGISTRY)
+    self.task_registry = registry.TaskRegistry()
+    self.original_registry = copy.deepcopy(
+        self.task_registry.ANDROID_TASK_REGISTRY
+    )
     self.testing_registry = {
         'Task1': test_utils.FakeCurrentStateEval,
         'Task2': test_utils.FakeAdbEval,
@@ -158,7 +160,9 @@ class TestSuite(absltest.TestCase):
     tasks = None
 
     result = suite_utils._filter_tasks(
-        suite, registry.get_registry(registry.ANDROID_FAMILY), tasks
+        suite,
+        self.task_registry.get_registry(registry.TaskRegistry.ANDROID_FAMILY),
+        tasks,
     )
 
     self.assertEqual(
@@ -216,7 +220,9 @@ class TestSuite(absltest.TestCase):
     with self.assertRaises(ValueError):
       suite_utils._filter_tasks(
           suite,
-          registry.get_registry(registry.ANDROID_FAMILY),
+          self.task_registry.get_registry(
+              registry.TaskRegistry.ANDROID_FAMILY
+          ),
           tasks,
       )
 

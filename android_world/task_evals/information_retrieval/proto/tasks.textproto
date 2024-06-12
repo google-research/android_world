@@ -1,4 +1,4 @@
-## proto-file: third_party/py/android_world/task_evals/common/proto/task.proto
+## proto-file: third_party/py/android_world/task_evals/information_retrieval/proto/task.proto
 # proto-message: Tasks
 
 tasks {
@@ -8,6 +8,7 @@ tasks {
   relevant_state {
     state: {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{time}"
@@ -129,6 +130,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "October 15 2023"
           start_time: "{time}"
@@ -241,6 +243,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{time}"
@@ -363,6 +366,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{time_without_replacement}"
@@ -474,6 +478,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{time}"
@@ -583,6 +588,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{time}"
@@ -711,6 +717,8 @@ tasks {
   relevant_state {
     state {
       calendar {
+
+        app_name: "simple calendar pro"
         events {
           start_date: "{date_without_replacement}"
           start_time: "{time_without_replacement}"
@@ -853,6 +861,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{time}"
@@ -960,6 +969,7 @@ tasks {
   relevant_state {
     state {
       calendar {
+        app_name: "simple calendar pro"
         events {
           start_date: "{date}"
           start_time: "{start_time}"
@@ -2110,7 +2120,7 @@ tasks {
   }
   task_params {
     name: "category"
-        possible_values: "running"
+    possible_values: "running"
     possible_values: "cycling"
     possible_values: "swimming"
     possible_values: "hiking"
@@ -2320,7 +2330,7 @@ tasks {
   }
   task_params {
     name: "category"
-        possible_values: "running"
+    possible_values: "running"
     possible_values: "cycling"
     possible_values: "swimming"
     possible_values: "hiking"
@@ -2542,7 +2552,7 @@ tasks {
   }
   task_params {
     name: "category"
-        possible_values: "running"
+    possible_values: "running"
     possible_values: "cycling"
     possible_values: "swimming"
     possible_values: "hiking"
@@ -2765,7 +2775,7 @@ tasks {
   }
   task_params {
     name: "category"
-        possible_values: "running"
+    possible_values: "running"
     possible_values: "cycling"
     possible_values: "swimming"
     possible_values: "hiking"
@@ -3003,7 +3013,7 @@ tasks {
 
   task_params {
     name: "category"
-        possible_values: "running"
+    possible_values: "running"
     possible_values: "cycling"
     possible_values: "swimming"
     possible_values: "hiking"

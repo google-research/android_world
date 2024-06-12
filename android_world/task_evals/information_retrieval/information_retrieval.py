@@ -48,6 +48,10 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
   def task_template(self) -> task_pb2.Task:
     """The Task proto defining this Information Retrieval task."""
 
+  @property
+  def task(self) -> task_pb2.Task:
+    return self._task
+
   def __init__(
       self,
       params: dict[str, Any],
@@ -56,7 +60,7 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
     task = task_pb2.Task()
     task.CopyFrom(self.task_template)
     if task.relevant_state.state.HasField('calendar'):
-      self.app_names = ('simple calendar pro',)
+      self.app_names = (task.relevant_state.state.calendar.app_name,)
     if task.relevant_state.state.HasField('tasks_app'):
       self.app_names = ('tasks',)
     if task.relevant_state.state.HasField('sports_activity_app'):
@@ -71,34 +75,38 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
     super().initialize_task(env)
     # Need to make a copy of the task template so that future runs aren't
     # affected.
-    self.task = task_pb2.Task()
-    self.task.CopyFrom(self.task_template)
-    self.template = self.task.prompt
-    self.complexity = self.task.complexity
-    proto_utils.initialize_proto(self.task, self.params)
+    self._task = task_pb2.Task()
+    self._task.CopyFrom(self.task_template)
+    self.template = self._task.prompt
+    self.complexity = self._task.complexity
+    proto_utils.initialize_proto(self._task, self.params)
     _maybe_replace_date(self.params)
-    if self.task.relevant_state.state.HasField('calendar'):
+    if (
+        self._task.relevant_state.state.HasField('calendar')
+        and self._task.relevant_state.state.calendar.app_name
+        == 'simple calendar pro'
+    ):
       calendar_utils_ir.setup_task_state(
-          self.task.relevant_state.state.calendar,
-          list(self.task.relevant_state.exclusion_conditions),
+          self._task.relevant_state.state.calendar,
+          list(self._task.relevant_state.exclusion_conditions),
           env.base_env,
       )
-    if self.task.relevant_state.state.HasField('tasks_app'):
+    if self._task.relevant_state.state.HasField('tasks_app'):
       task_app_utils.setup_task_state(
-          self.task.relevant_state.state.tasks_app,
-          list(self.task.relevant_state.exclusion_conditions),
+          self._task.relevant_state.state.tasks_app,
+          list(self._task.relevant_state.exclusion_conditions),
           env.base_env,
       )
-    if self.task.relevant_state.state.HasField('sports_activity_app'):
+    if self._task.relevant_state.state.HasField('sports_activity_app'):
       activity_app_utils.setup_task_state(
-          self.task.relevant_state.state.sports_activity_app,
-          list(self.task.relevant_state.exclusion_conditions),
+          self._task.relevant_state.state.sports_activity_app,
+          list(self._task.relevant_state.exclusion_conditions),
           env.base_env,
       )
-    if self.task.relevant_state.state.HasField('notes_app'):
+    if self._task.relevant_state.state.HasField('notes_app'):
       joplin_app_utils.setup_task_state(
-          self.task.relevant_state.state.notes_app,
-          list(self.task.relevant_state.exclusion_conditions),
+          self._task.relevant_state.state.notes_app,
+          list(self._task.relevant_state.exclusion_conditions),
           env.base_env,
       )
 
@@ -109,7 +117,7 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
 
     try:
       answers_are_equal = proto_utils.check_agent_answer(
-          env.interaction_cache, self.task
+          env.interaction_cache, self._task
       )
       return 1.0 if answers_are_equal else 0.0
     except ValueError:

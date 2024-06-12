@@ -284,6 +284,8 @@ def format_state_with_params(
         | state_pb2.SportsActivityApp
     ) = getattr(state, field.name)
     for app_field, _ in app_proto.ListFields():
+      if app_field.name == 'app_name':
+        continue
       app_data_list = getattr(app_proto, app_field.name)
       for app_data in app_data_list:
         for app_data_field, _ in app_data.ListFields():

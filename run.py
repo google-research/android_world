@@ -78,15 +78,15 @@ _DEVICE_CONSOLE_PORT = flags.DEFINE_integer(
 
 _SUITE_FAMILY = flags.DEFINE_enum(
     'suite_family',
-    registry.ANDROID_WORLD_FAMILY,
+    registry.TaskRegistry.ANDROID_WORLD_FAMILY,
     [
         # Families from the paper.
-        registry.ANDROID_WORLD_FAMILY,
-        registry.MINIWOB_FAMILY_SUBSET,
+        registry.TaskRegistry.ANDROID_WORLD_FAMILY,
+        registry.TaskRegistry.MINIWOB_FAMILY_SUBSET,
         # Other families for more testing.
-        registry.MINIWOB_FAMILY,
-        registry.ANDROID_FAMILY,
-        registry.INFORMATION_RETRIEVAL_FAMILY,
+        registry.TaskRegistry.MINIWOB_FAMILY,
+        registry.TaskRegistry.ANDROID_FAMILY,
+        registry.TaskRegistry.INFORMATION_RETRIEVAL_FAMILY,
     ],
     'Suite family to run. See registry.py for more information.',
 )
@@ -197,16 +197,10 @@ def _main() -> None:
   )
   env_launcher.verify_api_level(env)
 
-  if _SUITE_FAMILY.value in (
-      registry.VARY_TEMPLATE_FAMILY,
-      registry.VARY_SCREEN_FAMILY,
-  ):
-    n_task_combinations = 1
-  else:
-    n_task_combinations = _N_TASK_COMBINATIONS.value
-
+  n_task_combinations = _N_TASK_COMBINATIONS.value
+  task_registry = registry.TaskRegistry()
   suite = suite_utils.create_suite(
-      registry.get_registry(family=_SUITE_FAMILY.value),
+      task_registry.get_registry(family=_SUITE_FAMILY.value),
       n_task_combinations=n_task_combinations,
       seed=_TASK_RANDOM_SEED.value,
       tasks=_TASKS.value,

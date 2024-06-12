@@ -19,15 +19,18 @@ from android_world.task_evals.information_retrieval import information_retrieval
 class InformationRetrievalRegistryTest(absltest.TestCase):
 
   def test_read_in_tasks(self):
-    tasks = information_retrieval_registry._read_tasks()
+    tasks = information_retrieval_registry.InformationRetrievalRegistry(
+    )._read_tasks()
     self.assertNotEmpty(list(tasks.tasks))
     for task in tasks.tasks:
       self.assertNotEmpty(task.name)
       self.assertNotEmpty(task.prompt)
 
   def test_registry(self):
-    tasks = information_retrieval_registry._read_tasks()
-    registry = information_retrieval_registry.TASK_REGISTRY
+    ir_registry = information_retrieval_registry.InformationRetrievalRegistry(
+    )
+    tasks = ir_registry._read_tasks()
+    registry = ir_registry.registry
     for task in tasks.tasks:
       task_class = registry[task.name]
       self.assertIn(task.name, registry)

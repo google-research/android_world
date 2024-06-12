@@ -86,7 +86,8 @@ def _main() -> None:
   )
   env_launcher.verify_api_level(env)
   env.reset(go_home=True)
-  aw_registry = registry.get_registry(registry.ANDROID_WORLD_FAMILY)
+  task_registry = registry.TaskRegistry()
+  aw_registry = task_registry.get_registry(task_registry.ANDROID_WORLD_FAMILY)
   if _TASK.value:
     if _TASK.value not in aw_registry:
       raise ValueError('Task {} not found in registry.'.format(_TASK.value))

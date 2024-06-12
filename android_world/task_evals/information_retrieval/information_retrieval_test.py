@@ -48,13 +48,14 @@ class InformationRetrievalTaskForTest(
         relevant_state=task_pb2.RelevantState(
             state=state_pb2.State(
                 calendar=state_pb2.Calendar(
+                    app_name="simple calendar pro",
                     events=[
                         state_pb2.Event(
                             start_date="{start_date}",
                             start_time="10am",
                             title="{title}",
                         )
-                    ]
+                    ],
                 ),
                 tasks_app=state_pb2.TasksApp(
                     tasks_app_tasks=[
@@ -165,13 +166,14 @@ class InformationRetrievalTest(absltest.TestCase):
         relevant_state=task_pb2.RelevantState(
             state=state_pb2.State(
                 calendar=state_pb2.Calendar(
+                    app_name="simple calendar pro",
                     events=[
                         state_pb2.Event(
                             start_date="October 15 2023",
                             start_time="10am",
                             title="test title",
                         )
-                    ]
+                    ],
                 ),
                 tasks_app=state_pb2.TasksApp(
                     tasks_app_tasks=[
