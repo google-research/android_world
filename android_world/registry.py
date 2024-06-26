@@ -46,6 +46,16 @@ def get_information_retrieval_task_path() -> None:
   return None
 
 
+def get_families() -> list[str]:
+  return [
+      TaskRegistry.ANDROID_WORLD_FAMILY,
+      TaskRegistry.ANDROID_FAMILY,
+      TaskRegistry.MINIWOB_FAMILY,
+      TaskRegistry.MINIWOB_FAMILY_SUBSET,
+      TaskRegistry.INFORMATION_RETRIEVAL_FAMILY,
+  ]
+
+
 class TaskRegistry:
   """Registry of tasks."""
 
