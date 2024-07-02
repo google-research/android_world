@@ -215,17 +215,20 @@ class TaskRegistry:
       # sms.SimpleSmsSendAfterCall,
   )
 
-  def register_task(self, task_class: type[task_eval.TaskEval]) -> None:
+  def register_task(
+      self, task_registry: dict[Any, Any], task_class: type[task_eval.TaskEval]
+  ) -> None:
     """Registers the task class.
 
     Args:
+      task_registry: The registry to register the task in.
       task_class: The class to register.
     """
-    self.ANDROID_TASK_REGISTRY[task_class.__name__] = task_class
+    task_registry[task_class.__name__] = task_class
 
   def __init__(self):
     for task in self._TASKS:
-      self.register_task(task)
+      self.register_task(self.ANDROID_TASK_REGISTRY, task)
 
   # Add names with "." notation for autocomplete in Colab.
   names = types.SimpleNamespace(**{
