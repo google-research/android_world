@@ -713,8 +713,9 @@ class JoplinApp(AppSetup):
         ],
         env,
     )
-    time.sleep(2.0)
+    time.sleep(10.0)
     adb_utils.close_app(cls.app_name, env)
+    time.sleep(10.0)
 
     # Calling clear_dbs() without having added a note seems to make
     # the sqlite table inaccessible. Every subsequent call to clear_dbs()
