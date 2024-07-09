@@ -74,6 +74,19 @@ def _increase_file_descriptor_limit(limit: int = 32768):
     logging.exception('Failed to set file descriptor limit: %s', e)
 
 
+def setup_env(
+    env: interface.AsyncEnv,
+    emulator_setup: bool = False,
+    freeze_datetime: bool = True,
+) -> None:
+  """Performs environment setup and validation."""
+  _increase_file_descriptor_limit()
+  if emulator_setup:
+    setup.setup_apps(env.base_env)
+  if freeze_datetime:
+    datetime_utils.setup_datetime(env.base_env)
+
+
 def load_and_setup_env(
     console_port: int = 5554,
     emulator_setup: bool = False,
@@ -101,10 +114,6 @@ def load_and_setup_env(
   Returns:
     An interactable Android environment.
   """
-  _increase_file_descriptor_limit()
   env = _get_env(console_port, adb_path)
-  if emulator_setup:
-    setup.setup_apps(env.base_env)
-  if freeze_datetime:
-    datetime_utils.setup_datetime(env.base_env)
+  setup_env(env, emulator_setup, freeze_datetime)
   return env
