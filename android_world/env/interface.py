@@ -23,9 +23,9 @@ from android_env import env_interface
 from android_env.components import action_type
 from android_world.env import actuation
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import json_action
 from android_world.env import representation_utils
-from android_world.env import ui_tree_wrapper
 import dm_env
 import numpy as np
 
@@ -44,7 +44,7 @@ class State:
 
   Attributes:
     pixels: RGB array of current screen.
-    forest: Raw UI forest; see ui_tree_wrapper.py for more info.
+    forest: Raw UI forest; see android_world_controller.py for more info.
     ui_elements: Processed children and stateful UI elements extracted from
       forest.
   """
@@ -104,7 +104,8 @@ class AsyncEnv(abc.ABC):
 
     Returns:
       Observation containing RGB array of screen, the accessibility forest,
-        and UI elements derived from the forest. See ui_tree_wrapper.py for
+        and UI elements derived from the forest. See android_world_controller.py
+        for
         more detail.
     """
 
@@ -158,9 +159,11 @@ def _process_timestep(timestep: dm_env.TimeStep) -> State:
   """Parses timestep observation and returns State."""
   return State(
       pixels=timestep.observation['pixels'],
-      forest=timestep.observation[ui_tree_wrapper.OBSERVATION_KEY_FOREST],
+      forest=timestep.observation[
+          android_world_controller.OBSERVATION_KEY_FOREST
+      ],
       ui_elements=timestep.observation[
-          ui_tree_wrapper.OBSERVATION_KEY_UI_ELEMENTS
+          android_world_controller.OBSERVATION_KEY_UI_ELEMENTS
       ],
   )
 
@@ -169,7 +172,7 @@ class AsyncAndroidEnv(AsyncEnv):
   """Async environment interface using AndroidEnv to communicate with device."""
   interaction_cache = ''
 
-  def __init__(self, base_env: ui_tree_wrapper.UITreeWrapper):
+  def __init__(self, base_env: android_world_controller.AndroidWorldController):
     self._base_env = base_env
     self._prior_state = None
     # Variable used to temporarily save interactions between agent and user.

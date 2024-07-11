@@ -18,8 +18,8 @@ import resource
 
 from absl import logging
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import interface
-from android_world.env import ui_tree_wrapper
 from android_world.env.setup_device import setup
 from android_world.utils import datetime_utils
 
@@ -31,8 +31,8 @@ _ANDROID_WORLD_API_LEVEL = 33
 
 def _get_env(console_port: int, adb_path: str) -> interface.AsyncEnv:
   """Creates an AsyncEnv by connecting to an existing Android environment."""
-  wrapped = ui_tree_wrapper.get_wrapped(console_port, adb_path)
-  return interface.AsyncAndroidEnv(wrapped)
+  controller = android_world_controller.get_controller(console_port, adb_path)
+  return interface.AsyncAndroidEnv(controller)
 
 
 def verify_api_level(env: interface.AsyncEnv) -> None:
@@ -91,7 +91,7 @@ def load_and_setup_env(
     console_port: int = 5554,
     emulator_setup: bool = False,
     freeze_datetime: bool = True,
-    adb_path: str = ui_tree_wrapper.DEFAULT_ADB_PATH,
+    adb_path: str = android_world_controller.DEFAULT_ADB_PATH,
 ) -> interface.AsyncEnv:
   """Create environment with `get_env()` and perform env setup and validation.
 

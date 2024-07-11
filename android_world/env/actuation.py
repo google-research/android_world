@@ -21,9 +21,9 @@ from typing import Any
 
 from android_env import env_interface
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import json_action
 from android_world.env import representation_utils
-from android_world.env import ui_tree_wrapper
 
 
 def execute_adb_action(
@@ -202,7 +202,7 @@ def find_and_click_element(
   action = _wait_and_find_click_element(element_text, env, case_sensitive)
 
   # Send action.
-  forest = ui_tree_wrapper.get_a11y_tree(env)
+  forest = android_world_controller.get_a11y_tree(env)
   ui_elements = representation_utils.forest_to_ui_elements(
       forest, exclude_invisible_elements=True
   )
@@ -216,7 +216,7 @@ def _wait_and_find_click_element(
     case_sensitive: bool,
 ) -> json_action.JSONAction:
   """Wait for the screen to update until "element_text" appears."""
-  forest = ui_tree_wrapper.get_a11y_tree(env)
+  forest = android_world_controller.get_a11y_tree(env)
   ui_elements = representation_utils.forest_to_ui_elements(
       forest, exclude_invisible_elements=True
   )
@@ -228,7 +228,7 @@ def _wait_and_find_click_element(
   while current - start < 10:
     if distance == 0:
       return json_action.JSONAction(action_type='click', index=element)
-    forest = ui_tree_wrapper.get_a11y_tree(env)
+    forest = android_world_controller.get_a11y_tree(env)
     ui_elements = representation_utils.forest_to_ui_elements(
         forest, exclude_invisible_elements=True
     )

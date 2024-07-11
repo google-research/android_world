@@ -18,8 +18,8 @@ from absl.testing import absltest
 from android_env import env_interface
 from android_env.wrappers import a11y_grpc_wrapper
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import representation_utils
-from android_world.env import ui_tree_wrapper
 from android_world.utils import fake_adb_responses
 import dm_env
 
@@ -47,7 +47,7 @@ class TreeWrapperTest(absltest.TestCase):
   def test_initialization(self):
     mock_env = mock.Mock(spec=env_interface.AndroidEnvInterface)
 
-    env = ui_tree_wrapper.UITreeWrapper(mock_env)
+    env = android_world_controller.AndroidWorldController(mock_env)
 
     self.mock_a11y_wrapper.assert_called_with(
         mock_env,
@@ -61,18 +61,18 @@ class TreeWrapperTest(absltest.TestCase):
   def test_screen_size(self):
     mock_base_env = mock.Mock(spec=env_interface.AndroidEnvInterface)
 
-    env = ui_tree_wrapper.UITreeWrapper(mock_base_env)
+    env = android_world_controller.AndroidWorldController(mock_base_env)
 
     self.assertEqual(env.device_screen_size, (100, 200))
 
   @mock.patch.object(adb_utils, 'get_logical_screen_size')
-  @mock.patch.object(ui_tree_wrapper, 'get_a11y_tree')
+  @mock.patch.object(android_world_controller, 'get_a11y_tree')
   @mock.patch.object(representation_utils, 'forest_to_ui_elements')
   def test_process_timestep(
       self, mock_forest_to_ui, mock_get_a11y_tree, mock_get_logical_screen_size
   ):
     mock_base_env = mock.Mock(spec=env_interface.AndroidEnvInterface)
-    env = ui_tree_wrapper.UITreeWrapper(mock_base_env)
+    env = android_world_controller.AndroidWorldController(mock_base_env)
     mock_forest = mock.Mock()
     mock_ui_elements = mock.Mock()
     mock_get_logical_screen_size.return_value = (100, 200)
@@ -94,19 +94,21 @@ class TreeWrapperTest(absltest.TestCase):
     )
 
   @mock.patch.object(adb_utils, 'check_airplane_mode')
-  @mock.patch.object(ui_tree_wrapper, 'get_wrapped')
-  @mock.patch.object(ui_tree_wrapper, '_has_wrapper')
-  @mock.patch.object(ui_tree_wrapper.UITreeWrapper, 'refresh_env')
+  @mock.patch.object(android_world_controller, 'get_controller')
+  @mock.patch.object(android_world_controller, '_has_wrapper')
+  @mock.patch.object(
+      android_world_controller.AndroidWorldController, 'refresh_env'
+  )
   def test_refresh_env(
       self,
       mock_refresh_env,
       mock_has_wrapper,
-      mock_get_wrapped,
+      mock_get_controller,
       mock_check_airplane_mode,
   ):
-    del mock_has_wrapper, mock_get_wrapped, mock_check_airplane_mode
+    del mock_has_wrapper, mock_get_controller, mock_check_airplane_mode
     mock_base_env = mock.Mock(spec=env_interface.AndroidEnvInterface)
-    env = ui_tree_wrapper.UITreeWrapper(mock_base_env)
+    env = android_world_controller.AndroidWorldController(mock_base_env)
     unused_mock_check_airplane_mode = False
     env._env.accumulate_new_extras.side_effect = [
         {},

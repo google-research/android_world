@@ -18,20 +18,22 @@ from absl.testing import absltest
 from android_env import env_interface
 from android_env import loader
 from android_env.components import config_classes
+from android_world.env import android_world_controller
 from android_world.env import env_launcher
 from android_world.env import interface
-from android_world.env import ui_tree_wrapper
 
 
 class EnvLauncherTest(absltest.TestCase):
 
   @mock.patch.object(interface, "AsyncAndroidEnv", autospec=True)
-  @mock.patch.object(ui_tree_wrapper, "UITreeWrapper", autospec=True)
+  @mock.patch.object(
+      android_world_controller, "AndroidWorldController", autospec=True
+  )
   @mock.patch.object(loader, "load", autospec=True)
   def test_get_env(
       self,
       mock_loader,
-      mock_tree_wrapper,
+      mock_controller,
       mock_async_android_env,
   ):
     mock_android_env = mock.create_autospec(env_interface.AndroidEnvInterface)
@@ -42,7 +44,7 @@ class EnvLauncherTest(absltest.TestCase):
     mock_loader.assert_called_with(
         config=config_classes.AndroidEnvConfig(
             task=config_classes.FilesystemTaskConfig(
-                path=ui_tree_wrapper._TASK_PATH
+                path=android_world_controller._TASK_PATH
             ),
             simulator=config_classes.EmulatorConfig(
                 emulator_launcher=config_classes.EmulatorLauncherConfig(
@@ -54,8 +56,8 @@ class EnvLauncherTest(absltest.TestCase):
             ),
         )
     )
-    mock_tree_wrapper.assert_called_with(mock_android_env)
-    mock_async_android_env.assert_called_with(mock_tree_wrapper.return_value)
+    mock_controller.assert_called_with(mock_android_env)
+    mock_async_android_env.assert_called_with(mock_controller.return_value)
 
 
 if __name__ == "__main__":

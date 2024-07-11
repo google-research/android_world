@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Wrapper for Android that adds UI tree information to the observation."""
+"""Controller for Android that adds UI tree information to the observation."""
 
 import time
 from typing import Any
@@ -118,8 +118,8 @@ OBSERVATION_KEY_FOREST = 'forest'
 OBSERVATION_KEY_UI_ELEMENTS = 'ui_elements'
 
 
-class UITreeWrapper(base_wrapper.BaseWrapper):
-  """Wrapper for an Android instance that adds accessibility tree data.
+class AndroidWorldController(base_wrapper.BaseWrapper):
+  """Controller for an Android instance that adds accessibility tree data.
 
   The Accessibility Tree in Android is a tree-based structure, originally for
   for assisting accessibility services. It provides information about UI
@@ -171,7 +171,7 @@ class UITreeWrapper(base_wrapper.BaseWrapper):
     # pylint: disable=protected-access
     # pytype: disable=attribute-error
     # Reconnect to emulator and reload a11y wrapper in case we lose connection.
-    self._env = get_wrapped(
+    self._env = get_controller(
         console_port=self.env._coordinator._simulator._config.emulator_launcher.emulator_console_port,
         adb_path=self.env._coordinator._simulator._config.adb_controller.adb_path,
     ).env
@@ -206,10 +206,10 @@ max_episode_sec: 7200  # Prevent infinite episodes.
   return _TASK_PATH
 
 
-def get_wrapped(
+def get_controller(
     console_port: int = 5554, adb_path: str = DEFAULT_ADB_PATH
-) -> UITreeWrapper:
-  """Creates a wrapper by connecting to an existing Android environment."""
+) -> AndroidWorldController:
+  """Creates a controller by connecting to an existing Android environment."""
 
   config = config_classes.AndroidEnvConfig(
       task=config_classes.FilesystemTaskConfig(
@@ -225,5 +225,5 @@ def get_wrapped(
       ),
   )
   android_env_instance = loader.load(config)
-  logging.info('Setting up UITreeWrapper.')
-  return UITreeWrapper(android_env_instance)
+  logging.info('Setting up AndroidWorldController.')
+  return AndroidWorldController(android_env_instance)

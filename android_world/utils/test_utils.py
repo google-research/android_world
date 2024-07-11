@@ -23,10 +23,10 @@ from absl.testing import absltest
 from android_env import env_interface
 from android_env.proto import adb_pb2
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import interface
 from android_world.env import json_action
 from android_world.env import representation_utils
-from android_world.env import ui_tree_wrapper
 from android_world.task_evals import task_eval
 from android_world.task_evals.common_validators import phone_validators
 from android_world.task_evals.utils import user_data_generation
@@ -104,14 +104,12 @@ class AdbEvalTestBase(absltest.TestCase):
         representation_utils, 'forest_to_ui_elements'
     ).start()
     self.mock_get_a11y_tree = mock.patch.object(
-        ui_tree_wrapper, 'get_a11y_tree'
+        android_world_controller, 'get_a11y_tree'
     ).start()
     self.mock_dialer_with_phone_number = mock.patch.object(
         phone_validators, 'check_if_dialer_with_phone_number'
     ).start()
-    self.mock_close_app = mock.patch.object(
-        adb_utils, 'close_app'
-    ).start()
+    self.mock_close_app = mock.patch.object(adb_utils, 'close_app').start()
     self.mock_close_recents = mock.patch.object(
         adb_utils, 'close_recents'
     ).start()
@@ -212,7 +210,7 @@ class FakeAsyncEnv(interface.AsyncAndroidEnv):
   def __init__(self):
     self._reset_called = True
     self._base_env = mock.create_autospec(
-        ui_tree_wrapper.UITreeWrapper, instance=True
+        android_world_controller.AndroidWorldController, instance=True
     )
 
   @property

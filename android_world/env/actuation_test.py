@@ -20,14 +20,14 @@ from absl.testing import absltest
 from android_env import env_interface
 from android_world.env import actuation
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import json_action
 from android_world.env import representation_utils
-from android_world.env import ui_tree_wrapper
 
 
 @mock.patch.object(time, 'sleep')
 @mock.patch.object(actuation, '_find_target_element')
-@mock.patch.object(ui_tree_wrapper, 'get_a11y_tree')
+@mock.patch.object(android_world_controller, 'get_a11y_tree')
 @mock.patch.object(representation_utils, 'forest_to_ui_elements')
 class TestWaitAndFindClickElement(absltest.TestCase):
 
