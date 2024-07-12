@@ -80,10 +80,6 @@ class MultimodalLlmWrapper(abc.ABC):
 class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
   """Gemini GCP interface."""
 
-  # As of 05/15/2024, there is a limit of 5 RPM:
-  # https://cloud.google.com/vertex-ai/generative-ai/docs/quotas.
-  TIME_BETWEEN_REQUESTS = 15
-
   def __init__(
       self,
       model_name: str | None = None,
@@ -104,7 +100,6 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       max_retry = 3
       print('Max_retry must be positive. Reset it to 3')
     self.max_retry = min(max_retry, 5)
-    self.time_of_last_request = time.time() - self.TIME_BETWEEN_REQUESTS
 
   def predict(
       self,
@@ -116,13 +111,9 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       self, text_prompt: str, images: list[np.ndarray]
   ) -> tuple[str, Any]:
     counter = self.max_retry
-    retry_delay = self.TIME_BETWEEN_REQUESTS
+    retry_delay = 1.0
     while counter > 0:
       try:
-        time_since_last_request = time.time() - self.time_of_last_request
-        if time_since_last_request < self.TIME_BETWEEN_REQUESTS:
-          time.sleep(self.TIME_BETWEEN_REQUESTS - time_since_last_request)
-        self.time_of_last_request = time.time()
         output = self.llm.generate_content(
             [text_prompt] + [Image.fromarray(image) for image in images]
         )
@@ -132,6 +123,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
         print('Error calling LLM, will retry in {retry_delay} seconds')
         print(e)
         if counter > 0:
+          # Expo backoff
           time.sleep(retry_delay)
           retry_delay *= 2
     return ERROR_CALLING_LLM, None
