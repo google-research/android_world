@@ -39,7 +39,7 @@ class EnvLauncherTest(absltest.TestCase):
     mock_android_env = mock.create_autospec(env_interface.AndroidEnvInterface)
     mock_loader.return_value = mock_android_env
 
-    env_launcher._get_env(5556, "some_adb_path")
+    env_launcher._get_env(5556, "some_adb_path", 8554)
 
     mock_loader.assert_called_with(
         config=config_classes.AndroidEnvConfig(
