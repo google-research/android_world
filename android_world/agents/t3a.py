@@ -404,8 +404,8 @@ class T3A(base_agent.EnvironmentInteractingAgent):
             ui_elements[converted_action.index],
             converted_action.index,
             logical_screen_size,
-            adb_utils.get_physical_frame_boundary(self.env.base_env),
-            adb_utils.get_orientation(self.env.base_env),
+            adb_utils.get_physical_frame_boundary(self.env.controller),
+            adb_utils.get_orientation(self.env.controller),
         )
 
     if converted_action.action_type == 'status':

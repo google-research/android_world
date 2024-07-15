@@ -47,7 +47,7 @@ class AudioRecorderRecordAudio(_AudioRecorder):
     super().initialize_task(env)
     try:
       self.before_recording = file_utils.get_file_list_with_metadata(
-          device_constants.AUDIORECORDER_DATA, env.base_env
+          device_constants.AUDIORECORDER_DATA, env.controller
       )
     except RuntimeError as exc:
       raise RuntimeError(
@@ -62,7 +62,7 @@ class AudioRecorderRecordAudio(_AudioRecorder):
     after_recording = [
         file
         for file in file_utils.get_file_list_with_metadata(
-            device_constants.AUDIORECORDER_DATA, env.base_env
+            device_constants.AUDIORECORDER_DATA, env.controller
         )
         if file.file_size > 0
     ]
@@ -107,7 +107,7 @@ class AudioRecorderRecordAudioWithFileName(_AudioRecorder):
     super().is_successful(env)
     file_name = self.params["file_name"]
     exists = file_utils.check_file_or_folder_exists(
-        file_name + ".m4a", self.create_file_task.data_directory, env.base_env
+        file_name + ".m4a", self.create_file_task.data_directory, env.controller
     )
     if not exists:
       logging.info("%s not found", file_name)

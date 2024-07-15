@@ -223,7 +223,7 @@ class SeeAct(base_agent.EnvironmentInteractingAgent):
           action,
           [e.ui_element for e in actionable_elements],
           self.env.logical_screen_size,
-          self.env.base_env,
+          self.env.controller,
       )
 
     result["action_description"] = action_description

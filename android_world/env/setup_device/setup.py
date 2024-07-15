@@ -64,7 +64,7 @@ _APPS = (
 def _download_and_install_apk(apk: str, env: interface.AsyncEnv) -> None:
   """Downloads all APKs from remote location and installs them."""
   path = apps.download_app_data(apk)
-  adb_utils.install_apk(path, env.base_env)
+  adb_utils.install_apk(path, env.controller)
 
 
 def _install_all_apks(env: interface.AsyncEnv) -> None:
@@ -99,8 +99,8 @@ def setup_apps(env: interface.AsyncEnv) -> None:
   """
   # Make sure quick-settings are not displayed, which can override foreground
   # apps, and impede UI navigation required for setting up.
-  adb_utils.press_home_button(env.base_env)
-  adb_utils.issue_generic_request(["root"], env.base_env)
+  adb_utils.press_home_button(env.controller)
+  adb_utils.issue_generic_request(["root"], env.controller)
 
   _install_all_apks(env)
 
@@ -119,4 +119,4 @@ def setup_apps(env: interface.AsyncEnv) -> None:
           app.app_name,
           e,
       )
-    app_snapshot.save_snapshot(app.app_name, env.base_env)
+    app_snapshot.save_snapshot(app.app_name, env.controller)

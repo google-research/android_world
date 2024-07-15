@@ -227,11 +227,11 @@ class SimpleSMSSendSms(task_eval.TaskEval):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_airplane_mode("off", env.base_env)
-    clear_sms_and_threads(env.base_env)
-    android_time = self.get_android_time(env.base_env)
+    adb_utils.toggle_airplane_mode("off", env.controller)
+    clear_sms_and_threads(env.controller)
+    android_time = self.get_android_time(env.controller)
 
-    messages = self._get_sent_messages(env.base_env)
+    messages = self._get_sent_messages(env.controller)
     logging.info("During initialize_task, messages: %s", messages)
     if _was_sent(
         messages,
@@ -247,17 +247,17 @@ class SimpleSMSSendSms(task_eval.TaskEval):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
-    messages = self._get_sent_messages(env.base_env)
+    messages = self._get_sent_messages(env.controller)
     logging.info("During is_successful, messages: %s", messages)
     sms_was_sent = _was_sent(
         messages,
         phone_number=self.params["number"],
         body=self.params["message"],
-        current_time_ms=self.get_android_time(env.base_env),
+        current_time_ms=self.get_android_time(env.controller),
     )
     in_correct_app = (
         adb_utils.extract_package_name(
-            adb_utils.get_current_activity(env.base_env)[0]
+            adb_utils.get_current_activity(env.controller)[0]
         )
         == "com.simplemobiletools.smsmessenger"
     )

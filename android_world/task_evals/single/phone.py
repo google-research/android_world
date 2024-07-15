@@ -57,7 +57,7 @@ class MarkorCallApartment(phone_validators.MakeCall):
         user_data_generation.generate_apartments()
     )
     file_utils.create_file(
-        "apartments.md", device_constants.MARKOR_DATA, env.base_env, content
+        "apartments.md", device_constants.MARKOR_DATA, env.controller, content
     )
     self.phone_number = self.params["phone_number"]
 
@@ -95,9 +95,9 @@ class PhoneReturnMissedCall(phone_validators.MakeCall):
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
-    adb_utils.call_emulator(env.base_env, self.phone_number)
+    adb_utils.call_emulator(env.controller, self.phone_number)
     time.sleep(5)
-    adb_utils.end_call_if_active(env.base_env)
+    adb_utils.end_call_if_active(env.controller)
 
 
 class PhoneRedialNumber(phone_validators.MakeCall):
@@ -114,9 +114,9 @@ class PhoneRedialNumber(phone_validators.MakeCall):
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
-    adb_utils.call_phone_number(env.base_env, self.phone_number)
+    adb_utils.call_phone_number(env.controller, self.phone_number)
     time.sleep(5)
-    adb_utils.end_call_if_active(env.base_env)
+    adb_utils.end_call_if_active(env.controller)
 
 
 class PhoneCallTextSender(phone_validators.MakeCall):
@@ -134,10 +134,10 @@ class PhoneCallTextSender(phone_validators.MakeCall):
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
-    sms_validators.clear_sms_and_threads(env.base_env)
+    sms_validators.clear_sms_and_threads(env.controller)
     print(self.phone_number)
     adb_utils.text_emulator(
-        env.base_env, self.phone_number, "Hey give me a call"
+        env.controller, self.phone_number, "Hey give me a call"
     )
 
 
@@ -155,4 +155,4 @@ class PhoneAnswerCall(phone_validators.MakeCall):
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
-    adb_utils.call_emulator(env.base_env, self.phone_number)
+    adb_utils.call_emulator(env.controller, self.phone_number)

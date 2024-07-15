@@ -113,7 +113,7 @@ def _create_activity_from_proto(
 def clear_db(env: interface.AsyncEnv) -> None:
   """Clears the task database."""
   sqlite_utils.delete_all_rows_from_table(_TABLE, _DB_PATH, env, _APP_NAME)
-  adb_utils.close_app(_APP_NAME, env.base_env)  # Register changes.
+  adb_utils.close_app(_APP_NAME, env.controller)  # Register changes.
 
 
 def _add_activities(

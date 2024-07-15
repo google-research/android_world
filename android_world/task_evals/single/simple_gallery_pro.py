@@ -48,7 +48,7 @@ class SaveCopyOfReceiptTaskEval(task_eval.TaskEval):
     file_utils.copy_data_to_device(
         temp_storage_location,
         device_constants.GALLERY_DATA,
-        env.base_env,
+        env.controller,
     )
 
   def tear_down(self, env: interface.AsyncEnv):
@@ -61,7 +61,7 @@ class SaveCopyOfReceiptTaskEval(task_eval.TaskEval):
     if file_utils.check_file_or_folder_exists(
         target=self.params["file_name"],
         base_path=device_constants.DOWNLOAD_DATA,
-        env=env.base_env,
+        env=env.controller,
     ):
       return 1.0
 

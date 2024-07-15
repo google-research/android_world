@@ -54,12 +54,12 @@ class _BrowserTask(task_eval.TaskEval):
 
     adb_utils.clear_app_data(
         chrome_activity,
-        env.base_env,
+        env.controller,
     )
     adb_utils.grant_permissions(
         chrome_activity,
         'android.permission.POST_NOTIFICATIONS',
-        env.base_env,
+        env.controller,
     )
 
     html = self.HTML.replace('%%SEED%%', str(self.params['browser_task_seed']))
@@ -68,7 +68,7 @@ class _BrowserTask(task_eval.TaskEval):
     file_utils.copy_data_to_device(
         '/tmp/task.html',
         os.path.join(device_constants.DOWNLOAD_DATA, 'task.html'),
-        env.base_env,
+        env.controller,
     )
 
   def tear_down(self, env: interface.AsyncEnv):
@@ -76,13 +76,13 @@ class _BrowserTask(task_eval.TaskEval):
     user_data_generation.clear_device_storage(env)
     adb_utils.clear_app_data(
         adb_utils.extract_package_name(adb_utils.get_adb_activity('chrome')),
-        env.base_env,
+        env.controller,
     )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     state = env.get_state()
     package_name = adb_utils.extract_package_name(
-        adb_utils.get_current_activity(env.base_env)[0]
+        adb_utils.get_current_activity(env.controller)[0]
     )
     if package_name != 'com.android.chrome':
       return 0.0

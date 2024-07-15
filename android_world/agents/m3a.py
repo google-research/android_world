@@ -378,10 +378,10 @@ class M3A(base_agent.EnvironmentInteractingAgent):
     print('----------step ' + str(len(self.history) + 1))
 
     state = self.get_post_transition_state()
-    orientation = adb_utils.get_orientation(self.env.base_env)
+    orientation = adb_utils.get_orientation(self.env.controller)
     logical_screen_size = self.env.logical_screen_size
     physical_frame_boundary = adb_utils.get_physical_frame_boundary(
-        self.env.base_env
+        self.env.controller
     )
 
     before_ui_elements = state.ui_elements
@@ -518,10 +518,10 @@ class M3A(base_agent.EnvironmentInteractingAgent):
     time.sleep(self.WAIT_AFTER_ACTION_SECONDS)
 
     state = self.env.get_state(wait_to_stabilize=False)
-    orientation = adb_utils.get_orientation(self.env.base_env)
+    orientation = adb_utils.get_orientation(self.env.controller)
     logical_screen_size = self.env.logical_screen_size
     physical_frame_boundary = adb_utils.get_physical_frame_boundary(
-        self.env.base_env
+        self.env.controller
     )
 
     after_ui_elements = state.ui_elements

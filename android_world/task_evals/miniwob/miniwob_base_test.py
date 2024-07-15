@@ -126,17 +126,17 @@ class TestMiniWoBTask(absltest.TestCase):
         mock.call(
             miniwob_base._MAIN_ACTIVITY,
             ["--es", "RL_TASK_APP_CONFIG", '\'{"task":"test_task"}\''],
-            self.mock_env.base_env,
+            self.mock_env.controller,
         ),
         mock.call(
             miniwob_base._MAIN_ACTIVITY,
             ["--ez", "reset", "true"],
-            self.mock_env.base_env,
+            self.mock_env.controller,
         ),
         mock.call(
             miniwob_base._MAIN_ACTIVITY,
             ["--ez", "step", "true"],
-            self.mock_env.base_env,
+            self.mock_env.controller,
         ),
     ]
     mock_start_activity.assert_has_calls(expected_calls, any_order=False)

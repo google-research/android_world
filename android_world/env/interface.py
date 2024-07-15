@@ -19,7 +19,6 @@ import dataclasses
 import time
 from typing import Any, Optional, Self
 
-from android_env import env_interface
 from android_env.components import action_type
 from android_world.env import actuation
 from android_world.env import adb_utils
@@ -76,11 +75,6 @@ class AsyncEnv(abc.ABC):
   and OS does not pause when providing observations or when accepting actions.
   Changes from action execution may take some time to appear.
   """
-
-  @property
-  @abc.abstractmethod
-  def base_env(self) -> env_interface.AndroidEnvInterface:
-    """Returns the base Android environment."""
 
   @property
   @abc.abstractmethod
@@ -188,10 +182,6 @@ class AsyncAndroidEnv(AsyncEnv):
     # use this to save the agent response. Or later on when agent has the
     # ability to ask user question, user's answer will be saved here as well.
     self.interaction_cache = ''
-
-  @property
-  def base_env(self) -> android_world_controller.AndroidWorldController:
-    return self._controller
 
   @property
   def controller(self) -> android_world_controller.AndroidWorldController:

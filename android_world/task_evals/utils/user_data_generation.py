@@ -169,10 +169,10 @@ def write_to_gallery(
   file_utils.copy_data_to_device(
       temp_storage_location,
       device_constants.GALLERY_DATA,
-      env.base_env,
+      env.controller,
   )
   os.remove(temp_storage_location)
-  adb_utils.close_app("simple gallery", env.base_env)
+  adb_utils.close_app("simple gallery", env.controller)
 
 
 def _copy_data_to_device(
@@ -186,7 +186,7 @@ def _copy_data_to_device(
   file_utils.copy_data_to_device(
       temp_storage_location,
       location,
-      env.base_env,
+      env.controller,
   )
   os.remove(temp_storage_location)
 
@@ -204,7 +204,7 @@ def write_to_markor(
     env: The environment to write to.
   """
   _copy_data_to_device(data, file_name, device_constants.MARKOR_DATA, env)
-  adb_utils.close_app("markor", env.base_env)
+  adb_utils.close_app("markor", env.controller)
 
 
 def _create_mpeg_with_messages(
@@ -283,7 +283,7 @@ def write_video_file_to_device(
   file_utils.copy_data_to_device(
       os.path.join(_TMP, file_name),
       location,
-      env.base_env,
+      env.controller,
   )
 
 
@@ -334,7 +334,7 @@ def write_mp3_file_to_device(
   file_utils.copy_data_to_device(
       local,
       remote_path,
-      env.base_env,
+      env.controller,
   )
   os.remove(local)
 
@@ -431,7 +431,7 @@ def clear_internal_storage(env: interface.AsyncEnv) -> None:
   """Clears all internal storage directories on device."""
   for directory in EMULATOR_DIRECTORIES:
     file_utils.clear_directory(
-        os.path.join(device_constants.EMULATOR_DATA, directory), env.base_env
+        os.path.join(device_constants.EMULATOR_DATA, directory), env.controller
     )
 
 
@@ -439,7 +439,7 @@ def _clear_external_downloads(env: interface.AsyncEnv) -> None:
   """Clears all external downloads directories on device."""
   adb_utils.issue_generic_request(
       "shell content delete --uri content://media/external/downloads",
-      env.base_env,
+      env.controller,
       timeout_sec=10,  # This can sometimes take longer than 5s.
   )
 

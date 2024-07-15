@@ -244,7 +244,7 @@ def _run_task(
     )
 
     if demo_mode:
-      _display_success_overlay(env.base_env, agent_successful)
+      _display_success_overlay(env.controller, agent_successful)
 
     result = {
         constants.EpisodeConstants.GOAL: task.goal,
@@ -325,7 +325,7 @@ def _run_task_suite(
       correct += episode['is_successful']
       total += 1
       if demo_mode:
-        _update_scoreboard(correct, total, env.base_env)
+        _update_scoreboard(correct, total, env.controller)
     print()
 
   return all_episodes
@@ -372,7 +372,7 @@ def run(
     adb_utils.send_android_intent(
         'broadcast',
         'com.example.ACTION_UPDATE_SCOREBOARD',
-        agent.env.base_env,
+        agent.env.controller,
         extras={'player_name': agent.name, 'scoreboard_value': '00/00'},
     )
 
@@ -420,11 +420,11 @@ def _display_goal(env: interface.AsyncEnv, task: task_eval.TaskEval) -> None:
     env: The environment.
     task: The current task.
   """
-  adb_utils.launch_app('android world', env.base_env)
+  adb_utils.launch_app('android world', env.controller)
   time.sleep(1.0)
-  _display_message(task.goal, task.name, env.base_env)
+  _display_message(task.goal, task.name, env.controller)
   time.sleep(6.0)
-  adb_utils.press_home_button(env.base_env)
+  adb_utils.press_home_button(env.controller)
   time.sleep(1.0)
 
 

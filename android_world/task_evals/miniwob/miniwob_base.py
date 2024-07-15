@@ -122,18 +122,18 @@ class MiniWoBTask(task_eval.TaskEval, abc.ABC):
     adb_utils.start_activity(
         _MAIN_ACTIVITY,
         ["--es", "RL_TASK_APP_CONFIG", f"'{task_config}'"],
-        env.base_env,
+        env.controller,
     )
     time.sleep(1)
     # Reset and start the task.
     adb_utils.start_activity(
-        _MAIN_ACTIVITY, ["--ez", "reset", "true"], env.base_env
+        _MAIN_ACTIVITY, ["--ez", "reset", "true"], env.controller
     )
     adb_utils.start_activity(
-        _MAIN_ACTIVITY, ["--ez", "step", "true"], env.base_env
+        _MAIN_ACTIVITY, ["--ez", "step", "true"], env.controller
     )
-    self._params["utterance"] = _get_episode_utterance(env.base_env)
+    self._params["utterance"] = _get_episode_utterance(env.controller)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
-    return float(get_episode_reward(env.base_env) == 1.0)
+    return float(get_episode_reward(env.controller) == 1.0)

@@ -341,7 +341,7 @@ class ExpenseAddMultipleFromMarkor(_ExpenseAddMultiple):
     ]
     rows = targets + self.params[sqlite_validators.NOISE_ROW_OBJECTS]
     random.shuffle(rows)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
     user_data_generation.write_to_markor(
         _get_expense_rows_as_text(rows, 'csv'),
         'my_expenses.txt',
@@ -350,7 +350,7 @@ class ExpenseAddMultipleFromMarkor(_ExpenseAddMultiple):
 
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
 
 
 class ExpenseAddMultipleFromGallery(_ExpenseAddMultiple):

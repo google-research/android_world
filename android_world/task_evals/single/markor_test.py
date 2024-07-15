@@ -350,7 +350,7 @@ class GalleryMarkorTest(test_utils.AdbEvalTestBase):
     mock_copy_data_to_device.assert_called_once_with(
         '/tmp/receipt.png',
         device_constants.GALLERY_DATA,
-        mock_env.base_env,
+        mock_env.controller,
     )
 
 

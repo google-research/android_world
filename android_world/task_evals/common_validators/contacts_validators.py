@@ -37,7 +37,7 @@ class AddContact(task_eval.TaskEval):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    contacts_utils.clear_contacts(env.base_env)
+    contacts_utils.clear_contacts(env.controller)
 
   def _has_contact(self, contacts: list[contacts_utils.Contact]) -> bool:
     return (
@@ -50,7 +50,7 @@ class AddContact(task_eval.TaskEval):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     contact_found = self._has_contact(
-        contacts_utils.list_contacts(env.base_env)
+        contacts_utils.list_contacts(env.controller)
     )
     return super().is_successful(env) if contact_found else 0.0
 

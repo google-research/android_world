@@ -40,7 +40,7 @@ class TurnOnWifiAndOpenAppTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOnWifiAndOpenApp({"app_name": "clock"})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=False),
         fake_adb_responses.create_get_activity_response(
             "com.google.android.apps.maps/.Inbox"
@@ -53,7 +53,7 @@ class TurnOnWifiAndOpenAppTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOnWifiAndOpenApp({"app_name": "settings"})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=False),
         fake_adb_responses.create_get_activity_response(
             "com.android.settings/com.android.settings.Settings"
@@ -66,7 +66,7 @@ class TurnOnWifiAndOpenAppTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOnWifiAndOpenApp({"app_name": "settings"})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=True),
         fake_adb_responses.create_get_activity_response(
             "com.google.page1/.Page1"
@@ -79,7 +79,7 @@ class TurnOnWifiAndOpenAppTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOnWifiAndOpenApp({"app_name": "settings"})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=True),
         fake_adb_responses.create_get_activity_response(
             "com.android.settings/com.android.settings.Settings"
@@ -101,7 +101,7 @@ class TurnOffWifiAndTurnOnBluetoothTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOffWifiAndTurnOnBluetooth({})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=True),
         fake_adb_responses.create_get_bluetooth_enabled_response(
             is_enabled=False
@@ -113,7 +113,7 @@ class TurnOffWifiAndTurnOnBluetoothTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOffWifiAndTurnOnBluetooth({})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=True),
         fake_adb_responses.create_get_bluetooth_enabled_response(
             is_enabled=True
@@ -125,7 +125,7 @@ class TurnOffWifiAndTurnOnBluetoothTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOffWifiAndTurnOnBluetooth({})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=False),
         fake_adb_responses.create_get_bluetooth_enabled_response(
             is_enabled=False
@@ -137,7 +137,7 @@ class TurnOffWifiAndTurnOnBluetoothTest(absltest.TestCase):
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task = system.TurnOffWifiAndTurnOnBluetooth({})
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.side_effect = [
+    env.controller.execute_adb_call.side_effect = [
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=False),
         fake_adb_responses.create_get_bluetooth_enabled_response(
             is_enabled=True

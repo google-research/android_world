@@ -58,20 +58,20 @@ class MoveFile(task_eval.TaskEval):
     user_data_generation.generate_noise_files(
         self.params["file_name"],
         self.source_directory,
-        env.base_env,
+        env.controller,
         self.params["noise_candidates"],
     )
     file_utils.create_file(
-        self.params["file_name"], self.source_directory, env.base_env
+        self.params["file_name"], self.source_directory, env.controller
     )
-    file_utils.mkdir(self.dest_directory, env.base_env)
+    file_utils.mkdir(self.dest_directory, env.controller)
 
     if not file_utils.check_file_or_folder_exists(
-        self.params["file_name"], self.source_directory, env.base_env
+        self.params["file_name"], self.source_directory, env.controller
     ):
       raise RuntimeError("File was not created in the source folder.")
     if file_utils.check_file_or_folder_exists(
-        self.params["file_name"], self.dest_directory, env.base_env
+        self.params["file_name"], self.dest_directory, env.controller
     ):
       raise RuntimeError(
           "Something went wrong. File somehow already exists in the destination"
@@ -86,10 +86,10 @@ class MoveFile(task_eval.TaskEval):
     """Check if the file has been moved successfully."""
     super().is_successful(env)
     src_exists = file_utils.check_file_or_folder_exists(
-        self.params["file_name"], self.source_directory, env.base_env
+        self.params["file_name"], self.source_directory, env.controller
     )
     dest_exists = file_utils.check_file_or_folder_exists(
-        self.params["file_name"], self.dest_directory, env.base_env
+        self.params["file_name"], self.dest_directory, env.controller
     )
     succeeded = not src_exists and dest_exists
     return 1.0 if succeeded else 0.0
@@ -135,16 +135,16 @@ class DeleteFile(task_eval.TaskEval):
     user_data_generation.clear_device_storage(env)
 
     file_utils.create_file(
-        self.params["file_name"], self.data_directory, env.base_env
+        self.params["file_name"], self.data_directory, env.controller
     )
     user_data_generation.generate_noise_files(
         self.params["file_name"],
         self.data_directory,
-        env.base_env,
+        env.controller,
         self.params["noise_candidates"],
     )
     if not file_utils.check_file_or_folder_exists(
-        self.params["file_name"], self.data_directory, env.base_env
+        self.params["file_name"], self.data_directory, env.controller
     ):
       raise RuntimeError("Something went wrong, file was not created.")
 
@@ -155,7 +155,7 @@ class DeleteFile(task_eval.TaskEval):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     exists = file_utils.check_file_or_folder_exists(
-        self.params["file_name"], self.data_directory, env.base_env
+        self.params["file_name"], self.data_directory, env.controller
     )
     return 0.0 if exists else 1.0
 
@@ -202,7 +202,7 @@ class CreateFile(task_eval.TaskEval):
     file_name = self.params["file_name"]
 
     exists = file_utils.check_file_or_folder_exists(
-        file_name, self.data_directory, env.base_env
+        file_name, self.data_directory, env.controller
     )
 
     if not exists:
@@ -216,7 +216,7 @@ class CreateFile(task_eval.TaskEval):
             "cat",
             os.path.join(self.data_directory, file_name),
         ],
-        env.base_env,
+        env.controller,
     )
     file_contents = res.generic.output.decode().strip()
     match = fuzzy_match_lib.fuzzy_match(file_contents, self.params["text"])

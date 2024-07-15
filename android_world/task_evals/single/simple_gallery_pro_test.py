@@ -73,7 +73,7 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
       env: interface.AsyncEnv,
   ):
     _touch_temp_file(eval_task.params["file_name"])
-    env.base_env.execute_adb_call.side_effect = list(
+    env.controller.execute_adb_call.side_effect = list(
         itertools.chain(
             fake_adb_responses.create_taskeval_initialize_responses(
                 len(eval_task.app_names)
@@ -100,7 +100,7 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
         simple_gallery_pro.SaveCopyOfReceiptTaskEval.generate_random_params()
     )
     self.assertInitializes(eval_task, env)
-    env.base_env.execute_adb_call.side_effect = (
+    env.controller.execute_adb_call.side_effect = (
         fake_adb_responses.create_check_file_or_folder_exists_responses(
             file_name=eval_task.params["file_name"],
             base_path=device_constants.DOWNLOAD_DATA,
@@ -116,7 +116,7 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
         simple_gallery_pro.SaveCopyOfReceiptTaskEval.generate_random_params()
     )
     self.assertInitializes(eval_task, env)
-    env.base_env.execute_adb_call.side_effect = (
+    env.controller.execute_adb_call.side_effect = (
         fake_adb_responses.create_check_file_or_folder_exists_responses(
             file_name=eval_task.params["file_name"],
             base_path=device_constants.DOWNLOAD_DATA,

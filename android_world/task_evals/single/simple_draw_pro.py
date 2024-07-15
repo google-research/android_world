@@ -51,7 +51,7 @@ class SimpleDrawProCreateDrawing(task_eval.TaskEval):
     super().is_successful(env)
     file_name = self.params["file_name"]
     exists = file_utils.check_file_or_folder_exists(
-        file_name, self.create_file_task.data_directory, env.base_env
+        file_name, self.create_file_task.data_directory, env.controller
     )
     return 1.0 if exists else 0.0
 

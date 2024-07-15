@@ -211,14 +211,14 @@ class OsmAndFavorite(_OsmTaskEval):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     """Initializes the task environment."""
     super().initialize_task(env)
-    _clear_favorites(env.base_env)
+    _clear_favorites(env.controller)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
-    if not file_utils.check_file_exists(_FAVORITES_PATH, env.base_env):
+    if not file_utils.check_file_exists(_FAVORITES_PATH, env.controller):
       logging.warning('Favorites file %s not found.', _FAVORITES_PATH)
       return 0.0
     with file_utils.tmp_file_from_device(
-        _FAVORITES_PATH, env.base_env
+        _FAVORITES_PATH, env.controller
     ) as favorites_file:
       if _favorites_contains(
           ElementTree.parse(favorites_file).getroot(), self.params['location']
@@ -228,7 +228,7 @@ class OsmAndFavorite(_OsmTaskEval):
 
   def tear_down(self, env: interface.AsyncEnv):
     """Cleans up after task completion."""
-    _clear_favorites(env.base_env)
+    _clear_favorites(env.controller)
     super().tear_down(env)
 
   @classmethod
@@ -402,7 +402,7 @@ class OsmAndTrack(_OsmTaskEval):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     """Initializes the task environment."""
     super().initialize_task(env)
-    _clear_tracks(env.base_env)
+    _clear_tracks(env.controller)
     self._target_waypoint_coords = _lookup_target_waypoints(
         self.params['waypoints']
     )
@@ -425,7 +425,7 @@ class OsmAndTrack(_OsmTaskEval):
 
   def tear_down(self, env: interface.AsyncEnv):
     """Cleans up after task completion."""
-    _clear_tracks(env.base_env)
+    _clear_tracks(env.controller)
     super().tear_down(env)
 
   @classmethod

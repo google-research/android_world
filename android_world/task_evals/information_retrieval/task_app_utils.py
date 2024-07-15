@@ -107,13 +107,13 @@ def add_tasks(
       _APP_NAME,
       env,
   )
-  adb_utils.close_app(_APP_NAME, env.base_env)  # Register changes.
+  adb_utils.close_app(_APP_NAME, env.controller)  # Register changes.
 
 
 def clear_task_db(env: interface.AsyncEnv) -> None:
   """Clears the task database."""
   sqlite_utils.delete_all_rows_from_table(_TASK_TABLE, _DB_PATH, env, _APP_NAME)
-  adb_utils.close_app(_APP_NAME, env.base_env)  # Register changes.
+  adb_utils.close_app(_APP_NAME, env.controller)  # Register changes.
 
 
 def list_rows(

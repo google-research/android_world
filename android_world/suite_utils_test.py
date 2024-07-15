@@ -263,7 +263,7 @@ class SuiteUtilsTest(parameterized.TestCase):
         [],
     )
     mock_android_env = mock.PropertyMock(return_value=mock.MagicMock())
-    mock_env.base_env = mock_android_env
+    mock_env.controller = mock_android_env
     mock_run_e2e = mock.MagicMock()
     mock_run_e2e.return_value = episode_runner.EpisodeResult(
         True,

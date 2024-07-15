@@ -48,10 +48,10 @@ class SimpleSmsSendAfterCall(sms_validators.SimpleSMSSendSms):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    phone_validators.clear_phone_state(env.base_env)
-    adb_utils.call_emulator(env.base_env, self.params["number"])
+    phone_validators.clear_phone_state(env.controller)
+    adb_utils.call_emulator(env.controller, self.params["number"])
     time.sleep(5.0)
-    adb_utils.end_call_if_active(env.base_env)
+    adb_utils.end_call_if_active(env.controller)
 
 
 class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
@@ -73,11 +73,11 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 
     # Disable notifications so we don't have to wait for them to disappear
     # before running the task.
-    adb_utils.disable_headsup_notifications(env.base_env)
+    adb_utils.disable_headsup_notifications(env.controller)
 
     for _ in range(random.randint(0, 5)):
       adb_utils.text_emulator(
-          env.base_env,
+          env.controller,
           user_data_generation.generate_random_number(),
           self._generate_non_goal_message(),
       )
@@ -88,7 +88,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 
     most_recent_message = self._generate_non_goal_message()
     adb_utils.text_emulator(
-        env.base_env,
+        env.controller,
         self.params["number"],
         most_recent_message,
     )
@@ -97,10 +97,10 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
     # last text came in
     time.sleep(0.3)
 
-    adb_utils.enable_headsup_notifications(env.base_env)
+    adb_utils.enable_headsup_notifications(env.controller)
 
     most_recent = sms_validators.parse_message(
-        self._get_received_messages(env.base_env)[0]
+        self._get_received_messages(env.controller)[0]
     )
     if (
         most_recent["address"] != self.params["number"]
@@ -119,7 +119,7 @@ class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.disable_headsup_notifications(env.base_env)
+    adb_utils.disable_headsup_notifications(env.controller)
 
     relevant_text_sent = False
 
@@ -129,21 +129,21 @@ class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
       if not relevant_text_sent:
         if random.choice([True, False]):
           adb_utils.text_emulator(
-              env.base_env,
+              env.controller,
               self.params["number"],
               random.choice(sms_validators.SimpleSMSSendSms.messages),
           )
           relevant_text_sent = True
 
       adb_utils.text_emulator(
-          env.base_env,
+          env.controller,
           user_data_generation.generate_random_number(),
           random.choice(sms_validators.SimpleSMSSendSms.messages),
       )
 
     if not relevant_text_sent:
       adb_utils.text_emulator(
-          env.base_env,
+          env.controller,
           self.params["number"],
           random.choice(sms_validators.SimpleSMSSendSms.messages),
       )
@@ -151,7 +151,7 @@ class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
     # Need to pause to make sure re-enabling notifications happens after the
     # last text came in
     time.sleep(0.5)
-    adb_utils.enable_headsup_notifications(env.base_env)
+    adb_utils.enable_headsup_notifications(env.controller)
 
 
 class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
@@ -164,7 +164,7 @@ class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.set_clipboard_contents(self.params["message"], env.base_env)
+    adb_utils.set_clipboard_contents(self.params["message"], env.controller)
 
 
 class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
@@ -211,19 +211,21 @@ class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
     }
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
-    adb_utils.disable_headsup_notifications(env.base_env)
+    adb_utils.disable_headsup_notifications(env.controller)
     super().initialize_task(env)
 
     name2_number = user_data_generation.generate_random_number()
     contacts_utils.add_contact(
-        self.params["name1"], self.params["number"], env.base_env
+        self.params["name1"], self.params["number"], env.controller
     )
     time.sleep(5.0)
-    contacts_utils.add_contact(self.params["name2"], name2_number, env.base_env)
+    contacts_utils.add_contact(
+        self.params["name2"], name2_number, env.controller
+    )
 
     # Add text containing address from name2
     adb_utils.text_emulator(
-        env.base_env,
+        env.controller,
         name2_number,
         self.params["message"],
     )
@@ -231,11 +233,11 @@ class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
     # Need to pause to make sure re-enabling notifications happens after the
     # text came in
     time.sleep(1)
-    adb_utils.enable_headsup_notifications(env.base_env)
+    adb_utils.enable_headsup_notifications(env.controller)
 
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
-    adb_utils.delete_contacts(env.base_env)
+    adb_utils.delete_contacts(env.controller)
 
 
 class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
@@ -262,12 +264,12 @@ class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
     }
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
-    controller = tools.AndroidToolController(env.base_env)
-    adb_utils.disable_headsup_notifications(env.base_env)
+    controller = tools.AndroidToolController(env.controller)
+    adb_utils.disable_headsup_notifications(env.controller)
     super().initialize_task(env)
 
     contacts_utils.add_contact(
-        self.params["name"], self.params["number"], env.base_env
+        self.params["name"], self.params["number"], env.controller
     )
     time.sleep(3.0)
     controller.send_sms(self.params["number"], self.params["message"])
@@ -277,7 +279,7 @@ class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
 
     # Add text asking to repeat
     adb_utils.text_emulator(
-        env.base_env,
+        env.controller,
         self.params["number"],
         "Sorry, there was a glitch, what was the last message you sent me?",
     )
@@ -285,11 +287,11 @@ class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
     # Need to pause to make sure re-enabling notifications happens after the
     # text came in
     time.sleep(1)
-    adb_utils.enable_headsup_notifications(env.base_env)
-    self.before_messages = self._get_sent_messages(env.base_env)
+    adb_utils.enable_headsup_notifications(env.controller)
+    self.before_messages = self._get_sent_messages(env.controller)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
-    after_messages = self._get_sent_messages(env.base_env)
+    after_messages = self._get_sent_messages(env.controller)
     if len(after_messages) != len(self.before_messages) + 1:
       return 0.0
 
@@ -304,4 +306,4 @@ class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
 
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
-    adb_utils.delete_contacts(env.base_env)
+    adb_utils.delete_contacts(env.controller)

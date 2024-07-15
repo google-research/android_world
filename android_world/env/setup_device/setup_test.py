@@ -48,7 +48,7 @@ class SetupTest(absltest.TestCase):
       if app_class.apk_names:  # 1P apps do not have APKs.
         mock_install_apk.assert_any_call(app_class.apk_names[0], env)
       mock_app_setups[app_class].assert_any_call(env)
-      mock_save_snapshot.assert_any_call(app_class.app_name, env.base_env)
+      mock_save_snapshot.assert_any_call(app_class.app_name, env.controller)
 
 
 class _App(apps.AppSetup):

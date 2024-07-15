@@ -440,7 +440,7 @@ class RecipeAddMultipleRecipesFromMarkor(_RecipeAddMultipleRecipes):
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
     user_data_generation.write_to_markor(
         _get_rows_as_text(
             self.params[sqlite_validators.ROW_OBJECTS],
@@ -452,7 +452,7 @@ class RecipeAddMultipleRecipesFromMarkor(_RecipeAddMultipleRecipes):
 
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
 
 
 class RecipeAddMultipleRecipesFromMarkor2(RecipeAddMultipleRecipesFromMarkor):
@@ -478,7 +478,7 @@ class RecipeAddMultipleRecipesFromMarkor2(RecipeAddMultipleRecipesFromMarkor):
         + self.params[sqlite_validators.NOISE_ROW_OBJECTS]
     )
     random.shuffle(rows)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
     user_data_generation.write_to_markor(
         _get_rows_as_text(
             rows,
@@ -490,7 +490,7 @@ class RecipeAddMultipleRecipesFromMarkor2(RecipeAddMultipleRecipesFromMarkor):
 
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, Any]:

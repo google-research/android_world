@@ -76,7 +76,7 @@ def clear_dbs(env: interface.AsyncEnv) -> None:
   sqlite_utils.delete_all_rows_from_table(
       _NOTES_NORMALIZED_TABLE, _DB_PATH, env, _APP_NAME
   )
-  adb_utils.close_app(_APP_NAME, env.base_env)  # Register changes.
+  adb_utils.close_app(_APP_NAME, env.controller)  # Register changes.
 
 
 def _get_folder_to_id(

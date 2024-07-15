@@ -74,12 +74,12 @@ class _VLC(task_eval.TaskEval):
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
     user_data_generation.clear_internal_storage(env)
-    file_utils.clear_directory(apps.VlcApp.videos_path, env.base_env)
+    file_utils.clear_directory(apps.VlcApp.videos_path, env.controller)
 
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
     user_data_generation.clear_internal_storage(env)
-    file_utils.clear_directory(apps.VlcApp.videos_path, env.base_env)
+    file_utils.clear_directory(apps.VlcApp.videos_path, env.controller)
 
 
 class VlcCreatePlaylist(_VLC):

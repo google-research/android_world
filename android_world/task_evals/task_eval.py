@@ -110,7 +110,7 @@ class TaskEval(abc.ABC):
     for app_name in self.app_names:
       if app_name:
         try:
-          app_snapshot.restore_snapshot(app_name, env.base_env)
+          app_snapshot.restore_snapshot(app_name, env.controller)
         except RuntimeError as error:
           logging.warn("Skipping app snapshot loading : %s", error)
 
@@ -118,7 +118,7 @@ class TaskEval(abc.ABC):
     """Initializes the task."""
     # Reset the interaction cache so previous tasks don't affect this run:
     env.interaction_cache = ""
-    datetime_utils.set_datetime(env.base_env)
+    datetime_utils.set_datetime(env.controller)
     self._initialize_apps(env)
     logging.info("Initializing %s", self.name)
     if self.initialized:
@@ -151,6 +151,6 @@ class TaskEval(abc.ABC):
   def tear_down(self, env: interface.AsyncEnv) -> None:  # pylint: disable=unused-argument
     """Tears down the task."""
     self._initialize_apps(env)
-    adb_utils.close_recents(env.base_env)
+    adb_utils.close_recents(env.controller)
     self.initialized = False
     logging.info("Tearing down %s", self.name)

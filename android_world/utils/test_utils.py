@@ -20,7 +20,6 @@ from typing import Any
 from unittest import mock
 
 from absl.testing import absltest
-from android_env import env_interface
 from android_env.proto import adb_pb2
 from android_world.env import adb_utils
 from android_world.env import android_world_controller
@@ -209,16 +208,9 @@ class FakeAsyncEnv(interface.AsyncAndroidEnv):
 
   def __init__(self):
     self._reset_called = True
-    self._base_env = mock.create_autospec(
-        env_interface.AndroidEnvInterface, instance=True
-    )
     self._controller = mock.create_autospec(
         android_world_controller.AndroidWorldController, instance=True
     )
-
-  @property
-  def base_env(self) -> env_interface.AndroidEnvInterface:
-    return self._base_env
 
   @property
   def controller(self) -> android_world_controller.AndroidWorldController:

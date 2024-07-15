@@ -41,7 +41,7 @@ def _get_env(
 
 def verify_api_level(env: interface.AsyncEnv) -> None:
   """Verifies that the emulator's API level is expected."""
-  level = adb_utils.get_api_level(env.base_env)
+  level = adb_utils.get_api_level(env.controller)
   if level != _ANDROID_WORLD_API_LEVEL:
     raise ValueError(
         f'Emulator API level must be {_ANDROID_WORLD_API_LEVEL}, but found'
@@ -88,7 +88,7 @@ def setup_env(
   if emulator_setup:
     setup.setup_apps(env)
   if freeze_datetime:
-    datetime_utils.setup_datetime(env.base_env)
+    datetime_utils.setup_datetime(env.controller)
 
 
 def load_and_setup_env(

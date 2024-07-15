@@ -42,7 +42,7 @@ class _SystemBrightnessToggle(task_eval.TaskEval):
     super().is_successful(env)
     res = adb_utils.issue_generic_request(
         ['shell', 'settings', 'get', 'system', 'screen_brightness'],
-        env.base_env,
+        env.controller,
     )
     brightness_level = int(res.generic.output.decode().strip())
 
@@ -64,7 +64,7 @@ class SystemBrightnessMinVerify(_SystemBrightnessToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.set_brightness('min', env.base_env)
+    adb_utils.set_brightness('min', env.controller)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -79,7 +79,7 @@ class SystemBrightnessMaxVerify(_SystemBrightnessToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.set_brightness('max', env.base_env)
+    adb_utils.set_brightness('max', env.controller)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -94,7 +94,7 @@ class SystemBrightnessMin(_SystemBrightnessToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.set_brightness('max', env.base_env)
+    adb_utils.set_brightness('max', env.controller)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -109,7 +109,7 @@ class SystemBrightnessMax(_SystemBrightnessToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.set_brightness('min', env.base_env)
+    adb_utils.set_brightness('min', env.controller)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -131,7 +131,7 @@ class _SystemWifiToggle(task_eval.TaskEval):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     res = adb_utils.issue_generic_request(
-        ['shell', 'settings', 'get', 'global', 'wifi_on'], env.base_env
+        ['shell', 'settings', 'get', 'global', 'wifi_on'], env.controller
     )
     wifi_status = res.generic.output.decode().strip()
 
@@ -156,7 +156,7 @@ class SystemWifiTurnOffVerify(_SystemWifiToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_wifi(env.base_env, 'off')
+    adb_utils.toggle_wifi(env.controller, 'off')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -171,7 +171,7 @@ class SystemWifiTurnOnVerify(_SystemWifiToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_wifi(env.base_env, 'on')
+    adb_utils.toggle_wifi(env.controller, 'on')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -186,7 +186,7 @@ class SystemWifiTurnOff(_SystemWifiToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_wifi(env.base_env, 'on')
+    adb_utils.toggle_wifi(env.controller, 'on')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -201,7 +201,7 @@ class SystemWifiTurnOn(_SystemWifiToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_wifi(env.base_env, 'off')
+    adb_utils.toggle_wifi(env.controller, 'off')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -223,7 +223,7 @@ class _SystemBluetoothToggle(task_eval.TaskEval):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     res = adb_utils.issue_generic_request(
-        ['shell', 'settings', 'get', 'global', 'bluetooth_on'], env.base_env
+        ['shell', 'settings', 'get', 'global', 'bluetooth_on'], env.controller
     )
     bluetooth_status = res.generic.output.decode().strip()
     expected_status = '1' if self.params['on_or_off'] == 'on' else '0'
@@ -242,7 +242,7 @@ class SystemBluetoothTurnOffVerify(_SystemBluetoothToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_bluetooth(env.base_env, 'off')
+    adb_utils.toggle_bluetooth(env.controller, 'off')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -257,7 +257,7 @@ class SystemBluetoothTurnOnVerify(_SystemBluetoothToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_bluetooth(env.base_env, 'on')
+    adb_utils.toggle_bluetooth(env.controller, 'on')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -272,7 +272,7 @@ class SystemBluetoothTurnOff(_SystemBluetoothToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_bluetooth(env.base_env, 'on')
+    adb_utils.toggle_bluetooth(env.controller, 'on')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -287,7 +287,7 @@ class SystemBluetoothTurnOn(_SystemBluetoothToggle):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.toggle_bluetooth(env.base_env, 'off')
+    adb_utils.toggle_bluetooth(env.controller, 'off')
 
   @classmethod
   def generate_random_params(cls) -> dict[str, str]:
@@ -316,7 +316,7 @@ class SystemCopyToClipboard(task_eval.TaskEval):
 
   def _clear_clipboard(self, env: interface.AsyncEnv) -> None:
     # Use a unique string to set the clipboard contents.
-    adb_utils.set_clipboard_contents('~~~RESET~~~', env.base_env)
+    adb_utils.set_clipboard_contents('~~~RESET~~~', env.controller)
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
@@ -324,7 +324,7 @@ class SystemCopyToClipboard(task_eval.TaskEval):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     """Check if the clipboard content matches the expected content."""
-    actual_clipboard_content = adb_utils.get_clipboard_contents(env.base_env)
+    actual_clipboard_content = adb_utils.get_clipboard_contents(env.controller)
     return (
         1.0
         if fuzzy_match_lib.fuzzy_match(
@@ -483,7 +483,7 @@ class OpenAppTaskEval(task_eval.TaskEval):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
-    active_activity, _ = adb_utils.get_current_activity(env.base_env)
+    active_activity, _ = adb_utils.get_current_activity(env.controller)
     expected_package_name = _APP_NAME_TO_PACKAGE_NAME[self.params['app_name']]
     if (
         parse_component_name(active_activity).package_name

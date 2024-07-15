@@ -60,11 +60,11 @@ class Markor(task_eval.TaskEval):
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
 
   def tear_down(self, env: interface.AsyncEnv) -> None:
     super().tear_down(env)
-    file_utils.clear_directory(device_constants.MARKOR_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.MARKOR_DATA, env.controller)
 
 
 class MarkorMoveNote(Markor):
@@ -141,7 +141,7 @@ class MarkorCreateFolder(Markor):
     user_data_generation.generate_noise_files(
         "file",
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         _NOTE_TITLES,
     )
 
@@ -150,7 +150,7 @@ class MarkorCreateFolder(Markor):
     folder_name = self.params["folder_name"]
 
     exists = file_utils.check_file_or_folder_exists(
-        folder_name, device_constants.MARKOR_DATA, env.base_env
+        folder_name, device_constants.MARKOR_DATA, env.controller
     )
 
     if not exists:
@@ -212,13 +212,13 @@ class MarkorEditNote(Markor):
     user_data_generation.generate_noise_files(
         self.params["file_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         _NOTE_TITLES,
     )
     self.original_content = file_utils.create_file(
         self.params["file_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         content=generate_random_sentence(),
     )
 
@@ -232,7 +232,7 @@ class MarkorEditNote(Markor):
                 device_constants.MARKOR_DATA, self.params["file_name"]
             ),
         ],
-        env.base_env,
+        env.controller,
     )
     file_contents = res.generic.output.decode().strip()
     logging.info("Retrieved file contents: %s", file_contents)
@@ -330,17 +330,17 @@ class MarkorDeleteNewestNote(Markor):
       file_utils.create_file(
           note.name,
           device_constants.MARKOR_DATA,
-          env.base_env,
+          env.controller,
           content=note.content,
       )
       # Advance system time so the change time for these initial notes can be
       # separated.
       datetime_utils.advance_system_time(
-          datetime.timedelta(minutes=random.randint(-500, 500)), env.base_env
+          datetime.timedelta(minutes=random.randint(-500, 500)), env.controller
       )
 
     file_list = file_utils.get_file_list_with_metadata(
-        device_constants.MARKOR_DATA, env.base_env
+        device_constants.MARKOR_DATA, env.controller
     )
     self.initial_file_list_sorted = sorted(
         file_list, key=lambda f: f.change_time
@@ -349,7 +349,7 @@ class MarkorDeleteNewestNote(Markor):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     new_file_list = file_utils.get_file_list_with_metadata(
-        device_constants.MARKOR_DATA, env.base_env
+        device_constants.MARKOR_DATA, env.controller
     )
     new_file_list_sorted = sorted(new_file_list, key=lambda f: f.change_time)
     for i in range(len(new_file_list)):
@@ -389,13 +389,13 @@ class MarkorDeleteAllNotes(Markor):
     user_data_generation.generate_noise_files(
         user_data_generation.generate_random_string(5),
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         _NOTE_TITLES,
         random.randint(2, 6),
     )
 
     file_list = file_utils.get_file_list_with_metadata(
-        device_constants.MARKOR_DATA, env.base_env
+        device_constants.MARKOR_DATA, env.controller
     )
 
     if not file_list:
@@ -404,7 +404,7 @@ class MarkorDeleteAllNotes(Markor):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     file_list = file_utils.get_file_list_with_metadata(
-        device_constants.MARKOR_DATA, env.base_env
+        device_constants.MARKOR_DATA, env.controller
     )
     return 0.0 if file_list else 1.0
 
@@ -479,9 +479,11 @@ class MarkorCreateNoteFromClipboard(Markor):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
-    adb_utils.set_clipboard_contents(self.params["file_content"], env.base_env)
+    adb_utils.set_clipboard_contents(
+        self.params["file_content"], env.controller
+    )
     if (
-        adb_utils.get_clipboard_contents(env.base_env)
+        adb_utils.get_clipboard_contents(env.controller)
         != self.params["file_content"]
     ):
       raise RuntimeError(
@@ -563,19 +565,19 @@ class MarkorMergeNotes(Markor):
     file_utils.create_file(
         self.params["file1_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         content=self.params["file1_content"],
     )
     file_utils.create_file(
         self.params["file2_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         content=self.params["file2_content"],
     )
     file_utils.create_file(
         self.params["file3_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         content=self.params["file3_content"],
     )
 
@@ -599,7 +601,7 @@ class MarkorMergeNotes(Markor):
                     device_constants.MARKOR_DATA, self.params["new_file_name"]
                 ),
             ],
-            env.base_env,
+            env.controller,
         )
         .generic.output.decode()
         .strip()
@@ -653,19 +655,19 @@ class MarkorChangeNoteContent(Markor):
     file_utils.create_file(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         content=user_data_generation.generate_random_string(20),
     )
     user_data_generation.generate_noise_files(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         _NOTE_TITLES,
     )
     if not file_utils.check_file_or_folder_exists(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
     ):
       raise RuntimeError("Something went wrong, file not created correctly.")
 
@@ -674,19 +676,19 @@ class MarkorChangeNoteContent(Markor):
     if file_utils.check_file_or_folder_exists(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
     ):
       return 0.0
     if not file_utils.check_file_or_folder_exists(
         self.params["new_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
     ):
       return 0.0
     content_updated = file_utils.check_file_content(
         os.path.join(device_constants.MARKOR_DATA, self.params["new_name"]),
         self.params["updated_content"],
-        env.base_env,
+        env.controller,
     )
     return 1.0 if content_updated else 0.0
 
@@ -726,20 +728,20 @@ class MarkorAddNoteHeader(Markor):
     file_utils.create_file(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         content=self.params["original_content"],
     )
     user_data_generation.generate_noise_files(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
         _NOTE_TITLES,
     )
 
     if not file_utils.check_file_or_folder_exists(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
     ):
       raise RuntimeError("Something went wrong, file not created correctly.")
 
@@ -748,19 +750,19 @@ class MarkorAddNoteHeader(Markor):
     if file_utils.check_file_or_folder_exists(
         self.params["original_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
     ):
       return 0.0
     if not file_utils.check_file_or_folder_exists(
         self.params["new_name"],
         device_constants.MARKOR_DATA,
-        env.base_env,
+        env.controller,
     ):
       return 0.0
     correct = file_utils.check_file_content(
         os.path.join(device_constants.MARKOR_DATA, self.params["new_name"]),
         self.params["header"] + "\n\n" + self.params["original_content"] + "\n",
-        env.base_env,
+        env.controller,
         exact_match=True,
     )
     return 1.0 if correct else 0.0
@@ -809,7 +811,7 @@ class MarkorTranscribeReceipt(task_eval.TaskEval):
     file_utils.copy_data_to_device(
         "/tmp/receipt.png",
         device_constants.GALLERY_DATA,
-        env.base_env,
+        env.controller,
     )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
@@ -896,6 +898,7 @@ class MarkorTranscribeVideo(Markor):
             vlc.generate_file_name() for _ in range(random.randint(5, 20))
         ],
     }
+
 
 _NOTE_TITLES = [
     "grocery_list_weekly.md",

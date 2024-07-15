@@ -112,9 +112,9 @@ def _scan_music_directory(env: interface.AsyncEnv):
   action = 'android.intent.action.MEDIA_SCANNER_SCAN_FILE'
   data_uri = 'file:///storage/emulated/0/Music'
   adb_utils.send_android_intent(
-      command='broadcast', action=action, env=env.base_env, data_uri=data_uri
+      command='broadcast', action=action, env=env.controller, data_uri=data_uri
   )
-  adb_utils.close_app('retro music', env.base_env)
+  adb_utils.close_app('retro music', env.controller)
 
 
 class RetroCreatePlaylist(task_eval.TaskEval):
@@ -223,7 +223,7 @@ class RetroSavePlaylist(RetroCreatePlaylist):
             device_constants.DOWNLOAD_DATA,
             self.params['playlist_name'] + '.m3u',
         ),
-        env.base_env,
+        env.controller,
     )
 
     return (super().is_successful(env) + int(playlist_exists)) / 2.0

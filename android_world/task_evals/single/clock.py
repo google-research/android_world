@@ -130,7 +130,7 @@ class ClockTimerEntry(_ClockEval):
   ) -> float:
     super().is_successful(env)
     ui_elements = env.get_state().ui_elements
-    current_activity = adb_utils.get_current_activity(env.base_env)[0]
+    current_activity = adb_utils.get_current_activity(env.controller)[0]
     return (
         1.0
         if _is_timer_set(
@@ -181,7 +181,7 @@ class ClockStopWatchPausedVerify(_ClockEval):
   ) -> float:
     super().is_successful(env)
     ui_elements = env.get_state().ui_elements
-    current_activity = adb_utils.get_current_activity(env.base_env)[0]
+    current_activity = adb_utils.get_current_activity(env.controller)[0]
     return (
         1.0
         if _is_stopwatch_paused(
@@ -218,7 +218,7 @@ class ClockStopWatchRunning(_ClockEval):
   ) -> float:
     super().is_successful(env)
     ui_elements = env.get_state().ui_elements
-    current_activity = adb_utils.get_current_activity(env.base_env)[0]
+    current_activity = adb_utils.get_current_activity(env.controller)[0]
     return (
         1.0
         if _is_stopwatch_running(

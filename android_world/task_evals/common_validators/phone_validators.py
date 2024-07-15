@@ -88,7 +88,7 @@ class MakeCall(task_eval.TaskEval):
 
   def _called_correct_number(self, env: interface.AsyncEnv) -> bool:
     ui_elements = env.get_state().ui_elements
-    current_activity = adb_utils.get_current_activity(env.base_env)[0]
+    current_activity = adb_utils.get_current_activity(env.controller)[0]
     return check_if_dialer_with_phone_number(
         expected_number=self.phone_number,
         ui_elements=ui_elements,
@@ -98,11 +98,11 @@ class MakeCall(task_eval.TaskEval):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     """Clears call history."""
     super().initialize_task(env)
-    clear_phone_state(env.base_env)
+    clear_phone_state(env.controller)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
-    call_state = adb_utils.get_call_state(env.base_env)
+    call_state = adb_utils.get_call_state(env.controller)
     if call_state != "OFFHOOK":
       logging.info("Not dialed. Call state: %s", call_state)
       return 0.0
@@ -114,7 +114,7 @@ class MakeCall(task_eval.TaskEval):
   def tear_down(self, env: interface.AsyncEnv):
     """Maybe ends call and clears call history."""
     super().tear_down(env)
-    clear_phone_state(env.base_env)
+    clear_phone_state(env.controller)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, Any]:

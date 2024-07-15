@@ -31,8 +31,8 @@ class _Camera(task_eval.TaskEval):
 
   def _clear_app_data(self, env: interface.AsyncEnv) -> None:
     """Clears the app data."""
-    file_utils.clear_directory(device_constants.PHOTOS_DATA, env.base_env)
-    file_utils.clear_directory(device_constants.VIDEOS_DATA, env.base_env)
+    file_utils.clear_directory(device_constants.PHOTOS_DATA, env.controller)
+    file_utils.clear_directory(device_constants.VIDEOS_DATA, env.controller)
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
@@ -58,7 +58,7 @@ class CameraTakeVideo(_Camera):
     super().initialize_task(env)
     contents = adb_utils.issue_generic_request(
         ["shell", "ls", device_constants.VIDEOS_DATA],
-        env.base_env,
+        env.controller,
     )
     logging.info("before_videos: %s", contents.generic.output.decode())
     self.before_videos = set(contents.generic.output.decode().split("\n"))
@@ -68,7 +68,7 @@ class CameraTakeVideo(_Camera):
     super().is_successful(env)
     contents = adb_utils.issue_generic_request(
         ["shell", "ls", device_constants.VIDEOS_DATA],
-        env.base_env,
+        env.controller,
     )
     logging.info("before_videos: %s", contents.generic.output.decode())
     after_videos = set(contents.generic.output.decode().split("\n"))
@@ -99,7 +99,7 @@ class CameraTakePhoto(_Camera):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
     contents = adb_utils.issue_generic_request(
-        ["shell", "ls", device_constants.PHOTOS_DATA], env.base_env
+        ["shell", "ls", device_constants.PHOTOS_DATA], env.controller
     )
     logging.info("before_photos: %s", contents.generic.output.decode())
     self.before_photos = set(contents.generic.output.decode().split("\n"))
@@ -108,7 +108,7 @@ class CameraTakePhoto(_Camera):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     contents = adb_utils.issue_generic_request(
-        ["shell", "ls", device_constants.PHOTOS_DATA], env.base_env
+        ["shell", "ls", device_constants.PHOTOS_DATA], env.controller
     )
     logging.info("after_photos: %s", contents.generic.output.decode())
     after_photos = set(contents.generic.output.decode().split("\n"))

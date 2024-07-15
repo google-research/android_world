@@ -173,11 +173,11 @@ def clear_app_db(
   """Removes the app database on the device."""
   if not table_exists(table_name, remote_db_path, env):
     # If the database was never created, opening the app may create it.
-    adb_utils.launch_app(app_name, env.base_env)
+    adb_utils.launch_app(app_name, env.controller)
     time.sleep(2.0)
   delete_all_rows_from_table(table_name, remote_db_path, env, app_name)
   adb_utils.close_app(
-      app_name, env.base_env
+      app_name, env.controller
   )  # Close app to register the changes.
 
 

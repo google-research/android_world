@@ -33,7 +33,7 @@ class SystemWifiTurnOnTest(absltest.TestCase):
     eval_task = system.SystemWifiTurnOn(params={'on_or_off': 'on'})
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.return_value = (
+    env.controller.execute_adb_call.return_value = (
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=True)
     )
 
@@ -43,7 +43,7 @@ class SystemWifiTurnOnTest(absltest.TestCase):
     eval_task = system.SystemWifiTurnOn(params={'on_or_off': 'on'})
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.return_value = (
+    env.controller.execute_adb_call.return_value = (
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=False)
     )
 
@@ -62,7 +62,7 @@ class SystemWifiTurnOffTest(absltest.TestCase):
     eval_task = system.SystemWifiTurnOn(params={'on_or_off': 'off'})
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.return_value = (
+    env.controller.execute_adb_call.return_value = (
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=False)
     )
 
@@ -72,7 +72,7 @@ class SystemWifiTurnOffTest(absltest.TestCase):
     eval_task = system.SystemWifiTurnOn(params={'on_or_off': 'off'})
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.return_value = (
+    env.controller.execute_adb_call.return_value = (
         fake_adb_responses.create_get_wifi_enabled_response(is_enabled=True)
     )
 
@@ -184,7 +184,7 @@ class SystemTest(absltest.TestCase):
     eval_task = system.OpenAppTaskEval({'app_name': 'settings'})
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.return_value = (
+    env.controller.execute_adb_call.return_value = (
         fake_adb_responses.create_get_activity_response(
             'com.google.gmail/com.google.gmail.Inbox'
         )
@@ -198,7 +198,7 @@ class SystemTest(absltest.TestCase):
     eval_task = system.OpenAppTaskEval({'app_name': 'settings'})
     env = mock.create_autospec(interface.AsyncEnv)
     eval_task.initialize_task(env)
-    env.base_env.execute_adb_call.return_value = (
+    env.controller.execute_adb_call.return_value = (
         fake_adb_responses.create_get_activity_response(
             'com.android.settings/com.android.settings.Settings'
         )

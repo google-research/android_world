@@ -164,10 +164,10 @@ class TestSimpleSmsReplyMostRecent(test_utils.AdbEvalTestBase):
     task = sms.SimpleSmsReplyMostRecent(params)
     task.initialize_task(env)
     self.mock_text_emulator.assert_has_calls([
-        mock.call(env.base_env, self.random_number_1, self.message_1),
-        mock.call(env.base_env, self.random_number_2, self.message_2),
+        mock.call(env.controller, self.random_number_1, self.message_1),
+        mock.call(env.controller, self.random_number_2, self.message_2),
         mock.call(
-            env.base_env, self.most_recent_number, self.most_recent_message
+            env.controller, self.most_recent_number, self.most_recent_message
         ),
     ])
     self.mock_disable_notifications.assert_called_once()
@@ -267,9 +267,9 @@ class TestSimpleSmsReply(test_utils.AdbEvalTestBase):
     task = sms.SimpleSmsReply(params)
     task.initialize_task(env)
     self.mock_text_emulator.assert_has_calls([
-        mock.call(env.base_env, self.random_number_1, self.message_1),
-        mock.call(env.base_env, self.random_number_2, self.message_2),
-        mock.call(env.base_env, self.relevant_number, self.relevant_message),
+        mock.call(env.controller, self.random_number_1, self.message_1),
+        mock.call(env.controller, self.random_number_2, self.message_2),
+        mock.call(env.controller, self.relevant_number, self.relevant_message),
     ])
     self.mock_disable_notifications.assert_called_once()
     self.mock_enable_notifications.assert_called_once()
@@ -332,7 +332,7 @@ class TestSimpleSmsSendClipboardContent(test_utils.AdbEvalTestBase):
     task = sms.SimpleSmsSendClipboardContent(params)
     task.initialize_task(env)
     self.mock_set_clipboard_contents.assert_called_with(
-        clipboard_contents, env.base_env
+        clipboard_contents, env.controller
     )
     self.mock_initialize_sms_task.assert_called_once()
 
@@ -354,7 +354,7 @@ class TestSimpleSmsSendClipboardContent(test_utils.AdbEvalTestBase):
     task = sms.SimpleSmsSendClipboardContent(params)
     self.assertEqual(test_utils.perform_task(task, env), 1)
     self.mock_set_clipboard_contents.assert_called_with(
-        clipboard_contents, env.base_env
+        clipboard_contents, env.controller
     )
 
 
@@ -449,11 +449,11 @@ class TestSimpleSmsSendReceivedAddress(test_utils.AdbEvalTestBase):
     self.mock_disable_notifications.assert_called_once()
     self.mock_initialize_sms_task.assert_called_once()
     self.mock_add_contact.assert_has_calls([
-        mock.call(name1, name1_number, env.base_env),
-        mock.call(name2, self.random_number, env.base_env),
+        mock.call(name1, name1_number, env.controller),
+        mock.call(name2, self.random_number, env.controller),
     ])
     self.mock_text_emulator.assert_called_with(
-        env.base_env, self.random_number, '100 Main Street'
+        env.controller, self.random_number, '100 Main Street'
     )
     self.mock_enable_notifications.assert_called_once()
 
@@ -650,12 +650,12 @@ class TestMessagesResendTextMessage(test_utils.AdbEvalTestBase):
     task.initialize_task(env)
     self.mock_disable_notifications.assert_called_once()
     self.mock_initialize_sms_task.assert_called_once()
-    self.mock_add_contact.assert_called_with(name, number, env.base_env)
+    self.mock_add_contact.assert_called_with(name, number, env.controller)
     # Check that initial message was sent
     self.mock_send_sms.assert_called_with(number, message)
     # Check that resend message was sent
     self.mock_text_emulator.assert_called_with(
-        env.base_env, number, self.glitch_message
+        env.controller, number, self.glitch_message
     )
     self.mock_enable_notifications.assert_called_once()
 

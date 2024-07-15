@@ -80,7 +80,7 @@ def run_episode(
     print('Completed step {:d}.'.format(step_n + 1))
     assert constants.STEP_NUMBER not in result.data
     output.append(result.data | {constants.STEP_NUMBER: step_n})
-    if termination_fn(agent.env.base_env):
+    if termination_fn(agent.env.controller):
       print('Environment ends episode.')
       return EpisodeResult(
           done=True,
