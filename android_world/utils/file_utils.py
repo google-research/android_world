@@ -31,8 +31,9 @@ from android_env.proto import adb_pb2
 from android_world.env import adb_utils
 from android_world.utils import fuzzy_match_lib
 
+
 # Local temporary location for files copied to or from the device.
-_TMP_LOCAL_LOCATION = "/tmp/android_world"
+TMP_LOCAL_LOCATION = "/tmp/android_world"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -302,7 +303,7 @@ def tmp_directory_from_device(
     RuntimeError: If there is an adb communication error.
   """
   directory_name = os.path.split(device_path)[-1]
-  tmp_directory = os.path.join(_TMP_LOCAL_LOCATION, directory_name)
+  tmp_directory = os.path.join(TMP_LOCAL_LOCATION, directory_name)
   logging.info(
       "Copying %s directory to local tmp %s", device_path, tmp_directory
   )
@@ -317,7 +318,7 @@ def tmp_directory_from_device(
       raise FileNotFoundError(f"{device_path} does not exist.")
 
     response = adb_utils.issue_generic_request(
-        ["pull", device_path, _TMP_LOCAL_LOCATION], env, timeout_sec
+        ["pull", device_path, TMP_LOCAL_LOCATION], env, timeout_sec
     )
     if response.status != adb_pb2.AdbResponse.OK:
       raise RuntimeError(
@@ -350,7 +351,7 @@ def tmp_file_from_device(
     RuntimeError: If there is an adb communication error.
   """
   file_name = os.path.split(device_file)[-1]
-  local_file = os.path.join(_TMP_LOCAL_LOCATION, file_name)
+  local_file = os.path.join(TMP_LOCAL_LOCATION, file_name)
   logging.info("Copying %s to local tmp %s", device_file, local_file)
   try:
     # Need root access to access many directories.
@@ -359,8 +360,8 @@ def tmp_file_from_device(
     if not check_file_exists(device_file, env):
       raise FileNotFoundError(f"{device_file} does not exist.")
 
-    if not os.path.exists(_TMP_LOCAL_LOCATION):
-      os.makedirs(_TMP_LOCAL_LOCATION)
+    if not os.path.exists(TMP_LOCAL_LOCATION):
+      os.makedirs(TMP_LOCAL_LOCATION)
 
     # ADB pull command arguments for the file
     adb_args = ["pull", device_file, local_file]

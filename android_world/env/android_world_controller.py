@@ -14,10 +14,13 @@
 
 """Controller for Android that adds UI tree information to the observation."""
 
+import contextlib
+import os
 import time
 from typing import Any
 from typing import cast
 from typing import Optional
+
 from absl import logging
 from android_env import env_interface
 from android_env import loader
@@ -27,6 +30,7 @@ from android_env.wrappers import a11y_grpc_wrapper
 from android_env.wrappers import base_wrapper
 from android_world.env import adb_utils
 from android_world.env import representation_utils
+from android_world.utils import file_utils
 import dm_env
 
 
@@ -191,6 +195,45 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
       )
       self.refresh_env()
       return get_a11y_tree(self._env)
+
+  def pull_file(
+      self, remote_db_file_path: str, timeout_sec: Optional[float] = None
+  ) -> contextlib._GeneratorContextManager[str]:
+    """Pulls a file from the device to a temporary directory.
+
+    The directory will be deleted when the context manager exits.
+    Args:
+      remote_db_file_path: The path to the file on the device.
+      timeout_sec: Timeout in seconds for the adb calls.
+
+    Returns:
+      The path to the temporary directory containing the file.
+    """
+    remote_db_directory = os.path.dirname(remote_db_file_path)
+    return file_utils.tmp_directory_from_device(
+        remote_db_directory, self._env, timeout_sec
+    )
+
+  def push_file(
+      self,
+      local_db_directory: str,
+      remote_db_file_path: str,
+      timeout_sec: Optional[float] = None,
+  ) -> None:
+    """Pushes a file from a local directory to the device."""
+    local_db_path = os.path.join(
+        local_db_directory, os.path.split(remote_db_file_path)[1]
+    )
+    remote_db_directory = os.path.dirname(remote_db_file_path)
+
+    # First delete old .db, .db-wal, and .db-shm files.
+    file_utils.clear_directory(remote_db_directory, self._env)
+    file_utils.copy_data_to_device(
+        local_db_path,
+        remote_db_directory,
+        self._env,
+        timeout_sec,
+    )
 
 
 def _write_default_task_proto() -> str:

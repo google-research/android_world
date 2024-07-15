@@ -15,9 +15,9 @@
 from unittest import mock
 
 from absl.testing import absltest
-from android_env import env_interface
 from android_env.components import errors
 from android_world.env import adb_utils
+from android_world.env import interface
 from android_world.env import tools
 from android_world.env.setup_device import apps
 from android_world.env.setup_device import setup
@@ -36,7 +36,7 @@ class SetupTest(absltest.TestCase):
   @mock.patch.object(setup, "_download_and_install_apk")
   @mock.patch.object(app_snapshot, "save_snapshot")
   def test_setup_apps(self, mock_save_snapshot, mock_install_apk, unused_tools):
-    env = mock.create_autospec(env_interface.AndroidEnvInterface)
+    env = mock.create_autospec(interface.AsyncEnv)
     mock_app_setups = {
         app_class: mock.patch.object(app_class, "setup").start()
         for app_class in setup._APPS
@@ -48,7 +48,7 @@ class SetupTest(absltest.TestCase):
       if app_class.apk_names:  # 1P apps do not have APKs.
         mock_install_apk.assert_any_call(app_class.apk_names[0], env)
       mock_app_setups[app_class].assert_any_call(env)
-      mock_save_snapshot.assert_any_call(app_class.app_name, env)
+      mock_save_snapshot.assert_any_call(app_class.app_name, env.base_env)
 
 
 class _App(apps.AppSetup):
@@ -62,7 +62,7 @@ class InstallApksTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.env = mock.create_autospec(env_interface.AndroidEnvInterface)
+    self.env = mock.create_autospec(interface.AsyncEnv)
     self.mock_download_and_install_apk = self.enter_context(
         mock.patch.object(setup, "_download_and_install_apk")
     )

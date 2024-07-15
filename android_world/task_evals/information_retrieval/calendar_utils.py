@@ -17,8 +17,8 @@
 import datetime
 import random
 import zoneinfo
-from android_env import env_interface
 from android_world.env import device_constants
+from android_world.env import interface
 from android_world.task_evals.information_retrieval import datetime_utils as datetime_utils_ir
 from android_world.task_evals.information_retrieval import proto_utils
 from android_world.task_evals.information_retrieval.proto import state_pb2
@@ -130,7 +130,7 @@ def convert_datetime_to_unix_ts(date_str: str, time_str: str) -> int:
 def setup_task_state(
     relevant_state: state_pb2.Calendar,
     exclusion_conditions: list[task_pb2.ExclusionCondition],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
   """Initializes the calendar app with initial state + other random events.
 

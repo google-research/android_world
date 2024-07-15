@@ -18,7 +18,10 @@ from unittest import mock
 
 from absl.testing import absltest
 from android_env import env_interface
+from android_env.wrappers import a11y_grpc_wrapper
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
+from android_world.env import interface
 from android_world.task_evals.utils import sqlite_schema_utils
 from android_world.task_evals.utils import sqlite_test_utils
 from android_world.task_evals.utils import sqlite_utils
@@ -32,8 +35,23 @@ class SqliteUtilsTest(absltest.TestCase):
     super().setUp()
     self.remote_db_path = sqlite_test_utils.setup_test_db()
     self.table_name = 'events'
-    self.env_mock = mock.create_autospec(env_interface.AndroidEnvInterface)
+    self.async_env_mock = mock.create_autospec(interface.AsyncEnv)
+    self.android_env_mock = mock.create_autospec(
+        env_interface.AndroidEnvInterface
+    )
+    self.enter_context(
+        mock.patch.object(
+            a11y_grpc_wrapper,
+            'A11yGrpcWrapper',
+            instance=True,
+        )
+    )
+    self.controller = android_world_controller.AndroidWorldController(
+        self.android_env_mock
+    )
+    self.async_env_mock.controller = self.controller
     self.row_type = sqlite_schema_utils.CalendarEvent
+
     self.mock_copy_db = self.enter_context(
         mock.patch.object(
             file_utils,
@@ -60,12 +78,12 @@ class SqliteUtilsTest(absltest.TestCase):
     expected_rows = sqlite_test_utils.get_db_rows()
 
     result = sqlite_utils.get_rows_from_remote_device(
-        self.table_name, self.remote_db_path, self.row_type, self.env_mock
+        self.table_name, self.remote_db_path, self.row_type, self.async_env_mock
     )
 
     self.assertEqual(result, expected_rows)
     self.mock_copy_db.assert_called_once_with(
-        os.path.dirname(self.remote_db_path), self.env_mock, None
+        os.path.dirname(self.remote_db_path), self.controller.env, None
     )
 
   @mock.patch.object(sqlite_utils, 'execute_query', autospec=True)
@@ -76,7 +94,7 @@ class SqliteUtilsTest(absltest.TestCase):
     ]
 
     result = sqlite_utils.get_rows_from_remote_device(
-        self.table_name, self.remote_db_path, self.row_type, self.env_mock
+        self.table_name, self.remote_db_path, self.row_type, self.async_env_mock
     )
 
     self.assertEqual(result, sqlite_test_utils.get_db_rows())
@@ -88,7 +106,10 @@ class SqliteUtilsTest(absltest.TestCase):
 
     with self.assertRaises(ValueError):
       sqlite_utils.get_rows_from_remote_device(
-          self.table_name, self.remote_db_path, self.row_type, self.env_mock
+          self.table_name,
+          self.remote_db_path,
+          self.row_type,
+          self.async_env_mock,
       )
 
   @mock.patch.object(adb_utils, 'close_app', autospec=True)
@@ -108,12 +129,12 @@ class SqliteUtilsTest(absltest.TestCase):
         'events',
         self.remote_db_path,
         'TestApp',
-        self.env_mock,
+        self.async_env_mock,
     )
 
-    mock_close_app.assert_called_once_with('TestApp', self.env_mock)
+    mock_close_app.assert_called_once_with('TestApp', self.controller)
     retrieved = sqlite_utils.get_rows_from_remote_device(
-        self.table_name, self.remote_db_path, self.row_type, self.env_mock
+        self.table_name, self.remote_db_path, self.row_type, self.async_env_mock
     )
     original_rows = sqlite_test_utils.get_db_rows()
     self.assertEqual(retrieved, original_rows + [new_row])

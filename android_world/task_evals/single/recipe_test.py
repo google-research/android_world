@@ -173,11 +173,9 @@ class RecipeDeleteDuplicateRecipesTest(parameterized.TestCase):
     self.mock_add_rows.assert_has_calls([
         mock.call(
             self.params[sqlite_validators.NOISE_ROW_OBJECTS],
-            self.mock_env.base_env,
+            self.mock_env,
         ),
-        mock.call(
-            self.params[sqlite_validators.ROW_OBJECTS], self.mock_env.base_env
-        ),
+        mock.call(self.params[sqlite_validators.ROW_OBJECTS], self.mock_env),
     ])
 
     self.assertLen(

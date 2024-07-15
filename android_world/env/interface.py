@@ -82,6 +82,11 @@ class AsyncEnv(abc.ABC):
   def base_env(self) -> env_interface.AndroidEnvInterface:
     """Returns the base Android environment."""
 
+  @property
+  @abc.abstractmethod
+  def controller(self) -> android_world_controller.AndroidWorldController:
+    """Returns the controller for the environment."""
+
   @abc.abstractmethod
   def reset(self, go_home: bool = False) -> State:
     """Go home on reset.
@@ -170,10 +175,13 @@ def _process_timestep(timestep: dm_env.TimeStep) -> State:
 
 class AsyncAndroidEnv(AsyncEnv):
   """Async environment interface using AndroidEnv to communicate with device."""
+
   interaction_cache = ''
 
-  def __init__(self, base_env: android_world_controller.AndroidWorldController):
-    self._base_env = base_env
+  def __init__(
+      self, controller: android_world_controller.AndroidWorldController
+  ):
+    self._controller = controller
     self._prior_state = None
     # Variable used to temporarily save interactions between agent and user.
     # Like when agent use answer action to answer user questions, we
@@ -182,18 +190,22 @@ class AsyncAndroidEnv(AsyncEnv):
     self.interaction_cache = ''
 
   @property
-  def base_env(self) -> env_interface.AndroidEnvInterface:
-    return self._base_env
+  def base_env(self) -> android_world_controller.AndroidWorldController:
+    return self._controller
+
+  @property
+  def controller(self) -> android_world_controller.AndroidWorldController:
+    return self._controller
 
   def reset(self, go_home: bool = False) -> State:
     if go_home:
-      adb_utils.press_home_button(self._base_env)
+      adb_utils.press_home_button(self.controller)
     self.interaction_cache = ''
 
-    return _process_timestep(self._base_env.reset())
+    return _process_timestep(self.controller.reset())
 
   def _get_state(self):
-    return _process_timestep(self._base_env.step(_get_no_op_action()))
+    return _process_timestep(self.controller.step(_get_no_op_action()))
 
   def _get_stable_state(
       self,
@@ -252,26 +264,26 @@ class AsyncAndroidEnv(AsyncEnv):
         action,
         state.ui_elements,
         self.logical_screen_size,
-        self._base_env,
+        self.controller,
     )
 
   def hide_automation_ui(self) -> None:
     """Hides the coordinates on screen."""
     adb_utils.issue_generic_request(
-        'shell settings put system pointer_location 0', self._base_env
+        'shell settings put system pointer_location 0', self.controller
     )
 
   def display_message(self, message: str, header: str = '') -> None:
     adb_utils.send_android_intent(
         command='broadcast',
         action='com.example.ACTION_UPDATE_OVERLAY',
-        env=self._base_env,
+        env=self.controller,
         extras={'task_type_string': header, 'goal_string': message},
     )
 
   @property
   def foreground_activity_name(self) -> str:
-    activity = adb_utils.get_current_activity(self._base_env)[0]
+    activity = adb_utils.get_current_activity(self.controller)[0]
     if activity:
       return activity
     else:
@@ -279,11 +291,11 @@ class AsyncAndroidEnv(AsyncEnv):
 
   @property
   def device_screen_size(self) -> tuple[int, int]:
-    return self._base_env.device_screen_size
+    return self.controller.device_screen_size
 
   @property
   def logical_screen_size(self) -> tuple[int, int]:
-    return adb_utils.get_logical_screen_size(self._base_env)
+    return adb_utils.get_logical_screen_size(self.controller)
 
   def close(self) -> None:
-    return self._base_env.close()
+    return self.controller.close()

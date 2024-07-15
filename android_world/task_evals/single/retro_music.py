@@ -63,9 +63,8 @@ def _get_playlist_data(
     env: interface.AsyncEnv,
 ) -> list[sqlite_schema_utils.PlaylistInfo]:
   """Executes join query to fetch playlist file info."""
-  remote_db_directory = os.path.dirname(_PLAYLIST_DB_PATH)
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env.base_env, 3
+  with env.controller.pull_file(
+      _PLAYLIST_DB_PATH, timeout_sec=3
   ) as local_db_directory:
     local_db_path = os.path.join(
         local_db_directory, os.path.split(_PLAYLIST_DB_PATH)[1]
@@ -84,9 +83,8 @@ def _get_playing_queue(env: interface.AsyncEnv) -> list[str]:
   class Queue(sqlite_schema_utils.SQLiteRow):
     title: str
 
-  remote_db_directory = os.path.dirname(_PLAYBACK_DB_PATH)
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env.base_env, 3
+  with env.controller.pull_file(
+      _PLAYBACK_DB_PATH, timeout_sec=3
   ) as local_db_directory:
     local_db_path = os.path.join(
         local_db_directory, os.path.split(_PLAYBACK_DB_PATH)[1]
@@ -102,10 +100,10 @@ def _get_playing_queue(env: interface.AsyncEnv) -> list[str]:
 def _clear_playlist_dbs(env: interface.AsyncEnv) -> None:
   """Clears all DBs related to playlists."""
   sqlite_utils.delete_all_rows_from_table(
-      'PlaylistEntity', _PLAYLIST_DB_PATH, env.base_env
+      'PlaylistEntity', _PLAYLIST_DB_PATH, env, _APP_NAME
   )
   sqlite_utils.delete_all_rows_from_table(
-      'SongEntity', _PLAYLIST_DB_PATH, env.base_env
+      'SongEntity', _PLAYLIST_DB_PATH, env, _APP_NAME
   )
 
 

@@ -24,8 +24,8 @@ import os
 import time
 from typing import Iterable
 from absl import logging
-from android_env import env_interface
 from android_world.env import adb_utils
+from android_world.env import interface
 from android_world.env import tools
 from android_world.task_evals.information_retrieval import joplin_app_utils
 from android_world.utils import file_utils
@@ -73,13 +73,13 @@ class AppSetup(abc.ABC):
   app_name = ""
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     """Performs setup tasks specific to the app."""
     adb_utils.clear_app_data(
         adb_utils.extract_package_name(
             adb_utils.get_adb_activity(cls.app_name)
         ),
-        env,
+        env.controller,
     )
 
   @classmethod
@@ -87,7 +87,7 @@ class AppSetup(abc.ABC):
       cls,
       files: Iterable[str],
       device_path: str,
-      env: env_interface.AndroidEnvInterface,
+      env: interface.AsyncEnv,
   ) -> None:
     """Helper method for copying app data  to the device.
 
@@ -101,7 +101,7 @@ class AppSetup(abc.ABC):
           file_utils.copy_data_to_device(
               path,
               device_path,
-              env,
+              env.controller,
           ),
           f"Failed to copy {device_path} to device.",
       )
@@ -116,7 +116,7 @@ class CameraApp(AppSetup):
   app_name = "camera"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Prevent pop-up asking for permission.
@@ -125,18 +125,18 @@ class CameraApp(AppSetup):
             adb_utils.get_adb_activity(cls.app_name)
         ),
         "android.permission.ACCESS_COARSE_LOCATION",
-        env,
+        env.controller,
     )
 
     # Click through onboarding screens during first time launch.
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       time.sleep(2.0)
       controller.click_element("NEXT")
       time.sleep(2.0)
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class ChromeApp(AppSetup):
@@ -145,13 +145,13 @@ class ChromeApp(AppSetup):
   app_name = "chrome"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Click through onboarding screens during first time launch.
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       time.sleep(2.0)
       # Welcome screen.
       controller.click_element("Accept & continue")
@@ -163,7 +163,7 @@ class ChromeApp(AppSetup):
       controller.click_element("No thanks")
       time.sleep(2.0)
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class ClockApp(AppSetup):
@@ -172,13 +172,13 @@ class ClockApp(AppSetup):
   app_name = "clock"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Open once for initial tool tip display.
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     time.sleep(2.0)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.close_app(cls.app_name, env.controller)
 
 
 class ContactsApp(AppSetup):
@@ -187,13 +187,13 @@ class ContactsApp(AppSetup):
   app_name = "contacts"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Click through onboarding screens during first time launch.
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       time.sleep(2.0)
       # Back up & organize your contacts with Google.
       controller.click_element("Skip")
@@ -202,7 +202,7 @@ class ContactsApp(AppSetup):
       controller.click_element("Don't allow")
       time.sleep(2.0)
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class DialerApp(AppSetup):
@@ -230,12 +230,12 @@ class MarkorApp(AppSetup):
   app_name = "markor"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       time.sleep(2.0)
       controller.click_element("NEXT")
       time.sleep(2.0)
@@ -253,7 +253,7 @@ class MarkorApp(AppSetup):
       controller.click_element("Allow access to manage all files")
       time.sleep(2.0)
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class AndroidWorldApp(AppSetup):
@@ -266,7 +266,7 @@ class AndroidWorldApp(AppSetup):
   app_name = "android world"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
     adb_utils.issue_generic_request(
         [
@@ -279,10 +279,10 @@ class AndroidWorldApp(AppSetup):
             "android:system_alert_window",
             "allow",
         ],
-        env,
+        env.controller,
     )
-    adb_utils.launch_app(cls.app_name, env)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
+    adb_utils.close_app(cls.app_name, env.controller)
 
 
 class ClipperApp(AppSetup):
@@ -292,17 +292,17 @@ class ClipperApp(AppSetup):
   app_name = "clipper"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
-    controller = tools.AndroidToolController(env=env)
-    adb_utils.launch_app(cls.app_name, env)
+    controller = tools.AndroidToolController(env=env.controller)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
       time.sleep(2.0)
       controller.click_element("Continue")
       time.sleep(2.0)
       controller.click_element("OK")
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class SimpleCalendarProApp(AppSetup):
@@ -312,10 +312,10 @@ class SimpleCalendarProApp(AppSetup):
   app_name = "simple calendar pro"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
-    adb_utils.launch_app(cls.app_name, env)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
+    adb_utils.close_app(cls.app_name, env.controller)
 
     # Grant permissions for calendar app.
     calendar_package = adb_utils.extract_package_name(
@@ -324,17 +324,17 @@ class SimpleCalendarProApp(AppSetup):
     adb_utils.grant_permissions(
         calendar_package,
         "android.permission.READ_CALENDAR",
-        env,
+        env.controller,
     )
     adb_utils.grant_permissions(
         calendar_package,
         "android.permission.WRITE_CALENDAR",
-        env,
+        env.controller,
     )
     adb_utils.grant_permissions(
         calendar_package,
         "android.permission.POST_NOTIFICATIONS",
-        env,
+        env.controller,
     )
 
 
@@ -345,10 +345,10 @@ class TasksApp(AppSetup):
   app_name = "tasks"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
-    adb_utils.launch_app(cls.app_name, env)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
+    adb_utils.close_app(cls.app_name, env.controller)
 
 
 class SimpleDrawProApp(AppSetup):
@@ -373,7 +373,7 @@ class SimpleGalleryProApp(AppSetup):
   app_name = "simple gallery pro"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Grant permissions for gallery app.
@@ -381,17 +381,17 @@ class SimpleGalleryProApp(AppSetup):
         adb_utils.get_adb_activity(cls.app_name)
     )
     for permission in cls.PERMISSIONS:
-      adb_utils.grant_permissions(package, permission, env)
+      adb_utils.grant_permissions(package, permission, env.controller)
 
-    adb_utils.launch_app("simple gallery pro", env)
+    adb_utils.launch_app("simple gallery pro", env.controller)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       time.sleep(2.0)
       controller.click_element("All files")
       time.sleep(2.0)
       controller.click_element("Allow access to manage all files")
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class SimpleSMSMessengerApp(AppSetup):
@@ -401,7 +401,7 @@ class SimpleSMSMessengerApp(AppSetup):
   app_name = "simple sms messenger"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Make Simple Messenger the default SMS app.
@@ -410,18 +410,18 @@ class SimpleSMSMessengerApp(AppSetup):
         adb_utils.extract_package_name(
             adb_utils.get_adb_activity("simple sms messenger")
         ),
-        env,
+        env.controller,
     )
 
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       time.sleep(2.0)
       controller.click_element("SMS Messenger")
       time.sleep(2.0)
       controller.click_element("Set as default")
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class AudioRecorder(AppSetup):
@@ -431,15 +431,17 @@ class AudioRecorder(AppSetup):
   app_name = "audio recorder"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
     adb_utils.grant_permissions(
-        "com.dimowner.audiorecorder", "android.permission.RECORD_AUDIO", env
+        "com.dimowner.audiorecorder",
+        "android.permission.RECORD_AUDIO",
+        env.controller,
     )
     adb_utils.grant_permissions(
         "com.dimowner.audiorecorder",
         "android.permission.POST_NOTIFICATIONS",
-        env,
+        env.controller,
     )
 
     # Launch the app
@@ -452,10 +454,10 @@ class AudioRecorder(AppSetup):
             "-candroid.intent.category.LAUNCHER",
             "1",
         ],
-        env,
+        env.controller,
     )
     time.sleep(2.0)  # Let app setup.
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.close_app(cls.app_name, env.controller)
 
 
 class MiniWobApp(AppSetup):
@@ -472,18 +474,18 @@ class ExpenseApp(AppSetup):
   app_name = "pro expense"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     try:
       time.sleep(2.0)
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       controller.click_element("NEXT")
       time.sleep(2.0)
       controller.click_element("CONTINUE")
       time.sleep(3.0)
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class RecipeApp(AppSetup):
@@ -493,11 +495,11 @@ class RecipeApp(AppSetup):
   app_name = "broccoli"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     time.sleep(2.0)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.close_app(cls.app_name, env.controller)
 
 
 class OsmAndApp(AppSetup):
@@ -544,13 +546,13 @@ class OsmAndApp(AppSetup):
   app_name = "osmand"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     time.sleep(2.0)
 
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       controller.click_element("SKIP DOWNLOAD")
       time.sleep(2.0)
     except ValueError:
@@ -558,14 +560,14 @@ class OsmAndApp(AppSetup):
           "First time setup did not click through all anticipated screens."
       )
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
     # Grant permissions for OsmAnd mapping app.
     package = adb_utils.extract_package_name(
         adb_utils.get_adb_activity(cls.app_name)
     )
     for permission in cls.PERMISSIONS:
-      adb_utils.grant_permissions(package, permission, env)
+      adb_utils.grant_permissions(package, permission, env.controller)
 
     # Copy maps to data directory.
     cls._copy_data_to_device(cls.MAP_NAMES, cls.DEVICE_MAPS_PATH, env)
@@ -580,11 +582,11 @@ class OsmAndApp(AppSetup):
                   "u:object_r:media_rw_data_file:s0",
                   os.path.join(cls.DEVICE_MAPS_PATH, map_file),
               ],
-              env,
+              env.controller,
           )
       )
 
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.close_app(cls.app_name, env.controller)
 
 
 class OpenTracksApp(AppSetup):
@@ -594,9 +596,9 @@ class OpenTracksApp(AppSetup):
   app_name = "activity tracker"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
-    adb_utils.launch_app(cls.app_name, env)
-    adb_utils.close_app(cls.app_name, env)
+  def setup(cls, env: interface.AsyncEnv) -> None:
+    adb_utils.launch_app(cls.app_name, env.controller)
+    adb_utils.close_app(cls.app_name, env.controller)
 
     # Grant permissions for open tracks app.
     open_tracks_package = adb_utils.extract_package_name(
@@ -605,24 +607,24 @@ class OpenTracksApp(AppSetup):
     adb_utils.grant_permissions(
         open_tracks_package,
         "android.permission.ACCESS_COARSE_LOCATION",
-        env,
+        env.controller,
     )
     adb_utils.grant_permissions(
         open_tracks_package,
         "android.permission.ACCESS_FINE_LOCATION",
-        env,
+        env.controller,
     )
     adb_utils.grant_permissions(
         open_tracks_package,
         "android.permission.POST_NOTIFICATIONS",
-        env,
+        env.controller,
     )
     time.sleep(2.0)
-    controller = tools.AndroidToolController(env=env)
+    controller = tools.AndroidToolController(env=env.controller)
     # Give permission for bluetooth, can't be done through adb.
     controller.click_element("Allow")
-    adb_utils.launch_app("activity tracker", env)
-    adb_utils.close_app("activity tracker", env)
+    adb_utils.launch_app("activity tracker", env.controller)
+    adb_utils.close_app("activity tracker", env.controller)
 
 
 class VlcApp(AppSetup):
@@ -636,16 +638,16 @@ class VlcApp(AppSetup):
   app_name = "vlc"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
     package = adb_utils.extract_package_name(
         adb_utils.get_adb_activity(cls.app_name)
     )
     adb_utils.grant_permissions(
-        package, "android.permission.POST_NOTIFICATIONS", env
+        package, "android.permission.POST_NOTIFICATIONS", env.controller
     )
-    if not file_utils.check_directory_exists(cls.videos_path, env):
-      file_utils.mkdir(cls.videos_path, env)
+    if not file_utils.check_directory_exists(cls.videos_path, env.controller):
+      file_utils.mkdir(cls.videos_path, env.controller)
 
     time.sleep(2.0)
     # Launch similar to opening app from app launcher. This runs setup logic not
@@ -660,11 +662,11 @@ class VlcApp(AppSetup):
             "-candroid.intent.category.LAUNCHER",
             "1",
         ],
-        env,
+        env.controller,
     )
     time.sleep(2.0)
     try:
-      controller = tools.AndroidToolController(env=env)
+      controller = tools.AndroidToolController(env=env.controller)
       controller.click_element("Skip")
       time.sleep(2.0)
       controller.click_element("GRANT PERMISSION")
@@ -673,7 +675,7 @@ class VlcApp(AppSetup):
       time.sleep(2.0)
       controller.click_element("Allow access to manage all files")
     finally:
-      adb_utils.close_app(cls.app_name, env)
+      adb_utils.close_app(cls.app_name, env.controller)
 
 
 class JoplinApp(AppSetup):
@@ -683,7 +685,7 @@ class JoplinApp(AppSetup):
   app_name = "joplin"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
 
     # Grant permissions for joplin app.
@@ -693,12 +695,12 @@ class JoplinApp(AppSetup):
     adb_utils.grant_permissions(
         joplin_package,
         "android.permission.ACCESS_COARSE_LOCATION",
-        env,
+        env.controller,
     )
     adb_utils.grant_permissions(
         joplin_package,
         "android.permission.ACCESS_FINE_LOCATION",
-        env,
+        env.controller,
     )
 
     # Launch the app, similar to how user launches it from App Drawer.
@@ -711,10 +713,10 @@ class JoplinApp(AppSetup):
             "-candroid.intent.category.LAUNCHER",
             "1",
         ],
-        env,
+        env.controller,
     )
     time.sleep(10.0)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.close_app(cls.app_name, env.controller)
     time.sleep(10.0)
 
     # Calling clear_dbs() without having added a note seems to make
@@ -742,14 +744,14 @@ class RetroMusicApp(AppSetup):
   app_name = "retro music"
 
   @classmethod
-  def setup(cls, env: env_interface.AndroidEnvInterface) -> None:
+  def setup(cls, env: interface.AsyncEnv) -> None:
     super().setup(env)
     package = adb_utils.extract_package_name(
         adb_utils.get_adb_activity("retro music")
     )
     for permission in cls.PERMISSIONS:
-      adb_utils.grant_permissions(package, permission, env)
+      adb_utils.grant_permissions(package, permission, env.controller)
 
-    adb_utils.launch_app(cls.app_name, env)
+    adb_utils.launch_app(cls.app_name, env.controller)
     time.sleep(2.0)
-    adb_utils.close_app(cls.app_name, env)
+    adb_utils.close_app(cls.app_name, env.controller)

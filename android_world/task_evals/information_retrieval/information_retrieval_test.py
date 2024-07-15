@@ -262,17 +262,17 @@ class InformationRetrievalTest(absltest.TestCase):
     self.mock_initialize_calendar_app.assert_called_once_with(
         self.mock_task.task.relevant_state.state.calendar,
         expected_exclusion_conditions,
-        self.mock_env.base_env,
+        self.mock_env,
     )
     self.mock_initialize_tasks_app.assert_called_once_with(
         self.mock_task.task.relevant_state.state.tasks_app,
         expected_exclusion_conditions,
-        self.mock_env.base_env,
+        self.mock_env,
     )
     self.mock_initialize_sports_app.assert_called_once_with(
         self.mock_task.task.relevant_state.state.sports_activity_app,
         expected_exclusion_conditions,
-        self.mock_env.base_env,
+        self.mock_env,
     )
     self.assertEqual(self.mock_task.task, expected_task)
     self.assertEqual(self.mock_task.goal, "Test perform task for today")

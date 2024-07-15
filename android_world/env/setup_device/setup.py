@@ -24,12 +24,11 @@ It does the following:
 import os
 
 from absl import logging
-from android_env import env_interface
 from android_env.components import errors
 from android_world.env import adb_utils
+from android_world.env import interface
 from android_world.env.setup_device import apps
 from android_world.utils import app_snapshot
-from android_world.utils import file_utils
 
 # APKs required for Android World.
 _APPS = (
@@ -62,15 +61,13 @@ _APPS = (
 )
 
 
-def _download_and_install_apk(
-    apk: str, env: env_interface.AndroidEnvInterface
-) -> None:
+def _download_and_install_apk(apk: str, env: interface.AsyncEnv) -> None:
   """Downloads all APKs from remote location and installs them."""
   path = apps.download_app_data(apk)
-  adb_utils.install_apk(path, env)
+  adb_utils.install_apk(path, env.base_env)
 
 
-def _install_all_apks(env: env_interface.AndroidEnvInterface) -> None:
+def _install_all_apks(env: interface.AsyncEnv) -> None:
   """Installs all APKs for Android World."""
   print("Downloading app data and installing apps. This make take a few mins.")
   for app in _APPS:
@@ -91,7 +88,7 @@ def _install_all_apks(env: env_interface.AndroidEnvInterface) -> None:
       )
 
 
-def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
+def setup_apps(env: interface.AsyncEnv) -> None:
   """Sets up apps for Android World.
 
   Args:
@@ -102,8 +99,8 @@ def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
   """
   # Make sure quick-settings are not displayed, which can override foreground
   # apps, and impede UI navigation required for setting up.
-  adb_utils.press_home_button(env)
-  adb_utils.issue_generic_request(["root"], env)
+  adb_utils.press_home_button(env.base_env)
+  adb_utils.issue_generic_request(["root"], env.base_env)
 
   _install_all_apks(env)
 
@@ -122,4 +119,4 @@ def setup_apps(env: env_interface.AndroidEnvInterface) -> None:
           app.app_name,
           e,
       )
-    app_snapshot.save_snapshot(app.app_name, env)
+    app_snapshot.save_snapshot(app.app_name, env.base_env)

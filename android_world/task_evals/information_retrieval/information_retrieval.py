@@ -89,25 +89,25 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
       calendar_utils_ir.setup_task_state(
           self._task.relevant_state.state.calendar,
           list(self._task.relevant_state.exclusion_conditions),
-          env.base_env,
+          env,
       )
     if self._task.relevant_state.state.HasField('tasks_app'):
       task_app_utils.setup_task_state(
           self._task.relevant_state.state.tasks_app,
           list(self._task.relevant_state.exclusion_conditions),
-          env.base_env,
+          env,
       )
     if self._task.relevant_state.state.HasField('sports_activity_app'):
       activity_app_utils.setup_task_state(
           self._task.relevant_state.state.sports_activity_app,
           list(self._task.relevant_state.exclusion_conditions),
-          env.base_env,
+          env,
       )
     if self._task.relevant_state.state.HasField('notes_app'):
       joplin_app_utils.setup_task_state(
           self._task.relevant_state.state.notes_app,
           list(self._task.relevant_state.exclusion_conditions),
-          env.base_env,
+          env,
       )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
@@ -124,10 +124,10 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
       return 0.0
 
   def tear_down(self, env: interface.AsyncEnv) -> None:
-    calendar_utils.clear_calendar_db(env.base_env)
-    task_app_utils.clear_task_db(env.base_env)
-    activity_app_utils.clear_db(env.base_env)
-    joplin_app_utils.clear_dbs(env.base_env)
+    calendar_utils.clear_calendar_db(env)
+    task_app_utils.clear_task_db(env)
+    activity_app_utils.clear_db(env)
+    joplin_app_utils.clear_dbs(env)
     super().tear_down(env)
 
 

@@ -17,14 +17,13 @@
 import os
 import random
 
-from android_env import env_interface
 from android_world.env import adb_utils
+from android_world.env import interface
 from android_world.task_evals.information_retrieval import proto_utils
 from android_world.task_evals.information_retrieval.proto import state_pb2
 from android_world.task_evals.information_retrieval.proto import task_pb2
 from android_world.task_evals.utils import sqlite_schema_utils
 from android_world.task_evals.utils import sqlite_utils
-from android_world.utils import file_utils
 
 _NOTES_TABLE = "notes"
 _NOTES_NORMALIZED_TABLE = "notes_normalized"
@@ -38,9 +37,9 @@ _EXCLUDE_FIELD = "deleted_time"
 def setup_task_state(
     relevant_state: state_pb2.NotesApp,
     exclusion_conditions: list[task_pb2.ExclusionCondition],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
-  """Sets up the initial state for the Joplin app.
+  """Sets up the  state for the Joplin app.
 
   Args:
     relevant_state: The state to set up.
@@ -66,24 +65,25 @@ def setup_task_state(
   add_notes(notes, env)
 
 
-def clear_dbs(env: env_interface.AndroidEnvInterface) -> None:
+def clear_dbs(env: interface.AsyncEnv) -> None:
   """Clears Joplin databases."""
-  sqlite_utils.delete_all_rows_from_table(_FOLDER_TABLE, _DB_PATH, env)
-  sqlite_utils.delete_all_rows_from_table(_NOTES_TABLE, _DB_PATH, env)
   sqlite_utils.delete_all_rows_from_table(
-      _NOTES_NORMALIZED_TABLE, _DB_PATH, env
+      _FOLDER_TABLE, _DB_PATH, env, _APP_NAME
   )
-  adb_utils.close_app(_APP_NAME, env)  # Register changes.
+  sqlite_utils.delete_all_rows_from_table(
+      _NOTES_TABLE, _DB_PATH, env, _APP_NAME
+  )
+  sqlite_utils.delete_all_rows_from_table(
+      _NOTES_NORMALIZED_TABLE, _DB_PATH, env, _APP_NAME
+  )
+  adb_utils.close_app(_APP_NAME, env.base_env)  # Register changes.
 
 
 def _get_folder_to_id(
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> dict[str, str]:
   """Gets a mapping from folder title to ID as represented in Folder table."""
-  remote_db_directory = os.path.dirname(_DB_PATH)
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env, 3
-  ) as local_db_directory:
+  with env.controller.pull_file(_DB_PATH) as local_db_directory:
     local_db_path = os.path.join(local_db_directory, os.path.split(_DB_PATH)[1])
     folder_info = sqlite_utils.execute_query(
         f"select * from {_FOLDER_TABLE};",
@@ -99,7 +99,7 @@ def _get_folder_to_id(
 
 def _add_folders(
     rows: list[sqlite_schema_utils.JoplinFolder],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
   """Inserts multiple folder rows into the remote Joplin database.
 
@@ -123,7 +123,7 @@ def create_note(
     title: str,
     body: str,
     folder_mapping: dict[str, str],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
     is_todo: int = False,
     todo_completed: bool = False,
 ) -> sqlite_schema_utils.JoplinNote:
@@ -150,7 +150,7 @@ def create_note(
 
 def add_notes(
     rows: list[sqlite_schema_utils.JoplinNote],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
   """Inserts multiple note rows into the remote Joplin database."""
   sqlite_utils.insert_rows_to_remote_db(
@@ -195,7 +195,7 @@ def _normalize_notes(
 
 
 def list_notes(
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> list[sqlite_schema_utils.JoplinNote]:
   return sqlite_utils.get_rows_from_remote_device(
       _NOTES_TABLE,
@@ -208,7 +208,7 @@ def list_notes(
 def _create_note_from_proto(
     note: state_pb2.Note,
     folder_mapping: dict[str, str],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> sqlite_schema_utils.JoplinNote:
   """Creates a JoplinNote object from a state_pb2.Note proto."""
   is_todo = note.is_todo.lower() == "true"
@@ -229,7 +229,7 @@ def _generate_random_notes(
     exclusion_conditions: list[task_pb2.ExclusionCondition],
     relevant_folders: list[str],
     folder_mapping: dict[str, str],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> list[sqlite_schema_utils.JoplinNote]:
   """Generates random notes with the given exclusion conditions."""
   return sqlite_schema_utils.get_random_items(
@@ -246,7 +246,7 @@ def _generate_random_notes(
 def _generate_random_note(
     relevant_folders: list[str],
     folder_mapping: dict[str, str],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ):
   """Generates a single random sqlite_schema_utils.JoplinNote object."""
   new_note = state_pb2.Note()

@@ -20,7 +20,6 @@ from typing import Any
 from typing import Optional
 from typing import Type
 from absl import logging
-from android_env import env_interface
 from android_world.env import interface
 from android_world.task_evals import task_eval
 from android_world.task_evals.utils import sqlite_schema_utils
@@ -209,7 +208,7 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
 
   def list_rows(
       self,
-      env: env_interface.AndroidEnvInterface,
+      env: interface.AsyncEnv,
       timeout_sec: Optional[float] = None,
   ) -> list[sqlite_schema_utils.RowType]:
     """Lists all rows from the specified table in the app's database using ADB.
@@ -229,7 +228,7 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
   def add_rows(
       self,
       rows: list[sqlite_schema_utils.RowType],
-      env: env_interface.AndroidEnvInterface,
+      env: interface.AsyncEnv,
       timeout_sec: Optional[float] = None,
   ) -> None:
     sqlite_utils.insert_rows_to_remote_db(
@@ -242,7 +241,7 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
         timeout_sec,
     )
 
-  def _clear_db(self, env: env_interface.AndroidEnvInterface) -> None:
+  def _clear_db(self, env: interface.AsyncEnv) -> None:
     """Clears the app's SQLite database."""
     sqlite_utils.clear_app_db(
         self.table_name, self.db_path, self.app_name_with_db, env
@@ -259,11 +258,11 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
     """Initializes the task environment."""
     super().initialize_task(env)
     if NOISE_ROW_OBJECTS in self.params:
-      self.add_rows(self.params[NOISE_ROW_OBJECTS], env.base_env)
+      self.add_rows(self.params[NOISE_ROW_OBJECTS], env)
 
   def tear_down(self, env: interface.AsyncEnv):
     """Cleans up after task completion."""
-    self._clear_db(env.base_env)
+    self._clear_db(env)
     super().tear_down(env)
 
 
@@ -279,7 +278,7 @@ class AddMultipleRows(SQLiteApp, abc.ABC):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     """Initial setup for the task, if necessary."""
     super().initialize_task(env)
-    self.before = self.list_rows(env.base_env)
+    self.before = self.list_rows(env)
 
   @abc.abstractmethod
   def validate_addition_integrity(
@@ -302,7 +301,7 @@ class AddMultipleRows(SQLiteApp, abc.ABC):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     """Determine if the row addition task was successful."""
-    after = self.list_rows(env.base_env)
+    after = self.list_rows(env)
     row_addition_successful = self.validate_addition_integrity(
         self.before, after, self.params[ROW_OBJECTS]
     )
@@ -347,9 +346,9 @@ class DeleteMultipleRows(SQLiteApp, abc.ABC):
     super().initialize_task(env)
     n_rows = 0
     if ROW_OBJECTS in self.params:
-      self.add_rows(self.params[ROW_OBJECTS], env.base_env)
+      self.add_rows(self.params[ROW_OBJECTS], env)
       n_rows = len(self.params[ROW_OBJECTS])
-    self.before = self.list_rows(env.base_env)
+    self.before = self.list_rows(env)
     # Newly added rows are at the end.
     self.rows_to_delete = self.before[len(self.before) - n_rows :]
     self._validate_initial_state(self.before)
@@ -359,7 +358,7 @@ class DeleteMultipleRows(SQLiteApp, abc.ABC):
     super().is_successful(env)
 
     # Get the state of the database after the deletion attempt
-    after = self.list_rows(env.base_env)
+    after = self.list_rows(env)
 
     # Validate the integrity of the deletion
     deletion_successful = self.validate_deletion_integrity(self.before, after)

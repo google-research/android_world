@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import tempfile
 from unittest import mock
 
 from absl.testing import absltest
@@ -21,10 +23,20 @@ from android_world.env import adb_utils
 from android_world.env import android_world_controller
 from android_world.env import representation_utils
 from android_world.utils import fake_adb_responses
+from android_world.utils import file_test_utils
+from android_world.utils import file_utils
 import dm_env
 
 
-class TreeWrapperTest(absltest.TestCase):
+def create_file_with_contents(contents: str) -> str:
+  temp_dir = tempfile.mkdtemp()
+  file_path = os.path.join(temp_dir, 'file.txt')
+  with open(file_path, 'w') as f:
+    f.write(contents)
+  return file_path
+
+
+class AndroidWorldControllerTest(absltest.TestCase):
 
   def setUp(self):
     super().setUp()
@@ -41,6 +53,31 @@ class TreeWrapperTest(absltest.TestCase):
             a11y_grpc_wrapper,
             'A11yGrpcWrapper',
             spec=a11y_grpc_wrapper.A11yGrpcWrapper,
+        )
+    )
+
+    self.table_name = 'events'
+
+    self.mock_copy_db = self.enter_context(
+        mock.patch.object(
+            file_utils,
+            'tmp_directory_from_device',
+            side_effect=file_test_utils.mock_tmp_directory_from_device,
+        )
+    )
+    self.mock_copy_data_to_device = self.enter_context(
+        mock.patch.object(
+            file_utils,
+            'copy_data_to_device',
+            side_effect=file_test_utils.mock_copy_data_to_device,
+        )
+    )
+
+    self.mock_remove_files = self.enter_context(
+        mock.patch.object(
+            file_utils,
+            'clear_directory',
+            side_effect=file_test_utils.mock_remove_files,
         )
     )
 
@@ -123,6 +160,33 @@ class TreeWrapperTest(absltest.TestCase):
 
     self.assertEqual(forest, 'success')
     mock_refresh_env.assert_called_once()
+
+  def test_pull_file(self):
+    file_contents = 'test file contents'
+    remote_file_path = create_file_with_contents(file_contents)
+    mock_base_env = mock.Mock(spec=env_interface.AndroidEnvInterface)
+    env = android_world_controller.AndroidWorldController(mock_base_env)
+
+    with env.pull_file(remote_file_path) as local_dir:
+      local_path = os.path.split(remote_file_path)[1]
+      local_file = open(os.path.join(local_dir, local_path), 'r')
+      self.assertEqual(open(remote_file_path, 'r').read(), local_file.read())
+
+    self.mock_copy_db.assert_called_once_with(
+        os.path.dirname(remote_file_path), env._env, None
+    )
+
+  def test_push_file(self):
+    old_file_contents = 'test file contents'
+    new_file_contents = 'new file'
+    remote_file_path = create_file_with_contents(old_file_contents)
+    mock_base_env = mock.Mock(spec=env_interface.AndroidEnvInterface)
+    env = android_world_controller.AndroidWorldController(mock_base_env)
+    new_file = create_file_with_contents(new_file_contents)
+
+    env.push_file(os.path.dirname(new_file), remote_file_path, None)
+
+    self.assertEqual(open(remote_file_path, 'r').read(), new_file_contents)
 
 
 if __name__ == '__main__':

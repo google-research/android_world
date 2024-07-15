@@ -285,7 +285,7 @@ class OsmAndMarker(_OsmTaskEval, sqlite_validators.SQLiteApp):
   template = 'Add a location marker for {location} in the OsmAnd maps app.'
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
-    for row in self.list_rows(env.base_env):
+    for row in self.list_rows(env):
       if _marker_matches_location(row, self.params['location']):
         return super().is_successful(env)
     return 0.0
@@ -408,8 +408,8 @@ class OsmAndTrack(_OsmTaskEval):
     )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
-    with file_utils.tmp_directory_from_device(
-        os.path.join(_DEVICE_FILES, 'tracks'), env.base_env
+    with env.controller.pull_file(
+        os.path.join(_DEVICE_FILES, 'tracks')
     ) as tracks_directory:
       for track_file in os.listdir(tracks_directory):
         if _track_matches(

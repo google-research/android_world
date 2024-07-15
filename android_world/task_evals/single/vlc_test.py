@@ -20,6 +20,9 @@ from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
+from android_env import env_interface
+from android_env.wrappers import a11y_grpc_wrapper
+from android_world.env import android_world_controller
 from android_world.env import interface
 from android_world.env.setup_device import apps
 from android_world.task_evals.single import vlc
@@ -82,6 +85,21 @@ class VlcTestBase(parameterized.TestCase):
     """Set up the test environment and mock database."""
     super().setUp()
     self.env_mock = mock.create_autospec(interface.AsyncAndroidEnv)
+    self.android_env_mock = mock.create_autospec(
+        env_interface.AndroidEnvInterface
+    )
+    self.enter_context(
+        mock.patch.object(
+            a11y_grpc_wrapper,
+            'A11yGrpcWrapper',
+            instance=True,
+        )
+    )
+    self.controller = android_world_controller.AndroidWorldController(
+        self.android_env_mock
+    )
+    self.env_mock.controller = self.controller
+
     temp_dir = tempfile.mkdtemp()
     self.test_db_path = os.path.join(temp_dir, 'app_db/vlc_media.db')
     os.makedirs(

@@ -19,9 +19,9 @@ App available at github.com/OpenTracksApp/OpenTracks.
 
 import datetime
 import random
-from android_env import env_interface
 from android_world.env import adb_utils
 from android_world.env import device_constants
+from android_world.env import interface
 from android_world.task_evals.information_retrieval import calendar_utils
 from android_world.task_evals.information_retrieval import datetime_utils as datetime_utils_ir
 from android_world.task_evals.information_retrieval import proto_utils
@@ -42,7 +42,7 @@ _MILES_TO_METERS = 1609.34
 def setup_task_state(
     relevant_state: state_pb2.SportsActivityApp,
     exclusion_conditions: list[task_pb2.ExclusionCondition],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
   clear_db(env)
   activities = []
@@ -110,15 +110,15 @@ def _create_activity_from_proto(
   )
 
 
-def clear_db(env: env_interface.AndroidEnvInterface) -> None:
+def clear_db(env: interface.AsyncEnv) -> None:
   """Clears the task database."""
-  sqlite_utils.delete_all_rows_from_table(_TABLE, _DB_PATH, env)
-  adb_utils.close_app(_APP_NAME, env)  # Register changes.
+  sqlite_utils.delete_all_rows_from_table(_TABLE, _DB_PATH, env, _APP_NAME)
+  adb_utils.close_app(_APP_NAME, env.base_env)  # Register changes.
 
 
 def _add_activities(
     rows: list[sqlite_schema_utils.SportsActivity],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
   sqlite_utils.insert_rows_to_remote_db(
       rows,
@@ -131,7 +131,7 @@ def _add_activities(
 
 
 def list_rows(
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> list[sqlite_schema_utils.SportsActivity]:
   return sqlite_utils.get_rows_from_remote_device(
       _TABLE,

@@ -61,10 +61,8 @@ class _Expense(task_eval.TaskEval, abc.ABC):
   row_type = sqlite_schema_utils.Expense
 
   def initialize_task(self, env: interface.AsyncEnv):
-    if not sqlite_utils.table_exists(
-        self.table_name, self.db_path, env.base_env
-    ):
-      apps.ExpenseApp.setup(env.base_env)
+    if not sqlite_utils.table_exists(self.table_name, self.db_path, env):
+      apps.ExpenseApp.setup(env)
     super().initialize_task(env)
 
 

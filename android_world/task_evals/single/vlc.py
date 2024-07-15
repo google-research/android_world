@@ -27,6 +27,7 @@ from android_world.task_evals.utils import user_data_generation
 from android_world.utils import file_utils
 
 _DB_PATH = '/data/data/org.videolan.vlc/app_db/vlc_media.db'
+_APP_NAME = 'vlc'
 
 
 def _get_playlist_info_query() -> str:
@@ -48,10 +49,10 @@ def _get_playlist_info_query() -> str:
 
 def _clear_playlist_dbs(env: interface.AsyncEnv) -> None:
   """Clears all DBs related to playlists."""
-  sqlite_utils.delete_all_rows_from_table('Playlist', _DB_PATH, env.base_env)
-  sqlite_utils.delete_all_rows_from_table('Media', _DB_PATH, env.base_env)
+  sqlite_utils.delete_all_rows_from_table('Playlist', _DB_PATH, env, _APP_NAME)
+  sqlite_utils.delete_all_rows_from_table('Media', _DB_PATH, env, _APP_NAME)
   sqlite_utils.delete_all_rows_from_table(
-      'PlaylistMediaRelation', _DB_PATH, env.base_env
+      'PlaylistMediaRelation', _DB_PATH, env, _APP_NAME
   )
 
 
@@ -59,10 +60,7 @@ def _get_playlist_file_info(
     env: interface.AsyncEnv,
 ) -> list[sqlite_schema_utils.PlaylistInfo]:
   """Executes join query to fetch playlist file info."""
-  remote_db_directory = os.path.dirname(_DB_PATH)
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env.base_env, 3
-  ) as local_db_directory:
+  with env.controller.pull_file(_DB_PATH, timeout_sec=3) as local_db_directory:
     local_db_path = os.path.join(local_db_directory, os.path.split(_DB_PATH)[1])
     return sqlite_utils.execute_query(
         _get_playlist_info_query(),

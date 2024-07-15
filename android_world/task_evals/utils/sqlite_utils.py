@@ -18,10 +18,9 @@ import os
 import sqlite3
 import time
 from typing import Optional, Type
-from android_env import env_interface
 from android_world.env import adb_utils
+from android_world.env import interface
 from android_world.task_evals.utils import sqlite_schema_utils
-from android_world.utils import file_utils
 
 
 def execute_query(
@@ -54,7 +53,7 @@ def get_rows_from_remote_device(
     table_name: str,
     remote_db_file_path: str,
     row_type: Type[sqlite_schema_utils.RowType],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
     timeout_sec: Optional[float] = None,
     n_retries: int = 3,
 ) -> list[sqlite_schema_utils.RowType]:
@@ -81,9 +80,8 @@ def get_rows_from_remote_device(
   Raises:
     ValueError: If cannot query table.
   """
-  remote_db_directory = os.path.dirname(remote_db_file_path)
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env, timeout_sec
+  with env.controller.pull_file(
+      remote_db_file_path, timeout_sec
   ) as local_db_directory:
     local_db_path = os.path.join(
         local_db_directory, os.path.split(remote_db_file_path)[1]
@@ -107,7 +105,7 @@ def get_rows_from_remote_device(
 def table_exists(
     table_name: str,
     remote_db_file_path: str,
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> bool:
   """Checks if a table exists in a SQLite database on a remote Android device.
 
@@ -134,7 +132,8 @@ def table_exists(
 def delete_all_rows_from_table(
     table_name: str,
     remote_db_file_path: str,
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
+    app_name: str,
     timeout_sec: Optional[float] = None,
 ) -> None:
   """Deletes all rows from a specified table in a SQLite database on a remote Android device.
@@ -143,11 +142,11 @@ def delete_all_rows_from_table(
     table_name: Deletes all rows from the table.
     remote_db_file_path: The path to the sqlite database on the device.
     env: The environment.
+    app_name: The name of the app that owns the database.
     timeout_sec: Timeout in seconds.
   """
-  remote_db_directory = os.path.dirname(remote_db_file_path)
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env, timeout_sec
+  with env.controller.pull_file(
+      remote_db_file_path, timeout_sec
   ) as local_db_directory:
     local_db_path = os.path.join(
         local_db_directory, os.path.split(remote_db_file_path)[1]
@@ -159,31 +158,27 @@ def delete_all_rows_from_table(
     cursor.execute(delete_command)
     conn.commit()
     conn.close()
-
-    # First delete old .db, .db-wal, and .db-shm files.
-    file_utils.clear_directory(remote_db_directory, env)
-    # Copy new .db file.
-    file_utils.copy_data_to_device(
-        local_db_path,
-        remote_db_directory,
-        env,
-        timeout_sec,
+    env.controller.push_file(
+        local_db_directory, remote_db_file_path, timeout_sec
     )
+    adb_utils.close_app(app_name, env.controller)
 
 
 def clear_app_db(
     table_name: str,
     remote_db_path: str,
     app_name: str,
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
 ) -> None:
   """Removes the app database on the device."""
   if not table_exists(table_name, remote_db_path, env):
     # If the database was never created, opening the app may create it.
-    adb_utils.launch_app(app_name, env)
+    adb_utils.launch_app(app_name, env.base_env)
     time.sleep(2.0)
-  delete_all_rows_from_table(table_name, remote_db_path, env)
-  adb_utils.close_app(app_name, env)  # Close app to register the changes.
+  delete_all_rows_from_table(table_name, remote_db_path, env, app_name)
+  adb_utils.close_app(
+      app_name, env.base_env
+  )  # Close app to register the changes.
 
 
 def insert_rows_to_remote_db(
@@ -192,7 +187,7 @@ def insert_rows_to_remote_db(
     table_name: str,
     remote_db_file_path: str,
     app_name: str,
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
     timeout_sec: Optional[float] = None,
 ) -> None:
   """Inserts rows into a SQLite database located on a remote Android device.
@@ -207,10 +202,8 @@ def insert_rows_to_remote_db(
     env: The environment.
     timeout_sec: Optional timeout in seconds for the database copy operation.
   """
-  remote_db_directory = os.path.dirname(remote_db_file_path)
-
-  with file_utils.tmp_directory_from_device(
-      remote_db_directory, env, timeout_sec
+  with env.controller.pull_file(
+      remote_db_file_path, timeout_sec
   ) as local_db_directory:
     local_db_path = os.path.join(
         local_db_directory, os.path.split(remote_db_file_path)[1]
@@ -226,12 +219,7 @@ def insert_rows_to_remote_db(
     conn.commit()
     conn.close()
 
-    # First delete old .db, .db-wal, and .db-shm files.
-    file_utils.clear_directory(remote_db_directory, env)
-    adb_utils.close_app(app_name, env)
-    file_utils.copy_data_to_device(
-        local_db_path,
-        remote_db_directory,
-        env,
-        timeout_sec,
+    env.controller.push_file(
+        local_db_directory, remote_db_file_path, timeout_sec
     )
+    adb_utils.close_app(app_name, env.controller)

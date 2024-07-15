@@ -15,7 +15,7 @@
 """Utils for Simple Calendar Pro."""
 
 from typing import Optional
-from android_env import env_interface
+from android_world.env import interface
 from android_world.task_evals.single.calendar import events_generator
 from android_world.task_evals.utils import sqlite_schema_utils
 from android_world.task_evals.utils import sqlite_utils
@@ -28,7 +28,7 @@ DB_KEY = 'id'
 
 
 def clear_calendar_db(
-    env: env_interface.AndroidEnvInterface, timeout_sec: Optional[float] = None
+    env: interface.AsyncEnv, timeout_sec: Optional[float] = None
 ) -> None:
   """Removes the calendar database on the device."""
   sqlite_utils.clear_app_db(EVENTS_TABLE, DB_PATH, 'simple calendar pro', env)
@@ -49,7 +49,7 @@ def clear_calendar_db(
 
 def add_events(
     events: list[sqlite_schema_utils.CalendarEvent],
-    env: env_interface.AndroidEnvInterface,
+    env: interface.AsyncEnv,
     timeout_sec: Optional[float] = None,
 ) -> None:
   """Adds an event to the Android calendar database using ADB.
@@ -73,9 +73,7 @@ def add_events(
   )
 
 
-def add_random_events(
-    env: env_interface.AndroidEnvInterface, n: int = 75
-) -> None:
+def add_random_events(env: interface.AsyncEnv, n: int = 75) -> None:
   """Adds random events to calendar to increase task complexity."""
   events = [
       events_generator.generate_event(

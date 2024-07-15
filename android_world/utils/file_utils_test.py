@@ -66,13 +66,13 @@ class FilesTest(parameterized.TestCase):
     mock_path_exists.return_value = False
     mock_check_directory_exists.return_value = True
 
-    tmp_local_directory = os.path.join(file_utils._TMP_LOCAL_LOCATION, 'dir')
+    tmp_local_directory = os.path.join(file_utils.TMP_LOCAL_LOCATION, 'dir')
     with file_utils.tmp_directory_from_device(
         '/remote/dir', self.mock_env
     ) as tmp_directory:
       self.assertEqual(tmp_local_directory, tmp_directory)
       self.mock_issue_generic_request.assert_called_with(
-          ['pull', '/remote/dir', file_utils._TMP_LOCAL_LOCATION],
+          ['pull', '/remote/dir', file_utils.TMP_LOCAL_LOCATION],
           self.mock_env,
           None,
       )
