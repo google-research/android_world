@@ -25,7 +25,7 @@ from android_world.task_evals.utils import user_data_generation
 from android_world.utils import file_utils
 
 
-class _BrowserTask(task_eval.TaskEval):
+class BrowserTask(task_eval.TaskEval):
   """Base class for browser tasks."""
 
   app_names = ['chrome']
@@ -97,7 +97,7 @@ class _BrowserTask(task_eval.TaskEval):
     return {'browser_task_seed': random.randint(0, 2**32 - 1)}
 
 
-class BrowserMaze(_BrowserTask):
+class BrowserMaze(BrowserTask):
   """Task to create a maze game."""
 
   @property
@@ -312,7 +312,7 @@ class BrowserMaze(_BrowserTask):
 </html>"""
 
 
-class BrowserMultiply(_BrowserTask):
+class BrowserMultiply(BrowserTask):
   """Task for multiplying multiple numbers together."""
 
   @property
@@ -423,7 +423,7 @@ class BrowserMultiply(_BrowserTask):
 </html>"""
 
 
-class BrowserDraw(_BrowserTask):
+class BrowserDraw(BrowserTask):
   """Task for drawing on a canvas."""
 
   @property

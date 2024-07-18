@@ -93,7 +93,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
     self.llm = genai.GenerativeModel(
         model_name,
         generation_config=generation_types.GenerationConfig(
-            temperature=temperature, top_p=top_p
+            temperature=temperature, top_p=top_p, max_output_tokens=1000
         ),
     )
     if max_retry <= 0:
