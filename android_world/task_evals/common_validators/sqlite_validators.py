@@ -256,6 +256,7 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     """Initializes the task environment."""
+    self._clear_db(env)  # In case the previous run crashed.
     super().initialize_task(env)
     if NOISE_ROW_OBJECTS in self.params:
       self.add_rows(self.params[NOISE_ROW_OBJECTS], env)

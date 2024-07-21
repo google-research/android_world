@@ -34,6 +34,8 @@ class TaskEval(abc.ABC):
 
   template = ""  # Each task eval needs a template.
 
+  start_on_home_screen = True
+
   def __init__(self, params: dict[str, Any]):
     self.initialized = False
     jsonschema.validate(params, self.schema)
