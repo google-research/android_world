@@ -55,7 +55,6 @@ class AudioRecorderRecordAudio(_AudioRecorder):
           " {device_constants.AUDIORECORDER_DATA}, for Audio Recorder task."
           " Check to make sure Audio Recorder app is correctly installed."
       ) from exc
-    logging.info("Number before_recording: %s", self.before_recording)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
@@ -66,14 +65,16 @@ class AudioRecorderRecordAudio(_AudioRecorder):
         )
         if file.file_size > 0
     ]
-    logging.info("Number after_recording: %s", after_recording)
-    logging.info(
-        "Number of after_recording - Number of before_recording: %s",
-        len(after_recording) - len(self.before_recording),
-    )
+    changed = []
+    # Old recordings may be deleted and a new recording may reuse an existing
+    # file name.
+    for item in after_recording:
+      if item not in self.before_recording:
+        changed.append(item.file_name)
+    logging.info("New or changed recording: %s", changed)
 
     # Check if a new audio recording is done by comparing directory contents
-    one_new_file = len(after_recording) - len(self.before_recording) == 1
+    one_new_file = len(changed) == 1
     return 1.0 if one_new_file else 0.0
 
   @classmethod
@@ -102,6 +103,12 @@ class AudioRecorderRecordAudioWithFileName(_AudioRecorder):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
     self.create_file_task.initialize_task(env)
+    file_name = self.params["file_name"] + ".m4a"
+    file_utils.remove_single_file(
+        file_name,
+        device_constants.AUDIORECORDER_DATA,
+        env.controller,
+    )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
