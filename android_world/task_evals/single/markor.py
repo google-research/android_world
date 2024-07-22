@@ -562,6 +562,7 @@ class MarkorMergeNotes(Markor):
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
+    self.create_file_task.initialize_task(env)
     file_utils.create_file(
         self.params["file1_name"],
         device_constants.MARKOR_DATA,
@@ -581,7 +582,24 @@ class MarkorMergeNotes(Markor):
         content=self.params["file3_content"],
     )
 
-    self.create_file_task.initialize_task(env)
+  def tear_down(self, env: interface.AsyncEnv) -> None:
+    super().tear_down(env)
+    file_utils.remove_single_file(
+        self.params["file1_name"],
+        device_constants.MARKOR_DATA,
+        env.controller,
+    )
+    file_utils.remove_single_file(
+        self.params["file2_name"],
+        device_constants.MARKOR_DATA,
+        env.controller,
+    )
+    file_utils.remove_single_file(
+        self.params["file3_name"],
+        device_constants.MARKOR_DATA,
+        env.controller,
+    )
+    self.create_file_task.tear_down(env)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
@@ -671,6 +689,14 @@ class MarkorChangeNoteContent(Markor):
     ):
       raise RuntimeError("Something went wrong, file not created correctly.")
 
+  def tear_down(self, env: interface.AsyncEnv) -> None:
+    super().tear_down(env)
+    file_utils.remove_single_file(
+        self.params["original_name"],
+        device_constants.MARKOR_DATA,
+        env.controller,
+    )
+
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     if file_utils.check_file_or_folder_exists(
@@ -744,6 +770,14 @@ class MarkorAddNoteHeader(Markor):
         env.controller,
     ):
       raise RuntimeError("Something went wrong, file not created correctly.")
+
+  def tear_down(self, env: interface.AsyncEnv) -> None:
+    super().tear_down(env)
+    file_utils.remove_single_file(
+        self.params["original_name"],
+        device_constants.MARKOR_DATA,
+        env.controller,
+    )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
