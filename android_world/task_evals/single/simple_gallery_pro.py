@@ -42,7 +42,7 @@ class SaveCopyOfReceiptTaskEval(task_eval.TaskEval):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
     user_data_generation.clear_device_storage(env)
-    receipt_image = self.params.pop("receipt_image")
+    receipt_image = self.params["receipt_image"]
     temp_storage_location = os.path.join("/tmp/", self.params["file_name"])
     receipt_image.save(temp_storage_location)
     file_utils.copy_data_to_device(
