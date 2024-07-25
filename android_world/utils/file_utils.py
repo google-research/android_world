@@ -312,19 +312,21 @@ def tmp_directory_from_device(
 
   if os.path.exists(tmp_directory):
     raise FileExistsError(f"{tmp_directory} already exists.")
-
+  if not check_directory_exists(device_path, env):
+    raise FileNotFoundError(f"{device_path} does not exist.")
   try:
-    if not check_directory_exists(device_path, env):
-      raise FileNotFoundError(f"{device_path} does not exist.")
-
-    response = adb_utils.issue_generic_request(
-        ["pull", device_path, TMP_LOCAL_LOCATION], env, timeout_sec
-    )
-    if response.status != adb_pb2.AdbResponse.OK:
-      raise RuntimeError(
-          f"ADB command failed with status {response.status}:"
-          f" {response.generic.output.decode()}."
+    os.makedirs(tmp_directory, exist_ok=True)
+    files = get_file_list_with_metadata(device_path, env, timeout_sec)
+    for file in files:
+      pull_response = env.execute_adb_call(
+          adb_pb2.AdbRequest(
+              pull=adb_pb2.AdbRequest.Pull(path=file.full_path),
+              timeout_sec=timeout_sec,
+          )
       )
+      adb_utils.check_ok(pull_response)
+      with open(os.path.join(tmp_directory, file.file_name), "wb") as f:
+        f.write(pull_response.pull.content)
 
     yield tmp_directory
 
@@ -336,12 +338,14 @@ def tmp_directory_from_device(
 def tmp_file_from_device(
     device_file: str,
     env: env_interface.AndroidEnvInterface,
+    timeout_sec: Optional[float] = None,
 ) -> Iterator[str]:
   """Copies a remote file to a local temporary file.
 
   Args:
     device_file: The path on the device pointing to a file.
     env: The environment.
+    timeout_sec: A timeout for the ADB operations.
 
   Yields:
     The name of the local temporary file.
@@ -350,28 +354,49 @@ def tmp_file_from_device(
     FileNotFoundError: If device_file does not exist.
     RuntimeError: If there is an adb communication error.
   """
-  file_name = os.path.split(device_file)[-1]
-  local_file = os.path.join(TMP_LOCAL_LOCATION, file_name)
-  logging.info("Copying %s to local tmp %s", device_file, local_file)
+  head, tail = os.path.split(device_file)
+  dir_and_file_name = os.path.join(os.path.basename(head), tail)
+  local_file = os.path.join(TMP_LOCAL_LOCATION, dir_and_file_name)
   try:
     # Need root access to access many directories.
-    adb_utils.issue_generic_request(["root"], env)
+    adb_utils.issue_generic_request(["root"], env, timeout_sec)
 
     if not check_file_exists(device_file, env):
       raise FileNotFoundError(f"{device_file} does not exist.")
+    if not os.path.exists(os.path.dirname(local_file)):
+      os.makedirs(os.path.dirname(local_file), exist_ok=True)
+    pull_response = env.execute_adb_call(
+        adb_pb2.AdbRequest(
+            pull=adb_pb2.AdbRequest.Pull(path=device_file),
+            timeout_sec=timeout_sec,
+        )
+    )
+    adb_utils.check_ok(pull_response)
 
-    if not os.path.exists(TMP_LOCAL_LOCATION):
-      os.makedirs(TMP_LOCAL_LOCATION)
-
-    # ADB pull command arguments for the file
-    adb_args = ["pull", device_file, local_file]
-
-    # Issue ADB pull command to copy the directory
-    adb_utils.check_ok(adb_utils.issue_generic_request(adb_args, env))
+    with open(local_file, "wb") as f:
+      f.write(pull_response.pull.content)
 
     yield local_file
   finally:
     os.remove(local_file)
+
+
+def copy_file_to_device(
+    local_file_path: str,
+    remote_file_path: str,
+    env: env_interface.AndroidEnvInterface,
+    timeout_sec: Optional[float] = None,
+) -> adb_pb2.AdbResponse:
+  """Copies a local file to a remote file."""
+  with open(local_file_path, "rb") as f:
+    file_contents = f.read()
+    push_request = adb_pb2.AdbRequest(
+        push=adb_pb2.AdbRequest.Push(
+            content=file_contents, path=remote_file_path
+        ),
+        timeout_sec=timeout_sec,
+    )
+  return env.execute_adb_call(push_request)
 
 
 def copy_data_to_device(
@@ -397,8 +422,26 @@ def copy_data_to_device(
   """
   if not os.path.exists(local_path):
     raise FileNotFoundError(f"{local_path} does not exist.")
-  adb_args = ["push", local_path, remote_path]
-  return adb_utils.issue_generic_request(adb_args, env, timeout_sec)
+  response = adb_pb2.AdbResponse()
+  if os.path.isfile(local_path):
+    # If the file extension is different, remote_path is likely a directory.
+    if os.path.splitext(local_path)[1] != os.path.splitext(remote_path)[1]:
+      remote_path = os.path.join(remote_path, os.path.basename(local_path))
+    return copy_file_to_device(local_path, remote_path, env, timeout_sec)
+
+  # Copying a directory over, push every file separately.
+  for file_path in os.listdir(local_path):
+    current_response = copy_file_to_device(
+        os.path.join(local_path, file_path),
+        os.path.join(remote_path, os.path.basename(file_path)),
+        env,
+        timeout_sec,
+    )
+    if current_response.status != adb_pb2.AdbResponse.OK:
+      return current_response
+    response = current_response
+
+  return response
 
 
 def get_file_list_with_metadata(

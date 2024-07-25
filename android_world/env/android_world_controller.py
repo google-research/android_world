@@ -20,7 +20,6 @@ import time
 from typing import Any
 from typing import cast
 from typing import Optional
-
 from absl import logging
 from android_env import env_interface
 from android_env import loader
@@ -211,27 +210,25 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
     """
     remote_db_directory = os.path.dirname(remote_db_file_path)
     return file_utils.tmp_directory_from_device(
-        remote_db_directory, self._env, timeout_sec
+        remote_db_directory, self.env, timeout_sec
     )
 
   def push_file(
       self,
-      local_db_directory: str,
+      local_db_file_path: str,
       remote_db_file_path: str,
       timeout_sec: Optional[float] = None,
   ) -> None:
-    """Pushes a file from a local directory to the device."""
-    local_db_path = os.path.join(
-        local_db_directory, os.path.split(remote_db_file_path)[1]
-    )
+    """Pushes a local file to the device."""
+
     remote_db_directory = os.path.dirname(remote_db_file_path)
 
     # First delete old .db, .db-wal, and .db-shm files.
-    file_utils.clear_directory(remote_db_directory, self._env)
+    file_utils.clear_directory(remote_db_directory, self)
     file_utils.copy_data_to_device(
-        local_db_path,
-        remote_db_directory,
-        self._env,
+        local_db_file_path,
+        remote_db_file_path,
+        self.env,
         timeout_sec,
     )
 

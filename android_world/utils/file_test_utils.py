@@ -44,7 +44,7 @@ def mock_tmp_directory_from_device(
 
 def mock_copy_data_to_device(
     local_db_path: str,
-    remote_db_directory: str,
+    remote_db_path: str,
     env: env_interface.AndroidEnvInterface,
     timeout_sec: float | None = None,
 ):
@@ -55,13 +55,13 @@ def mock_copy_data_to_device(
 
   Args:
     local_db_path: The path to the local SQLite database file.
-    remote_db_directory: The directory path on the simulated remote device.
+    remote_db_path: The file path on the simulated remote device.
     env: The Android environment interface (unused in the mock).
     timeout_sec: Optional timeout in seconds (unused in the mock).
   """
   del env, timeout_sec
-  os.makedirs(remote_db_directory, exist_ok=True)
-  shutil.copy(local_db_path, remote_db_directory)
+  os.makedirs(os.path.dirname(remote_db_path), exist_ok=True)
+  shutil.copy(local_db_path, remote_db_path)
 
 
 def mock_remove_files(directory: str, env: env_interface.AndroidEnvInterface):

@@ -15,6 +15,7 @@
 import datetime
 import os
 import shutil
+import tempfile
 from unittest import mock
 
 from absl.testing import absltest
@@ -22,6 +23,11 @@ from absl.testing import parameterized
 from android_env.proto import adb_pb2
 from android_world.env import adb_utils
 from android_world.utils import file_utils
+
+
+def create_file_with_contents(file_name: str, contents: bytes) -> str:
+  with open(file_name, 'wb') as f:
+    f.write(contents)
 
 
 class FilesTest(parameterized.TestCase):
@@ -60,22 +66,41 @@ class FilesTest(parameterized.TestCase):
       self, mock_rmtree, mock_check_directory_exists, mock_path_exists
   ):
     """Test if tmp_directory_from_device correctly copies a directory and handles exceptions."""
-    mock_response = adb_pb2.AdbResponse()
-    mock_response.status = adb_pb2.AdbResponse.OK
-    self.mock_issue_generic_request.return_value = mock_response
+    mock_response = adb_pb2.AdbResponse(status=adb_pb2.AdbResponse.Status.OK)
+    self.mock_env.execute_adb_call.return_value = mock_response
     mock_path_exists.return_value = False
+    file_names = ['test1.txt', 'test2.txt']
     mock_check_directory_exists.return_value = True
+    self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
+        status=adb_pb2.AdbResponse.Status.OK,
+        generic=adb_pb2.AdbResponse.GenericResponse(
+            output=bytes(
+                '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
+                f' +0000 {file_names[0]}\n'
+                '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
+                f' +0000 {file_names[1]}',
+                'utf-8',
+            )
+        ),
+    )
 
     tmp_local_directory = os.path.join(file_utils.TMP_LOCAL_LOCATION, 'dir')
     with file_utils.tmp_directory_from_device(
         '/remote/dir', self.mock_env
     ) as tmp_directory:
       self.assertEqual(tmp_local_directory, tmp_directory)
-      self.mock_issue_generic_request.assert_called_with(
-          ['pull', '/remote/dir', file_utils.TMP_LOCAL_LOCATION],
-          self.mock_env,
-          None,
-      )
+      self.mock_env.execute_adb_call.assert_has_calls([
+          mock.call(
+              adb_pb2.AdbRequest(
+                  pull=adb_pb2.AdbRequest.Pull(
+                      path=os.path.join('/remote/dir/', file_name)
+                  ),
+                  timeout_sec=None,
+              )
+          )
+          for file_name in file_names
+      ])
+      self.assertCountEqual(os.listdir(tmp_directory), file_names)
       mock_rmtree.assert_not_called()
     mock_rmtree.assert_called_with(tmp_local_directory)
 
@@ -106,23 +131,71 @@ class FilesTest(parameterized.TestCase):
       ):
         pass
 
-  @mock.patch.object(os, 'path')
-  def test_copy_data_to_device(self, mock_path):
-    """Test if copy_data_to_device correctly copies data and handles exceptions."""
-    mock_response = adb_pb2.AdbResponse()
-    self.mock_issue_generic_request.return_value = mock_response
-    mock_path.exists.return_value = True
+  def test_copy_data_to_device_copies_file(self):
+    """Test if copy_data_to_device correctly copies a single file."""
+    file_contents = b'test file contents'
+    mock_response = adb_pb2.AdbResponse(status=adb_pb2.AdbResponse.Status.OK)
+    self.mock_env.execute_adb_call.return_value = mock_response
+    temp_dir = tempfile.mkdtemp()
+    file_name = 'file1.txt'
+    create_file_with_contents(os.path.join(temp_dir, file_name), file_contents)
 
     response = file_utils.copy_data_to_device(
-        '/local/file_or_dir', '/remote/dir', self.mock_env
+        temp_dir, '/remote/dir', self.mock_env
     )
-    self.mock_issue_generic_request.assert_called_with(
-        ['push', '/local/file_or_dir', '/remote/dir'], self.mock_env, None
+    self.mock_env.execute_adb_call.assert_has_calls(
+        [
+            mock.call(
+                adb_pb2.AdbRequest(
+                    push=adb_pb2.AdbRequest.Push(
+                        content=file_contents,
+                        path=os.path.join('/remote/dir/', file_name),
+                    ),
+                    timeout_sec=None,
+                )
+            )
+        ],
+        any_order=True,
     )
+
     self.assertEqual(response, mock_response)
 
+  def test_copy_data_to_device_copies_full_dir(self):
+    """Test if copy_data_to_device correctly copies data from a directory."""
+    file_contents = b'test file contents'
+    mock_response = adb_pb2.AdbResponse(status=adb_pb2.AdbResponse.Status.OK)
+    self.mock_env.execute_adb_call.return_value = mock_response
+    temp_dir = tempfile.mkdtemp()
+    file_names = ['file1.txt', 'file2.txt']
+    for file_name in file_names:
+      create_file_with_contents(
+          os.path.join(temp_dir, file_name), file_contents
+      )
+
+    response = file_utils.copy_data_to_device(
+        temp_dir, '/remote/dir', self.mock_env
+    )
+    self.mock_env.execute_adb_call.assert_has_calls(
+        [
+            mock.call(
+                adb_pb2.AdbRequest(
+                    push=adb_pb2.AdbRequest.Push(
+                        content=file_contents,
+                        path=os.path.join('/remote/dir/', file_name),
+                    ),
+                    timeout_sec=None,
+                )
+            )
+            for file_name in file_names
+        ],
+        any_order=True,
+    )
+
+    self.assertEqual(response, mock_response)
+
+  def test_copy_data_to_device_file_not_found(self):
+    """Test if copy_data_to_device handles errors."""
     # Test FileNotFoundError
-    mock_path.exists.return_value = False
     with self.assertRaises(FileNotFoundError):
       file_utils.copy_data_to_device(
           '/nonexistent/path', '/remote/dir', self.mock_env

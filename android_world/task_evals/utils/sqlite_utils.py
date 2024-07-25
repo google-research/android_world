@@ -158,9 +158,7 @@ def delete_all_rows_from_table(
     cursor.execute(delete_command)
     conn.commit()
     conn.close()
-    env.controller.push_file(
-        local_db_directory, remote_db_file_path, timeout_sec
-    )
+    env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
     adb_utils.close_app(app_name, env.controller)
 
 
@@ -219,7 +217,5 @@ def insert_rows_to_remote_db(
     conn.commit()
     conn.close()
 
-    env.controller.push_file(
-        local_db_directory, remote_db_file_path, timeout_sec
-    )
+    env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
     adb_utils.close_app(app_name, env.controller)

@@ -184,7 +184,7 @@ class AndroidWorldControllerTest(absltest.TestCase):
     env = android_world_controller.AndroidWorldController(mock_base_env)
     new_file = create_file_with_contents(new_file_contents)
 
-    env.push_file(os.path.dirname(new_file), remote_file_path, None)
+    env.push_file(new_file, remote_file_path, None)
 
     self.assertEqual(open(remote_file_path, 'r').read(), new_file_contents)
 
