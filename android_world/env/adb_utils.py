@@ -729,7 +729,7 @@ def send_android_intent(
 
   if extras:
     for key, value in extras.items():
-      if value is tuple:
+      if isinstance(value, tuple):
         type_override, value = value
         if type_override == 'str':
           adb_command.extend(['--es', key, f'"{value}"'])
