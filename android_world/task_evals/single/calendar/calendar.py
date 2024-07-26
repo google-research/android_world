@@ -31,14 +31,14 @@ _MONTH = "month"
 _DAY = "day"
 _DAY_OF_WEEK = "day_of_week"
 _HOUR = "hour"
-_EVENT_TITLE = "event_title"
+EVENT_TITLE = "event_title"
 _EVENT_DESCRIPTION = "event_description"
 _DURATION_MINS = "duration_mins"
 _REPEAT_INTERVAL = "repeat_rule"
 _REPEAT_INTERVALS = {"daily": 60 * 60 * 24, "weekly": 60 * 60 * 24 * 7}
 
 
-def _generate_noise_events(
+def generate_noise_events(
     target_events: list[sqlite_schema_utils.CalendarEvent],
     n: int,
     filter_fn: Optional[
@@ -130,10 +130,10 @@ class SimpleCalendarAddOneEvent(
         _DAY: event.start_datetime.day,
         _HOUR: event.start_datetime.hour,
         _DURATION_MINS: event.duration_mins,
-        _EVENT_TITLE: event.title,
+        EVENT_TITLE: event.title,
         _EVENT_DESCRIPTION: event.description,
         sqlite_validators.ROW_OBJECTS: [event],
-        sqlite_validators.NOISE_ROW_OBJECTS: _generate_noise_events(
+        sqlite_validators.NOISE_ROW_OBJECTS: generate_noise_events(
             [event], n_noise_events
         ),
     }
@@ -243,14 +243,14 @@ class SimpleCalendarAddRepeatingEvent(SimpleCalendarAddOneEvent):
         repeat_interval=_REPEAT_INTERVALS[repeat_interval],
         repeat_rule=repeat_rule,
     )
-    noise_events = _generate_noise_events([event], random.randint(0, 20))
+    noise_events = generate_noise_events([event], random.randint(0, 20))
     return {
         _YEAR: device_constants.DT.year,
         _MONTH: device_constants.DT.month,
         _DAY: event.start_datetime.day,
         _HOUR: event.start_datetime.hour,
         _DURATION_MINS: event.duration_mins,
-        _EVENT_TITLE: event.title,
+        EVENT_TITLE: event.title,
         _EVENT_DESCRIPTION: event.description,
         sqlite_validators.ROW_OBJECTS: [event],
         sqlite_validators.NOISE_ROW_OBJECTS: noise_events,
@@ -302,7 +302,7 @@ class SimpleCalendarDeleteEvents(
         cls._get_random_target_row(template.start_datetime.day)
         for _ in range(cls.n_rows)
     ]
-    noise_events = _generate_noise_events(
+    noise_events = generate_noise_events(
         events,
         cls.n_rows_noise,
         filter_fn=lambda candidate: candidate.start_datetime.day
@@ -340,7 +340,7 @@ class SimpleCalendarDeleteOneEvent(SimpleCalendarDeleteEvents):
   def generate_random_params(cls) -> dict[str, Any]:
     """Generate random parameters for a remove calendar event task."""
     event = cls._get_random_target_row()
-    noise_events = _generate_noise_events(
+    noise_events = generate_noise_events(
         [event],
         cls.n_rows_noise,
         filter_fn=(
@@ -354,7 +354,7 @@ class SimpleCalendarDeleteOneEvent(SimpleCalendarDeleteEvents):
         _DAY: event.start_datetime.day,
         _HOUR: event.start_datetime.hour,
         _DURATION_MINS: event.duration_mins,
-        _EVENT_TITLE: event.title,
+        EVENT_TITLE: event.title,
         _EVENT_DESCRIPTION: event.description,
         sqlite_validators.ROW_OBJECTS: [event],
         sqlite_validators.NOISE_ROW_OBJECTS: noise_events,
@@ -398,7 +398,7 @@ class SimpleCalendarDeleteEventsOnRelativeDay(SimpleCalendarDeleteEvents):
         cls._get_random_target_row(template.start_datetime.day)
         for _ in range(cls.n_rows)
     ]
-    noise_events = _generate_noise_events(
+    noise_events = generate_noise_events(
         events,
         cls.n_rows_noise,
         filter_fn=lambda candidate: candidate.start_datetime.day
