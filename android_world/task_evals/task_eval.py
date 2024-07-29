@@ -15,8 +15,8 @@
 """Interface for a task and the evaluation logic for that task."""
 
 import abc
+import random
 from typing import Any
-
 from absl import logging
 from android_world.env import adb_utils
 from android_world.env import interface
@@ -124,6 +124,12 @@ class TaskEval(abc.ABC):
     if self.initialized:
       raise RuntimeError(f"{self.name}.initialize_task() is already called.")
     self.initialized = True
+
+    # Set random seed for so that any random params initialized here are
+    # deterministic when initialize_task is called again.
+    seed = self.params.get("seed")
+    if seed is not None:
+      random.seed(seed)
 
   def _check_is_initialized(self) -> None:
     if not self.initialized:
