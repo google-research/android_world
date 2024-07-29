@@ -25,6 +25,7 @@ import os
 
 from absl import app
 from absl import flags
+from absl import logging
 from android_world import checkpointer as checkpointer_lib
 from android_world import registry
 from android_world import suite_utils
@@ -37,6 +38,11 @@ from android_world.agents import seeact
 from android_world.agents import t3a
 from android_world.env import env_launcher
 from android_world.env import interface
+
+logging.set_verbosity(logging.WARNING)
+
+os.environ['GRPC_VERBOSITY'] = 'ERROR'  # Only show errors
+os.environ['GRPC_TRACE'] = 'none'  # Disable tracing
 
 
 def _find_adb_directory() -> str:
