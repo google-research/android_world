@@ -145,6 +145,11 @@ def delete_all_rows_from_table(
     app_name: The name of the app that owns the database.
     timeout_sec: Timeout in seconds.
   """
+  if not table_exists(table_name, remote_db_file_path, env):
+    # If the database was never created, opening the app may create it.
+    adb_utils.launch_app(app_name, env.controller)
+    time.sleep(2.0)
+
   with env.controller.pull_file(
       remote_db_file_path, timeout_sec
   ) as local_db_directory:
@@ -159,24 +164,9 @@ def delete_all_rows_from_table(
     conn.commit()
     conn.close()
     env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
-    adb_utils.close_app(app_name, env.controller)
-
-
-def clear_app_db(
-    table_name: str,
-    remote_db_path: str,
-    app_name: str,
-    env: interface.AsyncEnv,
-) -> None:
-  """Removes the app database on the device."""
-  if not table_exists(table_name, remote_db_path, env):
-    # If the database was never created, opening the app may create it.
-    adb_utils.launch_app(app_name, env.controller)
-    time.sleep(2.0)
-  delete_all_rows_from_table(table_name, remote_db_path, env, app_name)
-  adb_utils.close_app(
-      app_name, env.controller
-  )  # Close app to register the changes.
+    adb_utils.close_app(
+        app_name, env.controller
+    )  # Close app to register the changes.
 
 
 def insert_rows_to_remote_db(

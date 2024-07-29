@@ -243,8 +243,8 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
 
   def _clear_db(self, env: interface.AsyncEnv) -> None:
     """Clears the app's SQLite database."""
-    sqlite_utils.clear_app_db(
-        self.table_name, self.db_path, self.app_name_with_db, env
+    sqlite_utils.delete_all_rows_from_table(
+        self.table_name, self.db_path, env, self.app_name_with_db
     )
     try:
       self.list_rows(env)
@@ -257,19 +257,20 @@ class SQLiteApp(task_eval.TaskEval, abc.ABC):
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     """Initializes the task environment."""
     super().initialize_task(env)
+    self._clear_db(env)
     if NOISE_ROW_OBJECTS in self.params:
       self.add_rows(self.params[NOISE_ROW_OBJECTS], env)
 
   def tear_down(self, env: interface.AsyncEnv):
     """Cleans up after task completion."""
-    self._clear_db(env)
     super().tear_down(env)
+    self._clear_db(env)
 
 
 class AddMultipleRows(SQLiteApp, abc.ABC):
   """Abstract class for tasks that involve adding multiple rows to a SQLite database."""
 
-  n_rows: int  # Number of rows to be added, to be defined in subclasses.
+  n_rows: int = -1  # Number of rows to be added, to be defined in subclasses.
 
   def __init__(self, params: dict[str, Any]):
     super().__init__(params)
@@ -315,6 +316,8 @@ class AddMultipleRows(SQLiteApp, abc.ABC):
   @classmethod
   def generate_random_params(cls) -> dict[str, Any]:
     """Generate random parameters for new row addition tasks."""
+    if cls.n_rows == -1:
+      raise ValueError("n_rows must be defined in subclasses.")
     random_rows = [cls._get_random_target_row() for _ in range(cls.n_rows)]
     return {ROW_OBJECTS: random_rows}
 

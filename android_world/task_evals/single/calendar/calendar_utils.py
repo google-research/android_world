@@ -31,7 +31,9 @@ def clear_calendar_db(
     env: interface.AsyncEnv, timeout_sec: Optional[float] = None
 ) -> None:
   """Removes the calendar database on the device."""
-  sqlite_utils.clear_app_db(EVENTS_TABLE, DB_PATH, 'simple calendar pro', env)
+  sqlite_utils.delete_all_rows_from_table(
+      EVENTS_TABLE, DB_PATH, env, 'simple calendar pro'
+  )
   try:
     sqlite_utils.get_rows_from_remote_device(
         EVENTS_TABLE,
