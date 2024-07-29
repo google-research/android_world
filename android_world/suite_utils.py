@@ -143,7 +143,9 @@ def create_suite(
     current = []
     for i in range(n_task_combinations):
       if use_identical_params:
-        instance_seed = seed or _FIXED_SEED
+        instance_seed = (
+            _get_instance_seed(name, 0) if seed is not None else _FIXED_SEED
+        )
       elif seed is not None:
         instance_seed = _get_instance_seed(name, i)
       else:
