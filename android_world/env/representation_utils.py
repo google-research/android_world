@@ -152,9 +152,7 @@ def forest_to_ui_elements(
     The extracted UI elements.
   """
 
-  logging.info('Converting forest to Ui Elements.')
-  if screen_size is None:
-    logging.warning('screen_size=None, no normalized bbox for elements.')
+  logging.info('Converting forest to UI Elements.')
 
   elements = []
   for window in forest.windows:

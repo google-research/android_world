@@ -225,6 +225,9 @@ def _create_mpeg_with_messages(
     height: The height of the video frames.
     fps: The frames per second for the video.
     display_time: The time in seconds each message is displayed.
+
+  Raises:
+    RuntimeError: If the video file was not written to the device.
   """
   fourcc = cv2.VideoWriter_fourcc(*"mp4v")
   out = cv2.VideoWriter(file_path, fourcc, fps, (width, height))
@@ -244,6 +247,11 @@ def _create_mpeg_with_messages(
       )
       out.write(frame)
   out.release()
+  if not os.path.exists(file_path):
+    raise RuntimeError(
+        f"File {file_path} was not written to device. There was a problem with"
+        " creating the video. Is ffmpeg installed?"
+    )
 
 
 def write_video_file_to_device(
@@ -440,7 +448,7 @@ def _clear_external_downloads(env: interface.AsyncEnv) -> None:
   adb_utils.issue_generic_request(
       "shell content delete --uri content://media/external/downloads",
       env.controller,
-      timeout_sec=10,  # This can sometimes take longer than 5s.
+      timeout_sec=20,  # This can sometimes take longer than 5s.
   )
 
 
