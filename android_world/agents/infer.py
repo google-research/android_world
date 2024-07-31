@@ -19,9 +19,10 @@ import base64
 import io
 import os
 import time
-from typing import Any
+from typing import Any, Optional
 import google.generativeai as genai
 from google.generativeai.types import generation_types
+from google.generativeai.types import safety_types
 import numpy as np
 from PIL import Image
 import requests
@@ -48,14 +49,14 @@ class LlmWrapper(abc.ABC):
   def predict(
       self,
       text_prompt: str,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     """Calling multimodal LLM with a prompt and a list of images.
 
     Args:
       text_prompt: Text prompt.
 
     Returns:
-      Text output and raw output.
+      Text output, is_safe, and raw output.
     """
 
 
@@ -65,7 +66,7 @@ class MultimodalLlmWrapper(abc.ABC):
   @abc.abstractmethod
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray]
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     """Calling multimodal LLM with a prompt and a list of images.
 
     Args:
@@ -104,12 +105,18 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
   def predict(
       self,
       text_prompt: str,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     return self.predict_mm(text_prompt, [])
+
+  def is_safe(self, raw_response):
+    safety_ratings = raw_response.candidates[0].safety_ratings
+    max_probability = max([rating.probability for rating in safety_ratings])
+
+    return max_probability < safety_types.HarmProbability.MEDIUM
 
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray]
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     counter = self.max_retry
     retry_delay = 1.0
     while counter > 0:
@@ -117,7 +124,10 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
         output = self.llm.generate_content(
             [text_prompt] + [Image.fromarray(image) for image in images]
         )
-        return output.text, output
+        if not self.is_safe(output):
+          return ERROR_CALLING_LLM, False, output
+
+        return output.text, True, output
       except Exception as e:  # pylint: disable=broad-exception-caught
         counter -= 1
         print('Error calling LLM, will retry in {retry_delay} seconds')
@@ -126,7 +136,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
           # Expo backoff
           time.sleep(retry_delay)
           retry_delay *= 2
-    return ERROR_CALLING_LLM, None
+    return ERROR_CALLING_LLM, None, None
 
 
 class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
@@ -165,12 +175,12 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
   def predict(
       self,
       text_prompt: str,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     return self.predict_mm(text_prompt, [])
 
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray]
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {self.openai_api_key}',
@@ -208,7 +218,11 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
             json=payload,
         )
         if response.ok and 'choices' in response.json():
-          return response.json()['choices'][0]['message']['content'], response
+          return (
+              response.json()['choices'][0]['message']['content'],
+              None,
+              response,
+          )
         print(
             'Error calling OpenAI API with error message: '
             + response.json()['error']['message']
@@ -222,4 +236,4 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
         counter -= 1
         print('Error calling LLM, will retry soon...')
         print(e)
-    return ERROR_CALLING_LLM, None
+    return ERROR_CALLING_LLM, None, None
