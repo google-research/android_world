@@ -14,15 +14,16 @@
 
 """Tasks that require interacting with a browser."""
 
+import http.server
 import os
 import random
+import threading
+import time
 from typing import Any
 from android_world.env import adb_utils
-from android_world.env import device_constants
 from android_world.env import interface
 from android_world.task_evals import task_eval
 from android_world.task_evals.utils import user_data_generation
-from android_world.utils import file_utils
 
 
 class BrowserTask(task_eval.TaskEval):
@@ -40,10 +41,27 @@ class BrowserTask(task_eval.TaskEval):
   template = ''
   HTML = ''  # Implementation overrides.
 
-  preamble = (
-      'Open the file task.html in Downloads in the file manager; when prompted'
-      ' open it with Chrome.'
-  )
+  start_on_home_screen = False
+
+  def start_server(self, directory):
+    """Starts a simple HTTP server in the background to serve the given directory."""
+
+    port = 8000
+
+    class Handler(http.server.SimpleHTTPRequestHandler):
+
+      def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=directory, **kwargs)
+
+    server_address = ('', port)
+    self.httpd = http.server.HTTPServer(server_address, Handler)
+
+    def run_server():
+      self.httpd.serve_forever()
+
+    self.server_thread = threading.Thread(target=run_server)
+    self.server_thread.daemon = True  # Kill the thread when main program exits
+    self.server_thread.start()
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
@@ -62,17 +80,46 @@ class BrowserTask(task_eval.TaskEval):
         env.controller,
     )
 
-    html = self.HTML.replace('%%SEED%%', str(self.params['browser_task_seed']))
-    with open('/tmp/task.html', 'w') as f:
-      f.write(html)
-    file_utils.copy_data_to_device(
-        '/tmp/task.html',
-        os.path.join(device_constants.DOWNLOAD_DATA, 'task.html'),
+    # Disable chrome welcome screen.
+    adb_utils.issue_generic_request(
+        'shell am set-debug-app --persistent com.android.chrome',
+        env.controller,
+    )
+    adb_utils.issue_generic_request(
+        """shell echo "chrome --disable-fre --no-default-browser-check --no-first-run" > /data/local/tmp/chrome-command-line""",
         env.controller,
     )
 
+    adb_utils.issue_generic_request(
+        'reverse tcp:8000 tcp:8000',
+        env.controller,
+    )
+
+    html = self.HTML.replace('%%SEED%%', str(self.params['browser_task_seed']))
+
+    website_path = '/tmp/android_world_task_website'
+    os.makedirs(website_path, exist_ok=True)
+    with open(os.path.join(website_path, 'task.html'), 'w') as f:
+      f.write(html)
+
+    self.start_server(website_path)
+
+    adb_utils.issue_generic_request(
+        'shell am start -n'
+        ' com.android.chrome/com.google.android.apps.chrome.Main -a'
+        " android.intent.action.VIEW -d 'http://localhost:8000/task.html'",
+        env.controller,
+    )
+
+    time.sleep(3)  # Wait for the task page to load.
+
   def tear_down(self, env: interface.AsyncEnv):
     super().tear_down(env)
+
+    self.httpd.shutdown()
+    self.httpd.server_close()
+    self.server_thread.join()
+
     user_data_generation.clear_device_storage(env)
     adb_utils.clear_app_data(
         adb_utils.extract_package_name(adb_utils.get_adb_activity('chrome')),
@@ -103,8 +150,7 @@ class BrowserMaze(BrowserTask):
   @property
   def goal(self) -> str:
     return (
-        self.preamble
-        + ' Then navigate the X to the bottom-right cell, by using the'
+        'Navigate the X to the bottom-right cell, by using the'
         ' direction buttons.'
     )
 
@@ -318,8 +364,7 @@ class BrowserMultiply(BrowserTask):
   @property
   def goal(self) -> str:
     return (
-        self.preamble
-        + ' Then click the button 5 times, remember the numbers displayed, and'
+        'Click the button 5 times, remember the numbers displayed, and'
         ' enter their product in the form.'
     )
 
@@ -429,8 +474,7 @@ class BrowserDraw(BrowserTask):
   @property
   def goal(self) -> str:
     return (
-        self.preamble
-        + ' Then create a drawing using the three colors shown at the top'
+        'Create a drawing using the three colors shown at the top'
         ' and hit submit.'
     )
 
