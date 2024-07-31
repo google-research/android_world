@@ -15,6 +15,7 @@
 from typing import Any
 from unittest import mock
 from absl.testing import absltest
+from absl.testing import parameterized
 from android_world import constants
 from android_world import episode_runner
 from android_world.agents import base_agent
@@ -44,7 +45,7 @@ class FakeEnvironmentInteractingAgent(base_agent.EnvironmentInteractingAgent):
     )
 
 
-class EpisodeRunnerTest(absltest.TestCase):
+class EpisodeRunnerTest(parameterized.TestCase):
 
   def setUp(self):
     super().setUp()
@@ -78,16 +79,41 @@ class EpisodeRunnerTest(absltest.TestCase):
     self.assertEqual(mock_agent.call_count, 1)
     self.assertLen(result.step_data[constants.STEP_NUMBER], 1)
 
-  @mock.patch.object(base_agent, 'EnvironmentInteractingAgent')
-  def test_start_on_home_screen(self, mock_agent_class):
-    mock_agent = FakeEnvironmentInteractingAgent(self.env, 'fake_agent')
-    mock_agent_class.return_value = mock_agent
+  @parameterized.parameters(True, False)
+  def test_start_on_home_screen(self, start_on_home_screen):
+    agent = FakeEnvironmentInteractingAgent(self.env, 'fake_agent')
 
     episode_runner.run_episode(
-        'test_goal', mock_agent, start_on_home_screen=True
+        'test_goal',
+        agent,
+        reset_agent_before_episode=True,
+        start_on_home_screen=start_on_home_screen,
     )
 
-    mock_agent.env.reset.assert_called_with(go_home=True)
+    agent.env.reset.assert_called_with(go_home=start_on_home_screen)
+
+  def test_reset_agent_before_episode_false(self):
+    agent = FakeEnvironmentInteractingAgent(self.env, 'fake_agent')
+
+    episode_runner.run_episode(
+        'test_goal',
+        agent,
+        reset_agent_before_episode=False,
+        start_on_home_screen=False,
+    )
+
+    agent.env.reset.assert_not_called()
+
+  def test_start_on_home_screen_and_not_reset_agent_raises_error(self):
+    agent = FakeEnvironmentInteractingAgent(self.env, 'fake_agent')
+
+    with self.assertRaises(ValueError):
+      episode_runner.run_episode(
+          'test_goal',
+          agent,
+          reset_agent_before_episode=False,
+          start_on_home_screen=True,
+      )
 
 
 if __name__ == '__main__':
