@@ -61,9 +61,7 @@ class TestMessageWasSent(absltest.TestCase):
         f'Row: 0 _id=1, address=1111, body=Hi, friend, date={four_minutes_ago}'
     ]
     self.assertTrue(
-        sms_validators._was_sent(
-            messages, '1111', 'Hi, friend', current_time, 5
-        )
+        sms_validators.was_sent(messages, '1111', 'Hi, friend', current_time, 5)
     )
 
   def test_expired_message(self):
@@ -72,7 +70,7 @@ class TestMessageWasSent(absltest.TestCase):
     ten_minutes_ago = int(time.time() * 1000) - 10 * 60 * 1000
     messages = [f'Row: 0 _id=1, address=1111, body=Hi, date={ten_minutes_ago}']
     self.assertFalse(
-        sms_validators._was_sent(messages, '1111', 'Hi', current_time, 5)
+        sms_validators.was_sent(messages, '1111', 'Hi', current_time, 5)
     )
 
   def test_invalid_address(self):
@@ -81,7 +79,7 @@ class TestMessageWasSent(absltest.TestCase):
     five_minutes_ago = int(time.time() * 1000) - 4 * 60 * 1000
     messages = [f'Row: 0 _id=1, address=2222, body=Hi, date={five_minutes_ago}']
     self.assertFalse(
-        sms_validators._was_sent(messages, '1111', 'Hi', current_time)
+        sms_validators.was_sent(messages, '1111', 'Hi', current_time)
     )
 
   def test_invalid_body(self):
@@ -92,7 +90,7 @@ class TestMessageWasSent(absltest.TestCase):
         f'Row: 0 _id=1, address=1111, body=Hello, date={five_minutes_ago}'
     ]
     self.assertFalse(
-        sms_validators._was_sent(messages, '1111', 'Hi', current_time)
+        sms_validators.was_sent(messages, '1111', 'Hi', current_time)
     )
 
   def test_fuzzy_matching(self):
@@ -102,7 +100,7 @@ class TestMessageWasSent(absltest.TestCase):
     five_minutes_ago = int(time.time() * 1000) - 4 * 60 * 1000
     messages = [f'Row: 0 _id=1, address=1111, body=hi, date={five_minutes_ago}']
     self.assertTrue(
-        sms_validators._was_sent(messages, '1111', 'Hi', current_time, 5)
+        sms_validators.was_sent(messages, '1111', 'Hi', current_time, 5)
     )
 
 

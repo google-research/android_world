@@ -84,7 +84,7 @@ def _decode_messages_from_response(response: adb_pb2.AdbResponse) -> list[str]:
   return [m.decode() for m in messages]
 
 
-def _was_sent(
+def was_sent(
     messages: list[str],
     phone_number: str,
     body: str,
@@ -202,7 +202,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
 
   messages = user_data_generation.RANDOM_SENTENCES
 
-  def _get_sent_messages(
+  def get_sent_messages(
       self, env: env_interface.AndroidEnvInterface
   ) -> list[str]:
     response = adb_utils.issue_generic_request(
@@ -231,9 +231,9 @@ class SimpleSMSSendSms(task_eval.TaskEval):
     clear_sms_and_threads(env.controller)
     android_time = self.get_android_time(env.controller)
 
-    messages = self._get_sent_messages(env.controller)
+    messages = self.get_sent_messages(env.controller)
     logging.info("During initialize_task, messages: %s", messages)
-    if _was_sent(
+    if was_sent(
         messages,
         phone_number=self.params["number"],
         body=self.params["message"],
@@ -247,9 +247,9 @@ class SimpleSMSSendSms(task_eval.TaskEval):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
-    messages = self._get_sent_messages(env.controller)
+    messages = self.get_sent_messages(env.controller)
     logging.info("During is_successful, messages: %s", messages)
-    sms_was_sent = _was_sent(
+    sms_was_sent = was_sent(
         messages,
         phone_number=self.params["number"],
         body=self.params["message"],

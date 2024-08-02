@@ -288,10 +288,10 @@ class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
     # text came in
     time.sleep(1)
     adb_utils.enable_headsup_notifications(env.controller)
-    self.before_messages = self._get_sent_messages(env.controller)
+    self.before_messages = self.get_sent_messages(env.controller)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
-    after_messages = self._get_sent_messages(env.controller)
+    after_messages = self.get_sent_messages(env.controller)
     if len(after_messages) != len(self.before_messages) + 1:
       return 0.0
 

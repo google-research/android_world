@@ -310,7 +310,7 @@ class TestSimpleSmsSendClipboardContent(test_utils.AdbEvalTestBase):
         task_eval.TaskEval, 'is_successful'
     ).start()
     self.mock_get_sent_messages = mock.patch.object(
-        sms_validators.SimpleSMSSendSms, '_get_sent_messages'
+        sms_validators.SimpleSMSSendSms, 'get_sent_messages'
     ).start()
     self.extract_package_name = mock.patch.object(
         adb_utils, 'extract_package_name'
@@ -391,7 +391,7 @@ class TestSimpleSmsSendReceivedAddress(test_utils.AdbEvalTestBase):
         sms_validators.SimpleSMSSendSms, 'get_android_time'
     ).start()
     self.mock_get_sent_messages = mock.patch.object(
-        sms_validators.SimpleSMSSendSms, '_get_sent_messages'
+        sms_validators.SimpleSMSSendSms, 'get_sent_messages'
     ).start()
 
     # Mock controller methods
@@ -558,7 +558,7 @@ class TestMessagesResendTextMessage(test_utils.AdbEvalTestBase):
         sms_validators.SimpleSMSSendSms, 'get_android_time'
     ).start()
     self.mock_get_sent_messages = mock.patch.object(
-        sms_validators.SimpleSMSSendSms, '_get_sent_messages'
+        sms_validators.SimpleSMSSendSms, 'get_sent_messages'
     ).start()
 
     # Mock controller methods
