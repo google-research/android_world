@@ -31,7 +31,7 @@ class AdbDatetimeManagerTest(absltest.TestCase):
   def test_set_date_time(self, mock_issue_generic_request):
     env_mock = mock.create_autospec(env_interface.AndroidEnvInterface)
 
-    datetime_utils.set_datetime(env_mock)
+    datetime_utils.set_datetime(env_mock, dt=device_constants.DT)
 
     expected_calls = [
         mock.call(['root'], env_mock),
