@@ -74,7 +74,7 @@ class Checkpointer(abc.ABC):
     """Saves a task's episodes to disk."""
 
   @abc.abstractmethod
-  def load(self) -> list[Episode]:
+  def load(self, fields: list[str] | None = None) -> list[Episode]:
     """Loads all episodes from disk."""
 
 
@@ -106,13 +106,18 @@ class IncrementalCheckpointer(Checkpointer):
       f.write(compressed)
     print(f'Wrote task episodes for {task_name} to {filename}')
 
-  def load(self) -> list[Episode]:
+  def load(self, fields: list[str] | None = None) -> list[Episode]:
     """Loads all task groups from disk."""
     data = []
     for filename in os.listdir(self.directory):
       if filename.endswith('.pkl.gz'):
         task_group_id = filename[:-7]  # Remove ".pkl.gz" extension
         task_group = self._load_task_group(task_group_id)
+        if fields is not None:
+          task_group = [
+              {field: episode[field] for field in fields}
+              for episode in task_group
+          ]
         data.extend(task_group)
     return data
 
@@ -138,7 +143,8 @@ class NullCheckpointer(Checkpointer):
   def save_episodes(self, task_episodes: list[Episode], task_name: str):
     pass
 
-  def load(self) -> list[Episode]:
+  def load(self, fields: list[str] | None = None) -> list[Episode]:
+    del fields
     return []
 
 
@@ -178,9 +184,10 @@ class DeprecatedCheckpointer:
     print(f'Wrote to {self.filename}')
 
   def load(
-      self,
+      self, fields: list[str] | None = None
   ) -> tuple[list[Episode], list[str]]:
     """Loads the results of an evaluation run."""
+    del fields
     try:
       return _unzip_and_read_pickle(self.filename)
     except FileNotFoundError:

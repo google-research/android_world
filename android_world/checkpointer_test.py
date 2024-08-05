@@ -77,6 +77,14 @@ class CheckpointerTest(absltest.TestCase):
     loaded_data = self.checkpointer.load()
     self.assertEqual([], loaded_data)
 
+  def test_load_fields(self) -> None:
+    """Tests if loading fields works as expected."""
+    task_group = [{'key1': 'value1', 'key2': 'value2'}]
+    self.checkpointer.save_episodes(task_group, 'task_group')
+    loaded_data = self.checkpointer.load(fields=['key1'])
+    expected_data = [{'key1': 'value1'}]
+    self.assertEqual(expected_data, loaded_data)
+
 
 if __name__ == '__main__':
   absltest.main()

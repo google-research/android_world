@@ -297,10 +297,18 @@ def _run_task_suite(
     agent_name: The name of the agent.
 
   Returns:
-    A list of dict data for each episode, including the scripted reward.
+    Metadata for each episode, including the scripted reward.
   """
-  all_episodes = checkpointer.load()
-  completed_tasks, failed_tasks = _get_task_info(all_episodes)
+  metadata_fields = [
+      constants.EpisodeConstants.GOAL,
+      constants.EpisodeConstants.TASK_TEMPLATE,
+      constants.EpisodeConstants.IS_SUCCESSFUL,
+      constants.EpisodeConstants.EPISODE_LENGTH,
+      constants.EpisodeConstants.RUN_TIME,
+      constants.EpisodeConstants.EXCEPTION_INFO,
+  ]
+  episodes_metadata = checkpointer.load(fields=metadata_fields)
+  completed_tasks, failed_tasks = _get_task_info(episodes_metadata)
 
   correct, total = 0, 0
   for name, instances in suite.items():
@@ -317,9 +325,9 @@ def _run_task_suite(
       episode[constants.EpisodeConstants.AGENT_NAME] = agent_name
       task_episodes.append(episode)
       checkpointer.save_episodes(task_episodes, name)
-      all_episodes.append(episode)
 
-      process_episodes(all_episodes, print_summary=True)
+      episodes_metadata.append({k: episode[k] for k in metadata_fields})
+      process_episodes(episodes_metadata, print_summary=True)
 
       if episode[constants.EpisodeConstants.EXCEPTION_INFO] is not None:
         # Don't include episode in tally if execution/eval logic errored out.
@@ -330,7 +338,7 @@ def _run_task_suite(
         _update_scoreboard(correct, total, env.controller)
     print()
 
-  return all_episodes
+  return episodes_metadata
 
 
 def run(
@@ -579,7 +587,9 @@ def process_episodes(
       )
   })
 
-  result_df = df.groupby('task_template', dropna=True).agg({
+  result_df = df.groupby(
+      constants.EpisodeConstants.TASK_TEMPLATE, dropna=True
+  ).agg({
       constants.EpisodeConstants.IS_SUCCESSFUL: ['count', 'mean'],
       constants.EpisodeConstants.EPISODE_LENGTH: 'mean',
       constants.EpisodeConstants.RUN_TIME: 'sum',
