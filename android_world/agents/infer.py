@@ -19,9 +19,10 @@ import base64
 import io
 import os
 import time
-from typing import Any
+from typing import Any, Optional
 import google.generativeai as genai
 from google.generativeai import types
+from google.generativeai.types import answer_types
 from google.generativeai.types import generation_types
 import numpy as np
 from PIL import Image
@@ -49,14 +50,14 @@ class LlmWrapper(abc.ABC):
   def predict(
       self,
       text_prompt: str,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     """Calling multimodal LLM with a prompt and a list of images.
 
     Args:
       text_prompt: Text prompt.
 
     Returns:
-      Text output and raw output.
+      Text output, is_safe, and raw output.
     """
 
 
@@ -66,7 +67,7 @@ class MultimodalLlmWrapper(abc.ABC):
   @abc.abstractmethod
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray]
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     """Calling multimodal LLM with a prompt and a list of images.
 
     Args:
@@ -127,10 +128,20 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       text_prompt: str,
       enable_safety_checks: bool = True,
       generation_config: generation_types.GenerationConfigType | None = None,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     return self.predict_mm(
         text_prompt, [], enable_safety_checks, generation_config
     )
+
+  def is_safe(self, raw_response):
+    try:
+      return (
+          raw_response.candidates[0].finish_reason
+          != answer_types.FinishReason.SAFETY
+      )
+    except Exception:  # pylint: disable=broad-exception-caught
+      #  Assume safe if the response is None or doesn't have candidates.
+      return True
 
   def predict_mm(
       self,
@@ -138,9 +149,10 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       images: list[np.ndarray],
       enable_safety_checks: bool = True,
       generation_config: generation_types.GenerationConfigType | None = None,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     counter = self.max_retry
     retry_delay = 1.0
+    output = None
     while counter > 0:
       try:
         output = self.llm.generate_content(
@@ -150,7 +162,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
             else SAFETY_SETTINGS_BLOCK_NONE,
             generation_config=generation_config,
         )
-        return output.text, output
+        return output.text, True, output
       except Exception as e:  # pylint: disable=broad-exception-caught
         counter -= 1
         print('Error calling LLM, will retry in {retry_delay} seconds')
@@ -159,7 +171,10 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
           # Expo backoff
           time.sleep(retry_delay)
           retry_delay *= 2
-    return ERROR_CALLING_LLM, None
+
+    if (output is not None) and (not self.is_safe(output)):
+      return ERROR_CALLING_LLM, False, output
+    return ERROR_CALLING_LLM, None, None
 
 
 class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
@@ -198,12 +213,12 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
   def predict(
       self,
       text_prompt: str,
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     return self.predict_mm(text_prompt, [])
 
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray]
-  ) -> tuple[str, Any]:
+  ) -> tuple[str, Optional[bool], Any]:
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {self.openai_api_key}',
@@ -241,7 +256,11 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
             json=payload,
         )
         if response.ok and 'choices' in response.json():
-          return response.json()['choices'][0]['message']['content'], response
+          return (
+              response.json()['choices'][0]['message']['content'],
+              None,
+              response,
+          )
         print(
             'Error calling OpenAI API with error message: '
             + response.json()['error']['message']
@@ -255,4 +274,4 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
         counter -= 1
         print('Error calling LLM, will retry soon...')
         print(e)
-    return ERROR_CALLING_LLM, None
+    return ERROR_CALLING_LLM, None, None

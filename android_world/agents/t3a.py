@@ -339,9 +339,15 @@ class T3A(base_agent.EnvironmentInteractingAgent):
         self.additional_guidelines,
     )
     step_data['action_prompt'] = action_prompt
-    action_output, raw_response = self.llm.predict(
+    action_output, is_safe, raw_response = self.llm.predict(
         action_prompt,
     )
+
+    if is_safe == False:  # pylint: disable=singleton-comparison
+      #  is_safe could be None
+      action_output = """Reason: Triggered LLM safety classifier.
+Action: {"action_type": "status", "goal_status": "infeasible"}"""
+
     if not raw_response:
       raise RuntimeError('Error calling LLM in action selection phase.')
 
@@ -461,9 +467,12 @@ class T3A(base_agent.EnvironmentInteractingAgent):
         after_element_list,
     )
 
-    summary, raw_response = self.llm.predict(
+    summary, is_safe, raw_response = self.llm.predict(
         summary_prompt,
     )
+    if is_safe == False:  # pylint: disable=singleton-comparison
+      #  is_safe could be None
+      summary = """Summary triggered LLM safety classifier."""
 
     step_data['summary_prompt'] = summary_prompt
     step_data['summary'] = (
