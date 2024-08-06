@@ -42,7 +42,6 @@ def run_episode(
     goal: str,
     agent: base_agent.EnvironmentInteractingAgent,
     max_n_steps: int = 10,
-    reset_agent_before_episode: bool = True,
     start_on_home_screen: bool = False,
     termination_fn: (
         Callable[[env_interface.AndroidEnvInterface], float] | None
@@ -59,10 +58,8 @@ def run_episode(
     agent: The agent to run on the environment.
     max_n_steps: The max number of steps to allow an agent to run before ending
       an episode.
-    reset_agent_before_episode: Whether to reset the agent before the episode.
     start_on_home_screen: Whether to start episode from the home screen or just
-      the current screen. When True, reset_agent_before_episode must also be
-      True.
+      the current screen.
     termination_fn: If provided, a determines whether to terminate an episode.
       For example, for MiniWoB++ tasks, the episode should terminate if there is
       a nonzero reward.
@@ -75,12 +72,7 @@ def run_episode(
   if termination_fn is None:
     termination_fn = lambda env: False
 
-  if start_on_home_screen and not reset_agent_before_episode:
-    raise ValueError(
-        'start_on_home_screen is True but reset_agent_before_episode is False.'
-    )
-  if reset_agent_before_episode:
-    agent.reset(start_on_home_screen)
+  agent.reset(start_on_home_screen)
 
   output = []
   for step_n in range(max_n_steps):
