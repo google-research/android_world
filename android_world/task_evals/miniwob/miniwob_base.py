@@ -78,6 +78,8 @@ class MiniWoBTask(task_eval.TaskEval, abc.ABC):
   logic is also providd by MiniWoB.
   """
 
+  start_on_home_screen = False
+
   schema = {
       "type": "object",
       "properties": {

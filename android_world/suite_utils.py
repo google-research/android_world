@@ -370,7 +370,7 @@ def run(
         goal=task.goal,
         agent=agent,
         max_n_steps=_allocate_step_budget(task.complexity),
-        start_on_home_screen=(not task.name.lower().startswith('miniwob')),
+        start_on_home_screen=task.start_on_home_screen,
         termination_fn=(
             miniwob_base.is_episode_terminated
             if task.name.lower().startswith('miniwob')
