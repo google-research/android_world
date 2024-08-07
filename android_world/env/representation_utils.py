@@ -121,9 +121,9 @@ def _accessibility_node_to_ui_element(
 
 def _normalize_bounding_box(
     node_bbox: BoundingBox,
-    screen_height_width_px: tuple[int, int],
+    screen_width_height_px: tuple[int, int],
 ) -> BoundingBox:
-  width, height = screen_height_width_px
+  width, height = screen_width_height_px
   return BoundingBox(
       node_bbox.x_min / width,
       node_bbox.x_max / width,
@@ -146,7 +146,7 @@ def forest_to_ui_elements(
     forest: The forest to extract leaf nodes from.
     exclude_invisible_elements: True if invisible elements should not be
       returned.
-    screen_size: The size of the device screen in pixels.
+    screen_size: The size of the device screen in pixels (width, height).
 
   Returns:
     The extracted UI elements.
