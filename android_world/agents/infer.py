@@ -21,6 +21,7 @@ import os
 import time
 from typing import Any
 import google.generativeai as genai
+from google.generativeai import types
 from google.generativeai.types import generation_types
 import numpy as np
 from PIL import Image
@@ -77,6 +78,22 @@ class MultimodalLlmWrapper(abc.ABC):
     """
 
 
+SAFETY_SETTINGS_BLOCK_NONE = {
+    types.HarmCategory.HARM_CATEGORY_HARASSMENT: (
+        types.HarmBlockThreshold.BLOCK_NONE
+    ),
+    types.HarmCategory.HARM_CATEGORY_HATE_SPEECH: (
+        types.HarmBlockThreshold.BLOCK_NONE
+    ),
+    types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: (
+        types.HarmBlockThreshold.BLOCK_NONE
+    ),
+    types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: (
+        types.HarmBlockThreshold.BLOCK_NONE
+    ),
+}
+
+
 class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
   """Gemini GCP interface."""
 
@@ -86,12 +103,16 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       max_retry: int = 3,
       temperature: float = 0.0,
       top_p: float = 0.95,
+      enable_safety_checks: bool = True,
   ):
     if 'GCP_API_KEY' not in os.environ:
       raise RuntimeError('GCP API key not set.')
     genai.configure(api_key=os.environ['GCP_API_KEY'])
     self.llm = genai.GenerativeModel(
         model_name,
+        safety_settings=None
+        if enable_safety_checks
+        else SAFETY_SETTINGS_BLOCK_NONE,
         generation_config=generation_types.GenerationConfig(
             temperature=temperature, top_p=top_p, max_output_tokens=1000
         ),
@@ -104,18 +125,30 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
   def predict(
       self,
       text_prompt: str,
+      enable_safety_checks: bool = True,
+      generation_config: generation_types.GenerationConfigType | None = None,
   ) -> tuple[str, Any]:
-    return self.predict_mm(text_prompt, [])
+    return self.predict_mm(
+        text_prompt, [], enable_safety_checks, generation_config
+    )
 
   def predict_mm(
-      self, text_prompt: str, images: list[np.ndarray]
+      self,
+      text_prompt: str,
+      images: list[np.ndarray],
+      enable_safety_checks: bool = True,
+      generation_config: generation_types.GenerationConfigType | None = None,
   ) -> tuple[str, Any]:
     counter = self.max_retry
     retry_delay = 1.0
     while counter > 0:
       try:
         output = self.llm.generate_content(
-            [text_prompt] + [Image.fromarray(image) for image in images]
+            [text_prompt] + [Image.fromarray(image) for image in images],
+            safety_settings=None
+            if enable_safety_checks
+            else SAFETY_SETTINGS_BLOCK_NONE,
+            generation_config=generation_config,
         )
         return output.text, output
       except Exception as e:  # pylint: disable=broad-exception-caught
