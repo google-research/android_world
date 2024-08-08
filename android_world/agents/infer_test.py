@@ -42,13 +42,21 @@ class InferTest(absltest.TestCase):
         generation_types.GenerateContentResponse.from_response(
             glm.GenerateContentResponse({
                 "candidates": (
-                    [{"content": {"parts": [{"text": "fake response"}]}}]
+                    [{
+                        "content": {"parts": [{"text": "fake response"}]},
+                        "safety_ratings": [
+                            {
+                                "category": "HARM_CATEGORY_HATE_SPEECH",
+                                "probability": "NEGLIGIBLE",
+                            },
+                        ],
+                    }]
                 )
             })
         )
     )
     llm = infer.GeminiGcpWrapper(model_name="some_gemini_model")
-    text_output, _ = llm.predict_mm("fake prompt", [])
+    text_output, _, _ = llm.predict_mm("fake prompt", [])
     self.assertEqual(text_output, "fake response")
 
   def test_gpt4v(self):
@@ -60,7 +68,7 @@ class InferTest(absltest.TestCase):
     )
     self.mock_post.return_value = mock_200_response
 
-    text_output, _ = llm.predict_mm("fake prompt", [])
+    text_output, _, _ = llm.predict_mm("fake prompt", [])
     self.assertEqual(text_output, "fake response")
 
   def test_gpt4v_retry(self):
@@ -79,7 +87,7 @@ class InferTest(absltest.TestCase):
     )
     self.mock_post.side_effect = [mock_429_response, mock_200_response]
 
-    _, _ = gpt4v.predict_mm("fake prompt", [])
+    gpt4v.predict_mm("fake prompt", [])
     self.mock_sleep.assert_called_once()
 
 
