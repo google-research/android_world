@@ -33,9 +33,9 @@ class MockLlmWrapper(infer.LlmWrapper):
     if self.index < len(self.mock_responses):
       index = self.index
       self.index += 1
-      return self.mock_responses[index]
+      return self.mock_responses[index][0], None, self.mock_responses[index][1]
     else:
-      return infer.ERROR_CALLING_LLM, None
+      return infer.ERROR_CALLING_LLM, None, None
 
 
 class T3AInteractionTest(absltest.TestCase):

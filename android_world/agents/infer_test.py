@@ -19,6 +19,7 @@ from absl.testing import absltest
 from android_world.agents import infer
 import google.ai.generativelanguage as glm
 import google.generativeai as genai
+from google.generativeai.types import answer_types
 from google.generativeai.types import generation_types
 import requests
 
@@ -48,8 +49,56 @@ class InferTest(absltest.TestCase):
         )
     )
     llm = infer.GeminiGcpWrapper(model_name="some_gemini_model")
-    text_output, _ = llm.predict_mm("fake prompt", [])
+    text_output, is_safe, _ = llm.predict_mm("fake prompt", [])
     self.assertEqual(text_output, "fake response")
+    self.assertEqual(is_safe, True)
+
+  @mock.patch.object(genai.GenerativeModel, "generate_content")
+  def test_gemini_gcp_error(self, mock_generate_content):
+    mock_generate_content.return_value = (
+        generation_types.GenerateContentResponse.from_response(
+            glm.GenerateContentResponse(
+                {"candidates": [{"content": {"parts": []}}]}
+            )
+        )
+    )
+    llm = infer.GeminiGcpWrapper(model_name="some_gemini_model")
+    text_output, is_safe, output = llm.predict_mm("fake prompt", [])
+    self.assertEqual(text_output, infer.ERROR_CALLING_LLM)
+    self.assertIsNone(is_safe)
+    self.assertIsNone(output)
+
+  @mock.patch.object(genai.GenerativeModel, "generate_content")
+  def test_gemini_gcp_no_candidates(self, mock_generate_content):
+    mock_generate_content.return_value = (
+        generation_types.GenerateContentResponse.from_response(
+            glm.GenerateContentResponse({"candidates": []})
+        )
+    )
+    llm = infer.GeminiGcpWrapper(model_name="some_gemini_model")
+    text_output, is_safe, output = llm.predict_mm("fake prompt", [])
+    self.assertEqual(text_output, infer.ERROR_CALLING_LLM)
+    self.assertIsNone(is_safe)
+    self.assertIsNone(output)
+
+  @mock.patch.object(genai.GenerativeModel, "generate_content")
+  def test_gemini_gcp_unsafe(self, mock_generate_content):
+    mock_generate_content.return_value = (
+        generation_types.GenerateContentResponse.from_response(
+            glm.GenerateContentResponse({
+                "candidates": (
+                    [{
+                        "content": {"parts": []},
+                        "finish_reason": answer_types.FinishReason.SAFETY,
+                    }]
+                )
+            })
+        )
+    )
+    llm = infer.GeminiGcpWrapper(model_name="some_gemini_model")
+    text_output, is_safe, _ = llm.predict_mm("fake prompt", [])
+    self.assertEqual(text_output, infer.ERROR_CALLING_LLM)
+    self.assertEqual(is_safe, False)
 
   def test_gpt4v(self):
     llm = infer.Gpt4Wrapper(model_name="gpt-4-turbo-2024-04-09")
@@ -60,7 +109,7 @@ class InferTest(absltest.TestCase):
     )
     self.mock_post.return_value = mock_200_response
 
-    text_output, _ = llm.predict_mm("fake prompt", [])
+    text_output, _, _ = llm.predict_mm("fake prompt", [])
     self.assertEqual(text_output, "fake response")
 
   def test_gpt4v_retry(self):
@@ -79,7 +128,7 @@ class InferTest(absltest.TestCase):
     )
     self.mock_post.side_effect = [mock_429_response, mock_200_response]
 
-    _, _ = gpt4v.predict_mm("fake prompt", [])
+    gpt4v.predict_mm("fake prompt", [])
     self.mock_sleep.assert_called_once()
 
 
