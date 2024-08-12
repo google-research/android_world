@@ -177,6 +177,7 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
     self._env = get_controller(
         console_port=self.env._coordinator._simulator._config.emulator_launcher.emulator_console_port,
         adb_path=self.env._coordinator._simulator._config.adb_controller.adb_path,
+        grpc_port=self.env._coordinator._simulator._config.emulator_launcher.grpc_port,
     ).env
     # pylint: enable=protected-access
     # pytype: enable=attribute-error
