@@ -140,7 +140,10 @@ def _waypoint_matches_location(
   if name is not None and location in name.text:
     return True
   lat, lon = [float(waypoint.attrib.get(x)) for x in ('lat', 'lon')]
-  location_coords = _parse_coords(location)
+  if location in _PRELOADED_MAP_LOCATIONS.keys():
+    location_coords = _PRELOADED_MAP_LOCATIONS[location]
+  else:
+    location_coords = _parse_coords(location)
   if location_coords is None:
     return False
   else:
