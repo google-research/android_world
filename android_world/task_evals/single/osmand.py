@@ -30,7 +30,10 @@ from android_world.task_evals.utils import sqlite_schema_utils
 from android_world.utils import file_utils
 
 _DEVICE_FILES = '/data/media/0/Android/data/net.osmand/files'
+_LEGACY_FILES = '/data/data/net.osmand/files'
 _FAVORITES_PATH = os.path.join(_DEVICE_FILES, 'favorites/favorites.gpx')
+_LEGACY_FAVORITES_PATH = os.path.join(_LEGACY_FILES, 'favourites_bak.gpx')
+_BACKUP_DIR_PATH = os.path.join(_LEGACY_FILES, 'backup')
 
 # Random location names and coords present in the pre-loaded Liechtenstein map.
 _PRELOADED_MAP_LOCATIONS = {
@@ -171,18 +174,20 @@ def _clear_favorites(env: env_interface.AndroidEnvInterface) -> None:
     FileNotFoundError: If there is an issue reading or writing files.
     RuntimeError: If there is an adb communication error.
   """
-  if not os.path.exists(_FAVORITES_PATH):
-    logging.warning(
-        'Favorites file %s not found during cleanup.', _FAVORITES_PATH
-    )
-    return
 
-  with file_utils.tmp_file_from_device(_FAVORITES_PATH, env) as favorites_file:
-    tree = ElementTree.parse(favorites_file)
-    for waypoint in tree.findall('gpx:wpt', _FAVORITES_XML_NAMESPACES):
-      tree.getroot().remove(waypoint)
-    tree.write(favorites_file)
-    file_utils.copy_data_to_device(favorites_file, _FAVORITES_PATH, env)
+  file_utils.clear_directory(_BACKUP_DIR_PATH, env)
+
+  for path in [_FAVORITES_PATH, _LEGACY_FAVORITES_PATH]:
+    if file_utils.check_file_exists(path, env):
+      with file_utils.tmp_file_from_device(path, env) as favorites_file:
+        tree = ElementTree.parse(favorites_file)
+        for waypoint in tree.findall('gpx:wpt', _FAVORITES_XML_NAMESPACES):
+          tree.getroot().remove(waypoint)
+        tree.write(favorites_file)
+        file_utils.copy_data_to_device(favorites_file, path, env)
+
+    else:
+      logging.warning('Favorites file %s not found during cleanup.', path)
 
 
 class _OsmTaskEval(task_eval.TaskEval):
