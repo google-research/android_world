@@ -408,6 +408,7 @@ def _adb_text_format(text: str) -> str:
       '(',
       ')',
       '#',
+      '$',
   ]
   for char in to_escape:
     text = text.replace(char, '\\' + char)
