@@ -185,6 +185,12 @@ def execute_adb_action(
     print('Invalid action type')
 
 
+def _get_a11y_forest(env: env_interface.AndroidEnvInterface):
+  if isinstance(env, android_world_controller.AndroidWorldController):
+    return env.get_a11y_forest()
+  return android_world_controller.get_a11y_tree(env)
+
+
 def find_and_click_element(
     element_text: str,
     env: env_interface.AndroidEnvInterface,
@@ -202,7 +208,8 @@ def find_and_click_element(
   action = _wait_and_find_click_element(element_text, env, case_sensitive)
 
   # Send action.
-  forest = android_world_controller.get_a11y_tree(env)
+  forest = _get_a11y_forest(env)
+
   ui_elements = representation_utils.forest_to_ui_elements(
       forest, exclude_invisible_elements=True
   )
@@ -216,7 +223,7 @@ def _wait_and_find_click_element(
     case_sensitive: bool,
 ) -> json_action.JSONAction:
   """Wait for the screen to update until "element_text" appears."""
-  forest = android_world_controller.get_a11y_tree(env)
+  forest = _get_a11y_forest(env)
   ui_elements = representation_utils.forest_to_ui_elements(
       forest, exclude_invisible_elements=True
   )
@@ -228,7 +235,7 @@ def _wait_and_find_click_element(
   while current - start < 10:
     if distance == 0:
       return json_action.JSONAction(action_type='click', index=element)
-    forest = android_world_controller.get_a11y_tree(env)
+    forest = _get_a11y_forest(env)
     ui_elements = representation_utils.forest_to_ui_elements(
         forest, exclude_invisible_elements=True
     )
