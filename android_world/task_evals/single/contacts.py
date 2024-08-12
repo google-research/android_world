@@ -175,7 +175,10 @@ class ContactsNewContactDraft(task_eval.TaskEval):
       env: interface.AsyncEnv,
   ) -> float:
     super().is_successful(env)
-    ui_elements = env.get_state().ui_elements
+    ui_elements = representation_utils.forest_to_ui_elements(
+        env.get_state().forest,
+        exclude_invisible_elements=False,
+    )
     return (
         1.0
         if _contact_info_is_entered(

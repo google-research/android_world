@@ -74,7 +74,8 @@ class ContactInfoIsEntered(absltest.TestCase):
 
 class ContactDraftTest(test_utils.AdbEvalTestBase):
 
-  def test_contact_draft_is_successful(self):
+  @mock.patch('android_world.env.representation_utils.forest_to_ui_elements')
+  def test_contact_draft_is_successful(self, mock_forest_to_ui_elements):
     # Create an instance of ContactDraft.
     first = 'Jane'
     last = 'Smith'
@@ -100,9 +101,7 @@ class ContactDraftTest(test_utils.AdbEvalTestBase):
     ]
 
     env = mock.create_autospec(interface.AsyncEnv)
-    env.get_state.return_value = interface.State(
-        pixels=None, forest=None, ui_elements=ui_elements
-    )
+    mock_forest_to_ui_elements.return_value = ui_elements
     self.assertEqual(test_utils.perform_task(contact_draft, env), 1)
 
 
