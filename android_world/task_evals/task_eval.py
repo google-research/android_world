@@ -19,6 +19,7 @@ import random
 from typing import Any
 from absl import logging
 from android_world.env import adb_utils
+from android_world.env import device_constants
 from android_world.env import interface
 from android_world.utils import app_snapshot
 from android_world.utils import datetime_utils
@@ -33,6 +34,7 @@ class TaskEval(abc.ABC):
   """
 
   template = ""  # Each task eval needs a template.
+  device_time = device_constants.DT
 
   start_on_home_screen = True
 
@@ -116,11 +118,21 @@ class TaskEval(abc.ABC):
         except RuntimeError as error:
           logging.warn("Skipping app snapshot loading : %s", error)
 
+  @classmethod
+  def set_device_time(cls, env: interface.AsyncEnv) -> None:
+    """Sets the device time."""
+    del env
+    cls.device_time = device_constants.DT
+
+  def initialize_device_time(self, env: interface.AsyncEnv) -> None:
+    """Initializes the device time."""
+    datetime_utils.set_datetime(env.controller, self.device_time)
+
   def initialize_task(self, env: interface.AsyncEnv) -> None:  # pylint: disable=unused-argument
     """Initializes the task."""
     # Reset the interaction cache so previous tasks don't affect this run:
     env.interaction_cache = ""
-    datetime_utils.set_datetime(env.controller)
+    self.initialize_device_time(env)
     self._initialize_apps(env)
     logging.info("Initializing %s", self.name)
     if self.initialized:

@@ -113,7 +113,7 @@ def setup_datetime(env: env_interface.AndroidEnvInterface) -> None:
 
 
 def set_datetime(
-    env: env_interface.AndroidEnvInterface,
+    env: env_interface.AndroidEnvInterface, dt: datetime.datetime
 ) -> None:
   """Configures the specific date and time for each task in the benchmark.
 
@@ -123,9 +123,10 @@ def set_datetime(
 
   Args:
     env: AndroidEnv instance.
+    dt: The datetime to set the device to.
   """
   adb_utils.issue_generic_request(['root'], env)
-  _set_datetime(env)
+  _set_datetime(env, dt)
 
 
 def advance_system_time(
@@ -192,10 +193,12 @@ def _set_timezone_to_utc(env: env_interface.AndroidEnvInterface) -> None:
   adb_utils.issue_generic_request(adb_command, env)
 
 
-def _set_datetime(env: env_interface.AndroidEnvInterface) -> None:
+def _set_datetime(
+    env: env_interface.AndroidEnvInterface, dt: datetime.datetime
+) -> None:
   """Sets the date and time on the Android device."""
   adb_utils.issue_generic_request(
-      ['shell', 'date', device_constants.ANDROID_DT], env
+      ['shell', 'date', dt.strftime('%m%d%H%M%y.%S')], env
   )
 
 

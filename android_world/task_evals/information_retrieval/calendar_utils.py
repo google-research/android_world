@@ -73,7 +73,9 @@ def create_event_from_proto(
   )
 
 
-def convert_str_to_datetime(date_str: str, time_str: str) -> datetime.datetime:
+def convert_str_to_datetime(
+    date_str: str, time_str: str, tzinfo: zoneinfo.ZoneInfo | None = None
+) -> datetime.datetime:
   """Converts a date string and a time string to a datetime.
 
   Handles the following formats for date_str:
@@ -87,6 +89,7 @@ def convert_str_to_datetime(date_str: str, time_str: str) -> datetime.datetime:
   Args:
     date_str: The date string to convert.
     time_str: The time string to convert.
+    tzinfo: The timezone to use. If None, uses the default timezone.
 
   Returns:
     The datetime corresponding to the input date string.
@@ -107,7 +110,7 @@ def convert_str_to_datetime(date_str: str, time_str: str) -> datetime.datetime:
       dt.day,
       hour,
       minute,
-      tzinfo=zoneinfo.ZoneInfo(device_constants.TIMEZONE),
+      tzinfo=tzinfo if tzinfo else zoneinfo.ZoneInfo(device_constants.TIMEZONE),
   )
   return localized_dt
 

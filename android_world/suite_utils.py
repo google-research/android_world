@@ -70,6 +70,7 @@ def _instantiate_task(
     task: Type[task_eval.TaskEval],
     params: dict[str, Any] | None = None,
     seed: int | None = None,
+    env: interface.AsyncEnv | None = None,
 ) -> task_eval.TaskEval:
   """Creates an instance of a task with params.
 
@@ -79,6 +80,7 @@ def _instantiate_task(
     task: The task to instantiate.
     params: Params to use.
     seed: Seed for the random number generator.
+    env: The environment.
 
   Returns:
     An instance of a task.
@@ -88,6 +90,7 @@ def _instantiate_task(
       random.seed(seed)
     params = task.generate_random_params()
     params[constants.EpisodeConstants.SEED] = seed
+  task.set_device_time(env)
   return task(params)
 
 
@@ -97,6 +100,7 @@ def create_suite(
     seed: int | None = None,
     tasks: list[str] | None = None,
     use_identical_params: bool = False,
+    env: interface.AsyncEnv | None = None,
 ) -> Suite:
   """Creates task suite.
 
@@ -127,6 +131,7 @@ def create_suite(
       all task types and associated instances will be created.
     use_identical_params: If True, each instance of a task, for a total of
       `n_task_combinations`, will have the same params.
+    env: The environment that will be run on.
 
   Returns:
     A mapping of task name to instances of the task.
@@ -150,7 +155,7 @@ def create_suite(
         instance_seed = _get_instance_seed(name, i)
       else:
         instance_seed = None
-      current.append(_instantiate_task(task_type, seed=instance_seed))
+      current.append(_instantiate_task(task_type, seed=instance_seed, env=env))
     suite[name] = current
   suite = _filter_tasks(suite, task_registry, tasks)
 
