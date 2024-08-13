@@ -286,7 +286,7 @@ class RetroPlaylistDuration(RetroCreatePlaylist):
       if song.playlist_name != self.params['playlist_name']:
         return False
       total_ms += song.duration_ms
-    return 45 * 60 * 1000 <= total_ms <= 50 * 60 * 1000
+    return float(45 * 60 * 1000 <= total_ms <= 50 * 60 * 1000)
 
   @classmethod
   def generate_random_params(cls) -> dict[str, Any]:
