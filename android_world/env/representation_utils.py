@@ -163,3 +163,45 @@ def forest_to_ui_elements(
         else:
           elements.append(_accessibility_node_to_ui_element(node, screen_size))
   return elements
+
+
+def get_element_text(
+    element: UIElement, include_extra_info: bool = True
+) -> str:
+  """Returns a text describing the element.
+
+  Args:
+    element: The UI element to get text from.
+    include_extra_info: Whether to consider extra information in deriving text,
+      such as resource_id and class_name.
+
+  Returns:
+    The text description if found, '' otherwise.
+  """
+  if element.text:
+    text = element.text
+    # Special handling of single character labels.
+    if (
+        len(text) == 1
+        and element.content_description
+        and len(element.content_description) > 1
+    ):
+      text = element.content_description
+    return text
+  if element.hint_text:
+    return element.hint_text
+  if element.content_description:
+    return element.content_description
+  if element.tooltip:
+    return element.tooltip
+  if include_extra_info:
+    if element.class_name is not None and element.class_name.endswith('Switch'):
+      return 'Switch:' + ('on' if element.is_checked else 'off')
+    if element.resource_id is not None:
+      return element.resource_id.split('/')[-1]
+    if element.class_name is not None and element.class_name.endswith(
+        'EditText'
+    ):
+      return 'edit text'
+  return ''
+
