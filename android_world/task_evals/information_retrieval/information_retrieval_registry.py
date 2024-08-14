@@ -32,13 +32,11 @@ TaskType = TypeVar('TaskType', bound=information_retrieval.InformationRetrieval)
 class InformationRetrievalRegistry(Generic[TaskType]):
   """Information retrieval registry; it dynamically creates tasks."""
 
-  TASK_REGISTRY: dict[str, TaskType] = {}
-
   @property
   def registry(
       self,
   ) -> dict[str, TaskType]:
-    return self.TASK_REGISTRY
+    return self._task_registry
 
   def _read_tasks(self) -> task_pb2.Tasks:
     proto = task_pb2.Tasks()
@@ -54,12 +52,13 @@ class InformationRetrievalRegistry(Generic[TaskType]):
       filename: str | None = None,
       task_type: Type[TaskType] = information_retrieval.InformationRetrieval,
   ):
+    self._task_registry: dict[str, TaskType] = {}
     self.filename = filename
     self.task_type = task_type
     raw_tasks = self._read_tasks()
     for raw_task in raw_tasks.tasks:
       task_class = self._build_task_class(raw_task)
-      self.TASK_REGISTRY[raw_task.name] = task_class
+      self._task_registry[raw_task.name] = task_class
 
   def _build_task_class(
       self,
