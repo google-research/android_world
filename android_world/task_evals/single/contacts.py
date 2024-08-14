@@ -86,6 +86,12 @@ def _contact_info_is_entered(
     ):
       phone_label_element = element
 
+  # Content description may not be set properly, so we try to find the phone
+  # label element by its text and its position if it is not found above
+  if phone_element and phone_label_element is None:
+    phone_label_element = _find_phone_label_element(
+        phone_element, phone_label, ui_elements
+    )
   if (
       first_name_element is None
       or last_name_element is None
@@ -103,6 +109,32 @@ def _contact_info_is_entered(
     return False
 
   return True
+
+
+def _find_phone_label_element(
+    phone_element: representation_utils.UIElement,
+    phone_label: str,
+    ui_elements: list[representation_utils.UIElement],
+) -> None | representation_utils.UIElement:
+  for element in ui_elements:
+    if element.text == phone_label and _vertically_adjacent(
+        phone_element, element
+    ):
+      return element
+  return None
+
+
+def _vertically_adjacent(
+    element1: representation_utils.UIElement,
+    element2: representation_utils.UIElement,
+) -> bool:
+  if not element1.bbox_pixels or not element2.bbox_pixels:
+    return False
+  return (
+      element1.bbox_pixels.y_max
+      <= element2.bbox_pixels.y_min
+      <= element1.bbox_pixels.y_max + element1.bbox_pixels.height
+  )
 
 
 class ContactsNewContactDraft(task_eval.TaskEval):
