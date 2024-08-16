@@ -137,5 +137,8 @@ In the current workflow, the agent tries to complete a task in a for loop. In ea
 
 3. Now you can run the benchmark with your new agent using the command above with the `agent_name` flag changed to your agent's name.
 
+## Adding new tasks
+
+Please see [the guide](https://github.com/google-research/android_world/blob/main/docs/tasks_guide.md) on adding new tasks to AndroidWorld.
 
 *This is not an officially supported Google product.*
