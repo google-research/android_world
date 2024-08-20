@@ -85,6 +85,10 @@ class JSONAction:
     goal_status: If the status is a 'status' type, indicates the status of the
       goal.
     app_name: The app name to launch, if the action type is 'open_app'.
+    keycode: Keycode actions are necessary for an agent to interact with complex
+      UI elements (like large textareas) that can't be accessed or controlled by
+      simply taping, ensuring precise control over navigation and selection in
+      the interface.
   """
 
   action_type: Optional[str] = None
@@ -95,6 +99,7 @@ class JSONAction:
   direction: Optional[str] = None
   goal_status: Optional[str] = None
   app_name: Optional[str] = None
+  keycode: Optional[str] = None
 
   def __post_init__(self):
     if self.action_type not in _ACTION_TYPES:
@@ -107,6 +112,8 @@ class JSONAction:
       raise ValueError(f'Invalid scroll direction: {self.direction}')
     if self.text is not None and not isinstance(self.text, str):
       self.text = str(self.text)
+    if self.keycode is not None and not self.keycode.startswith('KEYCODE_'):
+      raise ValueError(f'Invalid keycode: {self.keycode}')
 
   def __repr__(self) -> str:
     properties = []
@@ -162,6 +169,7 @@ def _compare_actions(a: JSONAction, b: JSONAction) -> bool:
       and a.index == b.index
       and a.x == b.x
       and a.y == b.y
+      and a.keycode == b.keycode
       and a.direction == b.direction
       and a.goal_status == b.goal_status
   )

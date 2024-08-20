@@ -391,6 +391,35 @@ def press_enter_button(
   return response
 
 
+def press_keyboard_generic(
+    keycode: str,
+    env: env_interface.AndroidEnvInterface,
+    timeout_sec: Optional[float] = _DEFAULT_TIMEOUT_SECS,
+) -> adb_pb2.AdbResponse:
+  """Issues an AdbRequest to press any button in the keyboard.
+
+  Args:
+    keycode: The keycode to press.
+    env: The environment.
+    timeout_sec: A timeout to use for this operation.
+
+  Returns:
+    The adb response received after issuing the request.
+  """
+  logging.info('Attemting to press the keyboard button: %s', keycode)
+
+  response = issue_generic_request(
+      ['shell', 'input', 'keyevent', keycode],
+      env,
+      timeout_sec,
+  )
+
+  if response.status != adb_pb2.AdbResponse.Status.OK:
+    logging.error('Failed to press the keyboard button: %s', keycode)
+
+  return response
+
+
 def _adb_text_format(text: str) -> str:
   """Prepares text for use with adb."""
   to_escape = [

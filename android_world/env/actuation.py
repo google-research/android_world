@@ -96,6 +96,9 @@ def execute_adb_action(
   elif action.action_type == 'navigate_back':
     adb_utils.press_back_button(env)
 
+  elif action.action_type == 'press_keyboard':
+    adb_utils.press_keyboard_generic(action.keycode, env)
+
   elif action.action_type == 'scroll':
     screen_width, screen_height = screen_size
     if action.index:
