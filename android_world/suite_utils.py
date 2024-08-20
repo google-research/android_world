@@ -276,10 +276,11 @@ def _run_task(
 def _get_task_info(episodes: list[dict[str, Any]]) -> tuple[set[str], set[str]]:
   completed, failed = [], []
   for episode in episodes:
+    instance_name = f'{episode[constants.EpisodeConstants.TASK_TEMPLATE]}_{episode[constants.EpisodeConstants.INSTANCE_ID]}'
     if episode.get(constants.EpisodeConstants.EXCEPTION_INFO) is not None:
-      failed.append(episode[constants.EpisodeConstants.TASK_TEMPLATE])
+      failed.append(instance_name)
     else:
-      completed.append(episode[constants.EpisodeConstants.TASK_TEMPLATE])
+      completed.append(instance_name)
   return set(completed), set(failed)
 
 
@@ -307,6 +308,7 @@ def _run_task_suite(
   metadata_fields = [
       constants.EpisodeConstants.GOAL,
       constants.EpisodeConstants.TASK_TEMPLATE,
+      constants.EpisodeConstants.INSTANCE_ID,
       constants.EpisodeConstants.IS_SUCCESSFUL,
       constants.EpisodeConstants.EPISODE_LENGTH,
       constants.EpisodeConstants.RUN_TIME,
@@ -317,19 +319,21 @@ def _run_task_suite(
 
   correct, total = 0, 0
   for name, instances in suite.items():
-    already_processed = name in completed_tasks and name not in failed_tasks
-    if already_processed:
-      continue
-
     msg = 'Running task: ' + name
     print(msg + '\n' + '=' * len(msg))
 
-    task_episodes = []
-    for instance in instances:
+    for i, instance in enumerate(instances):
+      instance_name = f'{name}_{i}'
+      already_processed = (
+          instance_name in completed_tasks and instance_name not in failed_tasks
+      )
+      if already_processed:
+        print(f'Skipping already processed task {instance_name}')
+        continue
       episode = _run_task(instance, run_episode, env, demo_mode=demo_mode)
       episode[constants.EpisodeConstants.AGENT_NAME] = agent_name
-      task_episodes.append(episode)
-      checkpointer.save_episodes(task_episodes, name)
+      episode[constants.EpisodeConstants.INSTANCE_ID] = i
+      checkpointer.save_episodes([episode], instance_name)
 
       episodes_metadata.append({k: episode[k] for k in metadata_fields})
       process_episodes(episodes_metadata, print_summary=True)
@@ -337,7 +341,7 @@ def _run_task_suite(
       if episode[constants.EpisodeConstants.EXCEPTION_INFO] is not None:
         # Don't include episode in tally if execution/eval logic errored out.
         continue
-      correct += episode['is_successful']
+      correct += episode[constants.EpisodeConstants.IS_SUCCESSFUL]
       total += 1
       if demo_mode:
         _update_scoreboard(correct, total, env.controller)

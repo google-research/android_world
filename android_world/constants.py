@@ -24,6 +24,7 @@ class EpisodeConstants:
   Attributes:
     EPISODE_DATA: Data for a full episode.
     GOAL: The high-level (episode-level) goal for an episode.
+    INSTANCE_ID: The index of the instance in the combinations.
     TASK_TEMPLATE: A task template, e.g., MessagesSendSMS
     IS_SUCCESSFUL: Binary variable whether automated system detects success.
     RUN_TIME: Time to run episode.
@@ -36,6 +37,7 @@ class EpisodeConstants:
 
   EPISODE_DATA = 'episode_data'
   GOAL = 'goal'
+  INSTANCE_ID = 'instance_id'
   # Scripted task constants.
   TASK_TEMPLATE = 'task_template'
   IS_SUCCESSFUL = 'is_successful'

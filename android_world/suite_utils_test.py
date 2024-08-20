@@ -220,9 +220,7 @@ class TestSuite(absltest.TestCase):
     with self.assertRaises(ValueError):
       suite_utils._filter_tasks(
           suite,
-          self.task_registry.get_registry(
-              registry.TaskRegistry.ANDROID_FAMILY
-          ),
+          self.task_registry.get_registry(registry.TaskRegistry.ANDROID_FAMILY),
           tasks,
       )
 
@@ -458,17 +456,11 @@ class RunTaskSuiteTest(absltest.TestCase):
       mock_env,
       unused_mock_sleep,
   ):
-    # Simulating already completed Task1
+    # Simulating partially completed Task1
     mock_checkpointer.load.return_value = [
         {
+            'instance_id': 0,
             'is_successful': 0.0,
-            'goal': 'Current state eval',
-            'task_template': 'Task1',
-            'episode_length': 1,
-            'run_time': 0,
-        },
-        {
-            'is_successful': 1.0,
             'goal': 'Current state eval',
             'task_template': 'Task1',
             'episode_length': 1,
@@ -486,6 +478,10 @@ class RunTaskSuiteTest(absltest.TestCase):
     )
     mock_run_e2e = mock.MagicMock()
     mock_run_e2e.side_effect = [
+        episode_runner.EpisodeResult(
+            True,
+            {'step_number': [0]},
+        ),
         episode_runner.EpisodeResult(
             True,
             {'step_number': [0]},
@@ -516,11 +512,11 @@ class RunTaskSuiteTest(absltest.TestCase):
 
     self.assertTaskResults(result)
     mock_checkpointer.load.assert_called_once()
-    # Don't need to run task 1.
-    # Task 2.
-    mock_run_e2e.assert_called_once()  # Task 2 has one instance.
+    # Run one instance for Task1, one instance for Task2
+    mock_run_e2e.assert_called()
     mock_checkpointer.save_episodes.assert_has_calls([
-        mock.call(mock.ANY, 'Task2'),
+        mock.call(mock.ANY, 'Task1_1'),
+        mock.call(mock.ANY, 'Task2_0'),
     ])
 
   @mock.patch.object(time, 'sleep', autospec=True)
@@ -587,8 +583,9 @@ class RunTaskSuiteTest(absltest.TestCase):
     mock_checkpointer.load.assert_called_once()
     mock_checkpointer.save_episodes.assert_has_calls(
         [
-            mock.call(mock.ANY, 'Task1'),
-            mock.call(mock.ANY, 'Task2'),
+            mock.call(mock.ANY, 'Task1_0'),
+            mock.call(mock.ANY, 'Task1_1'),
+            mock.call(mock.ANY, 'Task2_0'),
         ],
         any_order=False,
     )
@@ -606,16 +603,23 @@ class RunTaskSuiteTest(absltest.TestCase):
   ):
     mock_checkpointer.load.return_value = [
         {
+            'instance_id': 0,
             'is_successful': 0,
             'goal': 'Current state eval',
             'task_template': 'Task1',
         },
         {
+            'instance_id': 1,
             'is_successful': 1,
             'goal': 'Current state eval',
             'task_template': 'Task1',
         },
-        {'is_successful': 1, 'goal': 'ADB eval', 'task_template': 'Task2'},
+        {
+            'instance_id': 0,
+            'is_successful': 1,
+            'goal': 'ADB eval',
+            'task_template': 'Task2',
+        },
     ]
     mock_run_e2e = mock.MagicMock()
     suite = suite_utils.Suite(
