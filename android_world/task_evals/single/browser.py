@@ -402,6 +402,7 @@ class BrowserMultiply(BrowserTask):
         generateNumber();
       } else {
         document.getElementById('button').style.display = 'none';
+        document.getElementById('number').style.display = 'none';
         document.getElementById('form').style.display = 'block';
       }
     }
