@@ -153,6 +153,25 @@ class AsyncEnv(abc.ABC):
   def hide_automation_ui(self) -> None:
     """Hides any UI, such as screen coordinates,."""
 
+  @property
+  @abc.abstractmethod
+  def orientation(self) -> int:
+    """Returns the orientation of the environment.
+
+    Returns: 0 for portrait, 1 for landscape, 2 for reverse portrait,
+    3 for reverse landscape.
+    """
+
+  @property
+  @abc.abstractmethod
+  def physical_frame_boundary(self) -> tuple[int, int, int, int]:
+    """Returns the physical frame boundary of the environment.
+
+    Returns: First two integers are the coordinates for top left corner, last
+    two are for lower right corner. All coordinates are given in portrait
+    orientation.
+    """
+
 
 def _process_timestep(timestep: dm_env.TimeStep) -> State:
   """Parses timestep observation and returns State."""
@@ -289,3 +308,11 @@ class AsyncAndroidEnv(AsyncEnv):
 
   def close(self) -> None:
     return self.controller.close()
+
+  @property
+  def orientation(self) -> int:
+    return adb_utils.get_orientation(self.controller)
+
+  @property
+  def physical_frame_boundary(self) -> tuple[int, int, int, int]:
+    return adb_utils.get_physical_frame_boundary(self.controller)
