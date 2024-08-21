@@ -308,6 +308,190 @@ class ProtoUtilsTest(parameterized.TestCase):
 
   @parameterized.parameters([
       (
+          task_pb2.Task(
+              relevant_state=task_pb2.RelevantState(
+                  state=state_pb2.State(
+                      calendar=state_pb2.Calendar(
+                          events=[
+                              state_pb2.Event(
+                                  start_date='{month} {day} 2023',
+                                  duration='{duration}',
+                                  location='{location}',
+                                  description='{description}',
+                              )
+                          ]
+                      )
+                  ),
+                  exclusion_conditions=[
+                      task_pb2.ExclusionCondition(
+                          operation=task_pb2.ExclusionCondition.EQUAL_TO,
+                          field='start_date',
+                          value='{month} {day} 2023',
+                      )
+                  ],
+              ),
+              task_params=[
+                  task_pb2.TaskParams(
+                      name='month', possible_values=['October', 'November']
+                  ),
+                  task_pb2.TaskParams(name='day', possible_values=['1', '2']),
+                  task_pb2.TaskParams(
+                      name='duration', possible_values=['60m', '1h']
+                  ),
+              ],
+          ),
+          {
+              'month': 'October',
+              'day': '1',
+              'extra': 'extra',
+              'duration': '60m',
+              'location': 'Mountain View',
+              'description': 'Meeting',
+          },
+          task_pb2.Task(
+              relevant_state=task_pb2.RelevantState(
+                  state=state_pb2.State(
+                      calendar=state_pb2.Calendar(
+                          events=[
+                              state_pb2.Event(
+                                  start_date='October 1 2023',
+                                  duration='60m',
+                                  location='Mountain View',
+                                  description='Meeting',
+                              )
+                          ]
+                      )
+                  ),
+                  exclusion_conditions=[
+                      task_pb2.ExclusionCondition(
+                          operation=task_pb2.ExclusionCondition.EQUAL_TO,
+                          field='start_date',
+                          value='October 1 2023',
+                      )
+                  ],
+              ),
+              task_params=[
+                  task_pb2.TaskParams(
+                      name='month', possible_values=['October', 'November']
+                  ),
+                  task_pb2.TaskParams(name='day', possible_values=['1', '2']),
+                  task_pb2.TaskParams(
+                      name='duration', possible_values=['60m', '1h']
+                  ),
+              ],
+          ),
+      ),
+      (
+          task_pb2.Task(
+              relevant_state=task_pb2.RelevantState(
+                  state=state_pb2.State(
+                      calendar=state_pb2.Calendar(
+                          events=[
+                              state_pb2.Event(
+                                  start_date='{month} {day} 2023',
+                                  duration='{duration}',
+                                  location='{location}',
+                                  description='{description}',
+                              ),
+                              state_pb2.Event(
+                                  start_date='{month_without_replacement}',
+                                  duration='{duration_without_replacement}',
+                                  location='{location_without_replacement}',
+                              ),
+                          ]
+                      )
+                  ),
+                  exclusion_conditions=[
+                      task_pb2.ExclusionCondition(
+                          operation=task_pb2.ExclusionCondition.EQUAL_TO,
+                          field='start_date',
+                          value='{month} {day} 2023',
+                      )
+                  ],
+              ),
+              task_params=[
+                  task_pb2.TaskParams(
+                      name='month',
+                      possible_values=['{CURRENT_MONTH}', '{NEXT_MONTH}'],
+                  ),
+                  task_pb2.TaskParams(name='day', possible_values=['1', '2']),
+                  task_pb2.TaskParams(
+                      name='duration', possible_values=['60m', '30m']
+                  ),
+                  task_pb2.TaskParams(
+                      name='location',
+                      possible_values=['Mountain View', 'London'],
+                  ),
+              ],
+          ),
+          {
+              'month': '{CURRENT_MONTH}',
+              'CURRENT_MONTH': 'October',
+              'day': '1',
+              'extra': 'extra',
+              'duration': '60m',
+              'location': 'Mountain View',
+              'description': 'Meeting',
+              'NEXT_MONTH': 'November',
+          },
+          task_pb2.Task(
+              relevant_state=task_pb2.RelevantState(
+                  state=state_pb2.State(
+                      calendar=state_pb2.Calendar(
+                          events=[
+                              state_pb2.Event(
+                                  start_date='October 1 2023',
+                                  duration='60m',
+                                  location='Mountain View',
+                                  description='Meeting',
+                              ),
+                              state_pb2.Event(
+                                  start_date='November',
+                                  duration='30m',
+                                  location='London',
+                              ),
+                          ]
+                      )
+                  ),
+                  exclusion_conditions=[
+                      task_pb2.ExclusionCondition(
+                          operation=task_pb2.ExclusionCondition.EQUAL_TO,
+                          field='start_date',
+                          value='October 1 2023',
+                      )
+                  ],
+              ),
+              task_params=[
+                  task_pb2.TaskParams(
+                      name='month', possible_values=['October', 'November']
+                  ),
+                  task_pb2.TaskParams(name='day', possible_values=['1', '2']),
+                  task_pb2.TaskParams(
+                      name='duration', possible_values=['60m', '30m']
+                  ),
+                  task_pb2.TaskParams(
+                      name='location',
+                      possible_values=['Mountain View', 'London'],
+                  ),
+              ],
+          ),
+      ),
+  ])
+  def test_format_calendar_proto_with_params(
+      self,
+      task: task_pb2.Task,
+      chosen_params: dict[str, Any],
+      expected_proto: task_pb2.Task,
+  ):
+    proto_utils.initialize_proto(task, chosen_params)
+
+    self.assertEqual(
+        task,
+        expected_proto,
+    )
+
+  @parameterized.parameters([
+      (
           datetime.date(2023, 10, 15),
           datetime.date(2023, 10, 15),
           task_pb2.ExclusionCondition.Operation.EQUAL_TO,

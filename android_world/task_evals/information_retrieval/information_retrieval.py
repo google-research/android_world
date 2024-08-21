@@ -57,15 +57,19 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
       params: dict[str, Any],
   ):
     super().__init__(params)
-    task = task_pb2.Task()
-    task.CopyFrom(self.task_template)
-    if task.relevant_state.state.HasField('calendar'):
-      self.app_names = (task.relevant_state.state.calendar.app_name,)
-    if task.relevant_state.state.HasField('tasks_app'):
+    # Need to make a copy of the task template so that future runs aren't
+    # affected.
+    self._task = task_pb2.Task()
+    self._task.CopyFrom(self.task_template)
+    self.template = self.task.prompt
+    self.complexity = self.task.complexity
+    if self.task.relevant_state.state.HasField('calendar'):
+      self.app_names = (self.task.relevant_state.state.calendar.app_name,)
+    if self.task.relevant_state.state.HasField('tasks_app'):
       self.app_names = ('tasks',)
-    if task.relevant_state.state.HasField('sports_activity_app'):
+    if self.task.relevant_state.state.HasField('sports_activity_app'):
       self.app_names = ('open tracks sports tracker',)
-    if task.relevant_state.state.HasField('notes_app'):
+    if self.task.relevant_state.state.HasField('notes_app'):
       self.app_names = ('joplin',)
 
   def initialize_task(
@@ -73,40 +77,34 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
       env: interface.AsyncEnv,
   ) -> None:
     super().initialize_task(env)
-    # Need to make a copy of the task template so that future runs aren't
-    # affected.
-    self._task = task_pb2.Task()
-    self._task.CopyFrom(self.task_template)
-    self.template = self._task.prompt
-    self.complexity = self._task.complexity
-    proto_utils.initialize_proto(self._task, self.params)
+    proto_utils.initialize_proto(self.task, self.params)
     _maybe_replace_date(self.params)
     if (
-        self._task.relevant_state.state.HasField('calendar')
-        and self._task.relevant_state.state.calendar.app_name
+        self.task.relevant_state.state.HasField('calendar')
+        and self.task.relevant_state.state.calendar.app_name
         == 'simple calendar pro'
     ):
       calendar_utils_ir.setup_task_state(
-          self._task.relevant_state.state.calendar,
-          list(self._task.relevant_state.exclusion_conditions),
+          self.task.relevant_state.state.calendar,
+          list(self.task.relevant_state.exclusion_conditions),
           env,
       )
-    if self._task.relevant_state.state.HasField('tasks_app'):
+    if self.task.relevant_state.state.HasField('tasks_app'):
       task_app_utils.setup_task_state(
-          self._task.relevant_state.state.tasks_app,
-          list(self._task.relevant_state.exclusion_conditions),
+          self.task.relevant_state.state.tasks_app,
+          list(self.task.relevant_state.exclusion_conditions),
           env,
       )
-    if self._task.relevant_state.state.HasField('sports_activity_app'):
+    if self.task.relevant_state.state.HasField('sports_activity_app'):
       activity_app_utils.setup_task_state(
-          self._task.relevant_state.state.sports_activity_app,
-          list(self._task.relevant_state.exclusion_conditions),
+          self.task.relevant_state.state.sports_activity_app,
+          list(self.task.relevant_state.exclusion_conditions),
           env,
       )
-    if self._task.relevant_state.state.HasField('notes_app'):
+    if self.task.relevant_state.state.HasField('notes_app'):
       joplin_app_utils.setup_task_state(
-          self._task.relevant_state.state.notes_app,
-          list(self._task.relevant_state.exclusion_conditions),
+          self.task.relevant_state.state.notes_app,
+          list(self.task.relevant_state.exclusion_conditions),
           env,
       )
 
@@ -117,7 +115,7 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
 
     try:
       answers_are_equal = proto_utils.check_agent_answer(
-          env.interaction_cache, self._task
+          env.interaction_cache, self.task
       )
       return 1.0 if answers_are_equal else 0.0
     except ValueError:

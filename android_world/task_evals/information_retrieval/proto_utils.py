@@ -306,14 +306,19 @@ def format_relevant_state_with_params(
     _format_field_if_exists(condition, 'value', task_params, unused_params)
 
 
-def _format_params_with_params(params: dict[str, Any]):
+def _format_params_with_params(
+    task_params: list[task_pb2.TaskParams], params: dict[str, Any]
+):
+  for task_param in task_params:
+    for index, possible_value in enumerate(task_param.possible_values):
+      task_param.possible_values[index] = possible_value.format(**params)
   for param_name, param_value in params.items():
     if isinstance(param_value, str):
       params[param_name] = param_value.format(**params)
 
 
 def initialize_proto(task: task_pb2.Task, task_params: dict[str, Any]):
-  _format_params_with_params(task_params)
+  _format_params_with_params(list(task.task_params), task_params)
   _format_success_criteria_with_params(task.success_criteria, task_params)
   format_relevant_state_with_params(
       task.relevant_state, task_params, list(task.task_params)
