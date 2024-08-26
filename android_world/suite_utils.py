@@ -155,7 +155,12 @@ def create_suite(
         instance_seed = _get_instance_seed(name, i)
       else:
         instance_seed = None
-      current.append(_instantiate_task(task_type, seed=instance_seed, env=env))
+      try:
+        instance = _instantiate_task(task_type, seed=instance_seed, env=env)
+      except Exception as e:  # pylint: disable=broad-exception-caught
+        print(f'Error in creating task {name}: {e}.')
+        continue
+      current.append(instance)
     suite[name] = current
   suite = _filter_tasks(suite, task_registry, tasks)
 
@@ -633,6 +638,7 @@ def process_episodes(
     result.insert(0, 'task_num', list(range(len(result) - 1)) + [0])
     result.task_num = result.task_num.astype(int)
     pd.set_option('display.max_columns', 100)
+    pd.set_option('display.max_row', 100)
     pd.set_option('display.width', 1000)
     print(f'\n\n{result}')
 
