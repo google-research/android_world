@@ -216,6 +216,29 @@ def check_event_conditions(
     return True
   # Keeps track of whether an exclusion condition is met.
   all_conditions_met = True
+
+  # If both start_date and start_time are specified in the exclusion conditions
+  # as exact matches, use them together as a single datetime.
+  fields_to_conditions = {
+      condition.field: condition
+      for condition in exclusion_conditions
+      if condition.operation == task_pb2.ExclusionCondition.Operation.EQUAL_TO
+  }
+  if (
+      'start_date' in fields_to_conditions.keys()
+      and 'start_time' in fields_to_conditions.keys()
+  ):
+    condition_date = datetime_utils_ir.get_date(
+        fields_to_conditions['start_date'].value
+    )
+    condition_time = datetime_utils_ir.parse_time(
+        fields_to_conditions['start_time'].value
+    )
+    condition_datetime = datetime.datetime.combine(
+        condition_date, condition_time
+    )
+  else:
+    condition_datetime = None
   for condition in exclusion_conditions:
     start_date = datetime_utils_ir.get_date(event.start_date)
     start_time = datetime.datetime.strptime(
@@ -226,26 +249,78 @@ def check_event_conditions(
         seconds=parse_duration(event.duration)
     )
     if condition.field == 'start_date':
-      condition_value = datetime_utils_ir.get_date(condition.value)
-
-      # Checks if the whole span of the event meets the exclusion condition in
-      # case the event spans multiple days.
-      overlaps = proto_utils.compare(
-          start_date, condition.operation, condition_value
-      ) or proto_utils.compare(
-          end_datetime.date(), condition.operation, condition_value
+      condition_value = (
+          condition_datetime
+          if condition_datetime
+          else datetime_utils_ir.get_date(condition.value)
       )
+      event_start_value = start_datetime if condition_datetime else start_date
+      event_end_value = (
+          end_datetime if condition_datetime else end_datetime.date()
+      )
+
+      if condition.operation == task_pb2.ExclusionCondition.Operation.EQUAL_TO:
+
+        # Checks that no date between start and end overlaps with the
+        # condition value.
+        overlaps = proto_utils.compare(
+            event_start_value,
+            task_pb2.ExclusionCondition.Operation.LESS_THAN_OR_EQUAL_TO,
+            condition_value,
+        ) and proto_utils.compare(
+            event_end_value,
+            task_pb2.ExclusionCondition.Operation.GREATER_THAN_OR_EQUAL_TO,
+            condition_value,
+        )
+      else:
+        # Checks if the whole span of the event meets the exclusion condition in
+        # case the event spans multiple days.
+        overlaps = proto_utils.compare(
+            event_start_value,
+            condition.operation,
+            condition_value,
+        ) or proto_utils.compare(
+            event_end_value,
+            condition.operation,
+            condition_value,
+        )
       all_conditions_met = all_conditions_met and overlaps
 
     elif condition.field == 'start_time':
-      condition_value = datetime_utils_ir.parse_time(condition.value)
-
-      # Checks if the whole span of the event meets the exclusion condition.
-      overlaps = proto_utils.compare(
-          start_time, condition.operation, condition_value
-      ) or proto_utils.compare(
-          end_datetime.time(), condition.operation, condition_value
+      condition_value = (
+          condition_datetime
+          if condition_datetime
+          else datetime_utils_ir.parse_time(condition.value)
       )
+      event_start_value = start_datetime if condition_datetime else start_time
+      event_end_value = (
+          end_datetime if condition_datetime else end_datetime.time()
+      )
+
+      if condition.operation == task_pb2.ExclusionCondition.Operation.EQUAL_TO:
+        # Checks that no time between start and end time overlaps with the
+        # condition value.
+        overlaps = proto_utils.compare(
+            event_start_value,
+            task_pb2.ExclusionCondition.Operation.LESS_THAN_OR_EQUAL_TO,
+            condition_value,
+        ) and proto_utils.compare(
+            event_end_value,
+            task_pb2.ExclusionCondition.Operation.GREATER_THAN_OR_EQUAL_TO,
+            condition_value,
+        )
+
+      else:
+        # Checks if the whole span of the event meets the exclusion condition.
+        overlaps = proto_utils.compare(
+            event_start_value,
+            condition.operation,
+            condition_value,
+        ) or proto_utils.compare(
+            event_end_value,
+            condition.operation,
+            condition_value,
+        )
       all_conditions_met = all_conditions_met and overlaps
 
     elif condition.field == 'title':

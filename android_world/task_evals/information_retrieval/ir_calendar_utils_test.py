@@ -114,67 +114,310 @@ class TestTimestampToLocalDatetime(parameterized.TestCase):
     event = calendar_utils.generate_random_event(exclusion_conditions)
     self.assertEqual(event, expected_event)
 
-  @parameterized.parameters([
-      (
-          state_pb2.Event(
+  @parameterized.named_parameters(
+      dict(
+          testcase_name=(
+              'multiple exclusion conditions: start_date exact match, event'
+              ' time overlap - is excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 5 2023',
+              start_time='12:30',
+              duration='60m',
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 5 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+              task_pb2.ExclusionCondition(
+                  field='start_time',
+                  value='12:45',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=False,
+      ),
+      dict(
+          testcase_name=(
+              'multiple exclusion conditions: start_date before exclusion'
+              ' condition, event time overlap - not excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 4 2023',
+              start_time='12:30',
+              duration='60m',
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 5 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+              task_pb2.ExclusionCondition(
+                  field='start_time',
+                  value='12:45',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=True,
+      ),
+      dict(
+          testcase_name=(
+              'multiple exclusion conditions: start_date and time no overlap -'
+              ' not excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 6 2023',
+              start_time='12:30',
+              duration='48h',  # end date is October 8 2023
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 5 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+              task_pb2.ExclusionCondition(
+                  field='start_time',
+                  value='12:30',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=True,
+      ),
+      dict(
+          testcase_name=(
+              'event overlaps start_date exclusion condition - excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 4 2023',
+              start_time='12:30',
+              duration='48h',  # end date is October 6 2023
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 5 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=False,
+      ),
+      dict(
+          testcase_name=(
+              'event overlaps start_time exclusion condition with no excluded'
+              ' start_date - excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 4 2023',
+              start_time='12:30',
+              duration='30m',
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_time',
+                  value='12:45',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=False,
+      ),
+      dict(
+          testcase_name=(
+              'event overlaps start_date and start_time exclusion conditions -'
+              ' excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 4 2023',
+              start_time='12:30',
+              duration='48h',  # end date is October 6 2023
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 5 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+              task_pb2.ExclusionCondition(
+                  field='start_time',
+                  value='12:45',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=False,
+      ),
+      dict(
+          testcase_name='equal_to exclusion condition not excluded',
+          event=state_pb2.Event(
+              start_date='October 15 2023',
+              start_time='12:30',
+              duration='60m',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 22 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              )
+          ],
+          expected_value=True,
+      ),
+      dict(
+          testcase_name='less_than exclusion condition is excluded',
+          event=state_pb2.Event(
+              start_date='October 15 2023',
+              start_time='12:30',
+              duration='60m',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 22 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.LESS_THAN,
+              )
+          ],
+          expected_value=False,
+      ),
+      dict(
+          testcase_name=(
+              'multiple exclusion conditions: start_date less_than matches,'
+              ' start_time does not match - not excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 15 2023',
+              start_time='12:30',
+              duration='60m',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 22 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.LESS_THAN,
+              ),
+              task_pb2.ExclusionCondition(
+                  field='start_time',
+                  value='14:00',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=True,
+      ),
+      dict(
+          testcase_name='contains exclusion condition is excluded',
+          event=state_pb2.Event(
+              start_date='October 15 2023',
+              start_time='12:30',
+              duration='60m',
+              title='Meeting with John',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='title',
+                  value='John',
+                  operation=task_pb2.ExclusionCondition.Operation.CONTAINS,
+              )
+          ],
+          expected_value=False,
+      ),
+      dict(
+          testcase_name=(
+              'multiple exclusion conditions: only one applies - not excluded'
+          ),
+          event=state_pb2.Event(
+              start_date='October 22 2023',
+              start_time='12:30',
+              duration='60m',
+              title='test title',
+          ),
+          exclusion_conditions=[
+              task_pb2.ExclusionCondition(
+                  field='start_date',
+                  value='October 22 2023',
+                  operation=task_pb2.ExclusionCondition.Operation.GREATER_THAN,
+              ),
+              task_pb2.ExclusionCondition(
+                  field='title',
+                  value='test title',
+                  operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
+              ),
+          ],
+          expected_value=True,
+      ),
+      dict(
+          testcase_name='single condition: EQUAL_TO start_date - excluded',
+          event=state_pb2.Event(
               start_date='October 15 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_date',
                   value='October 15 2023',
                   operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
               )
           ],
-          False,
+          expected_value=False,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name='single condition: EQUAL_TO start_date - not excluded',
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_date',
                   value='October 24 2023',
                   operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
               )
           ],
-          True,
+          expected_value=True,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name='single condition: EQUAL_TO start_time - excluded',
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_time',
                   value='12:30pm',
                   operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
               )
           ],
-          False,
+          expected_value=False,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name=(
+              'multiple conditions: CONTAINS title met GREATER_THAN date not'
+              ' met - not excluded'
+          ),
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting with David',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_date',
                   value='October 24 2023',
@@ -186,112 +429,131 @@ class TestTimestampToLocalDatetime(parameterized.TestCase):
                   operation=task_pb2.ExclusionCondition.Operation.CONTAINS,
               ),
           ],
-          True,
+          expected_value=True,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name='single condition: title contains - not excluded',
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting with David',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='title',
                   value='Jane',
                   operation=task_pb2.ExclusionCondition.Operation.CONTAINS,
               )
           ],
-          True,
+          expected_value=True,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name=(
+              'single condition: greater_than_or_equal_to start_date - excluded'
+          ),
+          event=state_pb2.Event(
               start_date='October 15 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_date',
                   value='October 15 2023',
                   operation=task_pb2.ExclusionCondition.Operation.GREATER_THAN_OR_EQUAL_TO,
               )
           ],
-          False,
+          expected_value=False,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name=(
+              'single condition: GREATER_THAN_OR_EQUAL_TO start_date - not'
+              ' excluded'
+          ),
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_date',
                   value='October 24 2023',
                   operation=task_pb2.ExclusionCondition.Operation.GREATER_THAN_OR_EQUAL_TO,
               )
           ],
-          True,
+          expected_value=True,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name=(
+              'single condition: LESS_THAN_OR_EQUAL_TO - not excluded'
+          ),
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:30',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_time',
                   value='12:00pm',
                   operation=task_pb2.ExclusionCondition.Operation.LESS_THAN_OR_EQUAL_TO,
               )
           ],
-          True,
+          expected_value=True,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name=(
+              'single condition: GREATER_THAN_OR_EQUAL_TO start_time - excluded'
+          ),
+          event=state_pb2.Event(
               start_date='October 22 2023',
               start_time='12:00',
               duration='30m',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_time',
                   value='12:30pm',
                   operation=task_pb2.ExclusionCondition.Operation.GREATER_THAN_OR_EQUAL_TO,
               )
           ],
-          False,
+          expected_value=False,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name=(
+              'single condition: GREATER_THAN_OR_EQUAL_TO overlap at day'
+              ' boundary - excluded'
+          ),
+          event=state_pb2.Event(
               start_date='October 21 2023',
               start_time='23:59',
               duration='1h',
               location='Mountain View',
               title='Meeting',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   field='start_date',
                   value='October 22 2023',
                   operation=task_pb2.ExclusionCondition.Operation.GREATER_THAN_OR_EQUAL_TO,
               )
           ],
-          False,
+          expected_value=False,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name='multiple conditions: time range - not excluded',
+          event=state_pb2.Event(
               start_date='October 18 2023',
               start_time='00:45',
               duration='15 m',
@@ -301,7 +563,7 @@ class TestTimestampToLocalDatetime(parameterized.TestCase):
               ),
               title='Call with HR',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
                   field='start_date',
@@ -318,17 +580,18 @@ class TestTimestampToLocalDatetime(parameterized.TestCase):
                   value='8pm',
               ),
           ],
-          True,
+          expected_value=True,
       ),
-      (
-          state_pb2.Event(
+      dict(
+          testcase_name='multiple conditions: time range - excluded',
+          event=state_pb2.Event(
               start_date='October 17 2023',
               start_time='07:31',
               duration='15 m',
               description='We will celebrate contract details.',
               title='Catch up on Campaign',
           ),
-          [
+          exclusion_conditions=[
               task_pb2.ExclusionCondition(
                   operation=task_pb2.ExclusionCondition.Operation.EQUAL_TO,
                   field='start_date',
@@ -345,9 +608,9 @@ class TestTimestampToLocalDatetime(parameterized.TestCase):
                   value='8pm',
               ),
           ],
-          False,
+          expected_value=False,
       ),
-  ])
+  )
   def test_check_event_conditions(
       self,
       event: state_pb2.Event,
