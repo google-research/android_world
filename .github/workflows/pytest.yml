@@ -48,6 +48,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y fonts-dejavu fonts-liberation ttf-mscorefonts-installer
+        # Workaround for dependency issues with protobuf and google-generativeai
+        pip install protobuf==5.27.3
         pip --version
         pip install pytest-xdist
         pip install -e .[dev]
