@@ -85,12 +85,12 @@ def _instantiate_task(
   Returns:
     An instance of a task.
   """
+  task.set_device_time(env)
   if params is None:
     if seed is not None:
       random.seed(seed)
     params = task.generate_random_params()
     params[constants.EpisodeConstants.SEED] = seed
-  task.set_device_time(env)
   return task(params)
 
 
