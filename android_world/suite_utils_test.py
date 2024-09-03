@@ -462,7 +462,7 @@ class RunTaskSuiteTest(absltest.TestCase):
             'instance_id': 0,
             'is_successful': 0.0,
             'goal': 'Current state eval',
-            'task_template': 'Task1',
+            'task_template': 'FakeCurrentStateEval',
             'episode_length': 1,
             'run_time': 0,
         },
@@ -490,7 +490,7 @@ class RunTaskSuiteTest(absltest.TestCase):
 
     suite = suite_utils.Suite(
         **{
-            'Task1': [
+            'FakeCurrentStateEval': [
                 test_utils.FakeCurrentStateEval(
                     test_utils.FakeCurrentStateEval.generate_random_params()
                 ),
@@ -498,7 +498,7 @@ class RunTaskSuiteTest(absltest.TestCase):
                     test_utils.FakeCurrentStateEval.generate_random_params()
                 ),
             ],
-            'Task2': [
+            'FakeAdbEval': [
                 test_utils.FakeAdbEval(
                     test_utils.FakeAdbEval.generate_random_params()
                 )
@@ -515,8 +515,8 @@ class RunTaskSuiteTest(absltest.TestCase):
     # Run one instance for Task1, one instance for Task2
     mock_run_e2e.assert_called()
     mock_checkpointer.save_episodes.assert_has_calls([
-        mock.call(mock.ANY, 'Task1_1'),
-        mock.call(mock.ANY, 'Task2_0'),
+        mock.call(mock.ANY, 'FakeCurrentStateEval_1'),
+        mock.call(mock.ANY, 'FakeAdbEval_0'),
     ])
 
   @mock.patch.object(time, 'sleep', autospec=True)
@@ -557,7 +557,7 @@ class RunTaskSuiteTest(absltest.TestCase):
     ]
     suite = suite_utils.Suite(
         **{
-            'Task1': [
+            'FakeCurrentStateEval': [
                 test_utils.FakeCurrentStateEval(
                     test_utils.FakeCurrentStateEval.generate_random_params()
                 ),
@@ -565,7 +565,7 @@ class RunTaskSuiteTest(absltest.TestCase):
                     test_utils.FakeCurrentStateEval.generate_random_params()
                 ),
             ],
-            'Task2': [
+            'FakeAdbEval': [
                 test_utils.FakeAdbEval(
                     test_utils.FakeAdbEval.generate_random_params()
                 )
@@ -583,9 +583,9 @@ class RunTaskSuiteTest(absltest.TestCase):
     mock_checkpointer.load.assert_called_once()
     mock_checkpointer.save_episodes.assert_has_calls(
         [
-            mock.call(mock.ANY, 'Task1_0'),
-            mock.call(mock.ANY, 'Task1_1'),
-            mock.call(mock.ANY, 'Task2_0'),
+            mock.call(mock.ANY, 'FakeCurrentStateEval_0'),
+            mock.call(mock.ANY, 'FakeCurrentStateEval_1'),
+            mock.call(mock.ANY, 'FakeAdbEval_0'),
         ],
         any_order=False,
     )
@@ -606,25 +606,25 @@ class RunTaskSuiteTest(absltest.TestCase):
             'instance_id': 0,
             'is_successful': 0,
             'goal': 'Current state eval',
-            'task_template': 'Task1',
+            'task_template': 'FakeCurrentStateEval',
         },
         {
             'instance_id': 1,
             'is_successful': 1,
             'goal': 'Current state eval',
-            'task_template': 'Task1',
+            'task_template': 'FakeCurrentStateEval',
         },
         {
             'instance_id': 0,
             'is_successful': 1,
             'goal': 'ADB eval',
-            'task_template': 'Task2',
+            'task_template': 'FakeAdbEval',
         },
     ]
     mock_run_e2e = mock.MagicMock()
     suite = suite_utils.Suite(
         **{
-            'Task1': [
+            'FakeCurrentStateEval': [
                 test_utils.FakeCurrentStateEval(
                     test_utils.FakeCurrentStateEval.generate_random_params()
                 ),
@@ -632,7 +632,7 @@ class RunTaskSuiteTest(absltest.TestCase):
                     test_utils.FakeCurrentStateEval.generate_random_params()
                 ),
             ],
-            'Task2': [
+            'FakeAdbEval': [
                 test_utils.FakeAdbEval(
                     test_utils.FakeAdbEval.generate_random_params()
                 )

@@ -323,7 +323,7 @@ def _run_task_suite(
     print(msg + '\n' + '=' * len(msg))
 
     for i, instance in enumerate(instances):
-      instance_name = f'{name}_{i}'
+      instance_name = f'{instance.name}_{i}'
       already_processed = (
           instance_name in completed_tasks and instance_name not in failed_tasks
       )
