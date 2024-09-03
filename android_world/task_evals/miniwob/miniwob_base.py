@@ -19,6 +19,7 @@ import time
 
 from android_env import env_interface
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.env import interface
 from android_world.task_evals import task_eval
 
@@ -49,7 +50,9 @@ def _get_episode_utterance(env: env_interface.AndroidEnvInterface) -> str:
   return utterance
 
 
-def get_episode_reward(env: env_interface.AndroidEnvInterface) -> float:
+def get_episode_reward(
+    env: android_world_controller.AndroidWorldController,
+) -> float:
   """Gets the reward for the current episode by querying MiniWob Android app."""
   reward = _extract_data(f"{_APP_NAME}.app.GET_REWARD_ACTION", env)
   if reward is None:
@@ -59,9 +62,11 @@ def get_episode_reward(env: env_interface.AndroidEnvInterface) -> float:
   return float(int(reward))
 
 
-def is_episode_terminated(env: env_interface.AndroidEnvInterface) -> bool:
+def is_episode_terminated(
+    controller: android_world_controller.AndroidWorldController,
+) -> bool:
   """Checks if the current episode is terminated."""
-  return get_episode_reward(env) != 0.0
+  return get_episode_reward(controller) != 0.0
 
 
 class MiniWoBTask(task_eval.TaskEval, abc.ABC):

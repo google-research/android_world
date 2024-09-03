@@ -16,10 +16,9 @@
 
 import dataclasses
 from typing import Any, Callable, Optional
-
-from android_env import env_interface
 from android_world import constants
 from android_world.agents import base_agent
+from android_world.env import android_world_controller
 import termcolor
 
 
@@ -44,7 +43,8 @@ def run_episode(
     max_n_steps: int = 10,
     start_on_home_screen: bool = False,
     termination_fn: (
-        Callable[[env_interface.AndroidEnvInterface], float] | None
+        Callable[[android_world_controller.AndroidWorldController], float]
+        | None
     ) = None,
 ) -> EpisodeResult:
   """Runs an agent on goal, e.g., "turn off wifi".
