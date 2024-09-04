@@ -13,6 +13,6 @@ pandas==2.1.4
 pydub
 python-Levenshtein
 pytest
-requests==2.31.0
+requests
 tenacity
 termcolor
