@@ -17,8 +17,6 @@
 import dataclasses
 from typing import Any, Optional
 
-from absl import logging
-
 
 @dataclasses.dataclass
 class BoundingBox:
@@ -151,9 +149,6 @@ def forest_to_ui_elements(
   Returns:
     The extracted UI elements.
   """
-
-  logging.info('Converting forest to UI Elements.')
-
   elements = []
   for window in forest.windows:
     for node in window.tree.nodes:
