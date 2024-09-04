@@ -164,6 +164,7 @@ def _plot_episode(
   fig, axs = plt.subplots(
       num_rows, num_columns, figsize=(4 * num_columns, num_rows * 3)
   )
+  axs = np.atleast_2d(axs)
   fig.suptitle(title)
 
   i = 0
@@ -187,6 +188,10 @@ def plot_episode(episode: dict[str, Any]) -> None:
   """Plots an episode in a grid format."""
   goal = episode['goal']
   episode_data = episode['episode_data']
-  screens = episode_data.get('screenshot') or episode_data.get('raw_screenshot')
+  screens = (
+      episode_data.get('screenshot')
+      or episode_data.get('raw_screenshot')
+      or episode_data.get('before_screenshot')
+  )
   assert screens is not None
   _plot_episode(screens, title=goal)
