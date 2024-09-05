@@ -24,6 +24,7 @@ from typing import Any
 
 from absl import logging
 
+INSTANCE_SEPARATOR = '_'
 
 Episode = dict[str, Any]
 
@@ -108,8 +109,12 @@ class IncrementalCheckpointer(Checkpointer):
 
   def load(self, fields: list[str] | None = None) -> list[Episode]:
     """Loads all task groups from disk."""
+    # Keep same order as runtime.
+    directories = os.listdir(self.directory)
+    directories.sort(key=lambda x: x.split(INSTANCE_SEPARATOR)[0])
+
     data = []
-    for filename in os.listdir(self.directory):
+    for filename in directories:
       if filename.endswith('.pkl.gz'):
         task_group_id = filename[:-7]  # Remove ".pkl.gz" extension
         task_group = self._load_task_group(task_group_id)

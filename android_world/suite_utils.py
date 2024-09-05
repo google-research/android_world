@@ -274,9 +274,21 @@ def _run_task(
 
 
 def _get_task_info(episodes: list[dict[str, Any]]) -> tuple[set[str], set[str]]:
+  """Gets task info from episodes.
+
+  Args:
+    episodes: Episodes to get info from.
+
+  Returns:
+    A tuple of completed and failed task names.
+  """
   completed, failed = [], []
   for episode in episodes:
-    instance_name = f'{episode[constants.EpisodeConstants.TASK_TEMPLATE]}_{episode[constants.EpisodeConstants.INSTANCE_ID]}'
+    instance_name = (
+        episode[constants.EpisodeConstants.TASK_TEMPLATE]
+        + checkpointer_lib.INSTANCE_SEPARATOR
+        + str(episode[constants.EpisodeConstants.INSTANCE_ID])
+    )
     if episode.get(constants.EpisodeConstants.EXCEPTION_INFO) is not None:
       failed.append(instance_name)
     else:
@@ -323,7 +335,9 @@ def _run_task_suite(
     print(msg + '\n' + '=' * len(msg))
 
     for i, instance in enumerate(instances):
-      instance_name = f'{instance.name}_{i}'
+      instance_name = (
+          instance.name + checkpointer_lib.INSTANCE_SEPARATOR + str(i)
+      )
       already_processed = (
           instance_name in completed_tasks and instance_name not in failed_tasks
       )

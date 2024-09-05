@@ -56,13 +56,13 @@ def generate_screen_variation_wrapper(
       super().initialize_task(env)
       # Go back to home screen with a reset.
       env.reset(True)
-      adb_utils.set_screen_size(self.width, self.height, env.base_env)
+      adb_utils.set_screen_size(self.width, self.height, env.controller)
       # It has been observed that without this pause, the following orientation
       # change will not work.
       time.sleep(2)
       # Task starts from the home screen and the following orientation change
       # will take effect for the next app opened but expired after closing.
-      adb_utils.change_orientation(self.orientation, env.base_env)
+      adb_utils.change_orientation(self.orientation, env.controller)
 
     @property
     def name(self) -> str:
