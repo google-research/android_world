@@ -20,10 +20,14 @@ import io
 import os
 import time
 from typing import Any, Optional
+
 import google.generativeai as genai
 from google.generativeai import types
 from google.generativeai.types import answer_types
+from google.generativeai.types import answer_types
+from google.generativeai.types import content_types
 from google.generativeai.types import generation_types
+from google.generativeai.types import safety_types
 import numpy as np
 from PIL import Image
 import requests
@@ -150,19 +154,37 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
       enable_safety_checks: bool = True,
       generation_config: generation_types.GenerationConfigType | None = None,
   ) -> tuple[str, Optional[bool], Any]:
+    response = self.llm.generate_content(
+        [text_prompt] + [Image.fromarray(image) for image in images],
+        safety_settings=None
+        if enable_safety_checks
+        else SAFETY_SETTINGS_BLOCK_NONE,
+        generation_config=generation_config,
+    )
+    try:
+      return response.text, True, response
+    except Exception as e:  # pylint: disable=broad-exception-caught
+      print(e)
+    if (response is not None) and (not self.is_safe(response)):
+      return ERROR_CALLING_LLM, False, response
+    return ERROR_CALLING_LLM, None, None
+
+  def generate_content(
+      self,
+      contents: content_types.ContentsType,
+      safety_settings: safety_types.SafetySettingOptions | None = None,
+      generation_config: generation_types.GenerationConfigType | None = None,
+  ) -> generation_types.GenerateContentResponse:
     counter = self.max_retry
     retry_delay = 1.0
-    output = None
     while counter > 0:
       try:
-        output = self.llm.generate_content(
-            [text_prompt] + [Image.fromarray(image) for image in images],
-            safety_settings=None
-            if enable_safety_checks
-            else SAFETY_SETTINGS_BLOCK_NONE,
+        response = self.llm.generate_content(
+            contents=contents,
+            safety_settings=safety_settings,
             generation_config=generation_config,
         )
-        return output.text, True, output
+        return response
       except Exception as e:  # pylint: disable=broad-exception-caught
         counter -= 1
         print('Error calling LLM, will retry in {retry_delay} seconds')
@@ -171,10 +193,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
           # Expo backoff
           time.sleep(retry_delay)
           retry_delay *= 2
-
-    if (output is not None) and (not self.is_safe(output)):
-      return ERROR_CALLING_LLM, False, output
-    return ERROR_CALLING_LLM, None, None
+    return generation_types.GenerateContentResponse()
 
 
 class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
