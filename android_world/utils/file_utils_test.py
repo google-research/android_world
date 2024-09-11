@@ -175,19 +175,21 @@ class FilesTest(parameterized.TestCase):
     response = file_utils.copy_data_to_device(
         temp_dir, '/remote/dir', self.mock_env
     )
+    calls = []
+    for file_name in file_names:
+      calls.append(
+          mock.call(
+              adb_pb2.AdbRequest(
+                  push=adb_pb2.AdbRequest.Push(
+                      content=file_contents,
+                      path=os.path.join('/remote/dir/', file_name),
+                  ),
+                  timeout_sec=None,
+              )
+          )
+      )
     self.mock_env.execute_adb_call.assert_has_calls(
-        [
-            mock.call(
-                adb_pb2.AdbRequest(
-                    push=adb_pb2.AdbRequest.Push(
-                        content=file_contents,
-                        path=os.path.join('/remote/dir/', file_name),
-                    ),
-                    timeout_sec=None,
-                )
-            )
-            for file_name in file_names
-        ],
+        calls,
         any_order=True,
     )
 

@@ -396,7 +396,11 @@ def copy_file_to_device(
         ),
         timeout_sec=timeout_sec,
     )
-  return env.execute_adb_call(push_request)
+  push_response = env.execute_adb_call(push_request)
+  adb_utils.issue_generic_request(
+      ["shell", "chmod", "777", remote_file_path], env
+  )
+  return push_response
 
 
 def copy_data_to_device(
