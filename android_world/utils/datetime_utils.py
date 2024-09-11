@@ -105,7 +105,7 @@ def setup_datetime(env: env_interface.AndroidEnvInterface) -> None:
   Args:
     env: AndroidEnv instance.
   """
-  adb_utils.issue_generic_request(['root'], env)
+  adb_utils.set_root_if_needed(env)
   _disable_auto_settings(env)
   _enable_24_hour_format(env)
   _set_timezone_to_utc(env)
@@ -125,7 +125,7 @@ def set_datetime(
     env: AndroidEnv instance.
     dt: The datetime to set the device to.
   """
-  adb_utils.issue_generic_request(['root'], env)
+  adb_utils.set_root_if_needed(env)
   _set_datetime(env, dt)
 
 

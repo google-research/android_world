@@ -1164,8 +1164,7 @@ def execute_sql_command(
   Returns:
     The adb response received after issuing the request.
   """
-  adb_command = ['root']
-  issue_generic_request(adb_command, env)
+  set_root_if_needed(env)
   adb_command = ['shell', f'sqlite3 {db_path} "{sql_command}"']
   adb_response = issue_generic_request(adb_command, env)
   return adb_response
@@ -1612,3 +1611,23 @@ def retry(n: int) -> Callable[[Any], Any]:
     return wrapper
 
   return decorator
+
+
+def set_root_if_needed(
+    env: env_interface.AndroidEnvInterface, timeout_sec: Optional[float] = None
+) -> adb_pb2.AdbResponse:
+  """Checks if ADB is running as root, and if not, attempts to set root.
+
+  Args:
+      env: The environment.
+      timeout_sec: A timeout to use for this operation.
+
+  Returns:
+      bool: True if root is set (or was already set), False otherwise.
+  """
+  response = issue_generic_request(['shell', 'whoami'], env, timeout_sec)
+
+  if response.generic.output.decode('utf-8').strip() == 'root':
+    return response
+
+  return issue_generic_request(['root'], env, timeout_sec)

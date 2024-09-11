@@ -308,7 +308,7 @@ def tmp_directory_from_device(
       "Copying %s directory to local tmp %s", device_path, tmp_directory
   )
 
-  adb_utils.issue_generic_request(["root"], env, timeout_sec)
+  adb_utils.set_root_if_needed(env, timeout_sec)
 
   if os.path.exists(tmp_directory):
     raise FileExistsError(f"{tmp_directory} already exists.")
@@ -359,7 +359,7 @@ def tmp_file_from_device(
   local_file = os.path.join(TMP_LOCAL_LOCATION, dir_and_file_name)
   try:
     # Need root access to access many directories.
-    adb_utils.issue_generic_request(["root"], env, timeout_sec)
+    adb_utils.set_root_if_needed(env, timeout_sec)
 
     if not check_file_exists(device_file, env):
       raise FileNotFoundError(f"{device_file} does not exist.")

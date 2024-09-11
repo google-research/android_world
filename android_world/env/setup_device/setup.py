@@ -100,7 +100,7 @@ def setup_apps(env: interface.AsyncEnv) -> None:
   # Make sure quick-settings are not displayed, which can override foreground
   # apps, and impede UI navigation required for setting up.
   adb_utils.press_home_button(env.controller)
-  adb_utils.issue_generic_request(["root"], env.controller)
+  adb_utils.set_root_if_needed(env.controller)
 
   _install_all_apks(env)
 

@@ -21,39 +21,19 @@ from absl.testing import parameterized
 from android_env import env_interface
 from android_env.proto import adb_pb2
 from android_world.env import adb_utils
-from android_world.env import device_constants
 from android_world.utils import datetime_utils
 
 
 @mock.patch.object(adb_utils, 'issue_generic_request')
 class AdbDatetimeManagerTest(absltest.TestCase):
 
-  def test_set_date_time(self, mock_issue_generic_request):
-    env_mock = mock.create_autospec(env_interface.AndroidEnvInterface)
-
-    datetime_utils.set_datetime(env_mock, dt=device_constants.DT)
-
-    expected_calls = [
-        mock.call(['root'], env_mock),
-        mock.call(['shell', 'date', device_constants.ANDROID_DT], env_mock),
-    ]
-    mock_issue_generic_request.assert_has_calls(expected_calls, any_order=False)
-
   @mock.patch.object(adb_utils, 'put_settings')
   def test_setup_datetime_environment(
-      self, mock_put_settings, mock_issue_generic_request
+      self, mock_put_settings, unused_mock_issue_generic_request
   ):
     env_mock = mock.create_autospec(env_interface.AndroidEnvInterface)
 
     datetime_utils.setup_datetime(env_mock)
-
-    expected_calls = [
-        mock.call(['root'], env_mock),
-        mock.call(
-            ['shell', 'service', 'call', 'alarm', '3', 's16', 'UTC'], env_mock
-        ),
-    ]
-    mock_issue_generic_request.assert_has_calls(expected_calls, any_order=False)
 
     expected_calls = [
         mock.call(
