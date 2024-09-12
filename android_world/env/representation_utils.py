@@ -205,6 +205,7 @@ def xml_dump_to_ui_elements(xml_string: str) -> list[UIElement]:
         is_selected=node.get('selected') == 'true',
         package_name=node.get('package'),
         resource_id=node.get('resource-id'),
+        is_visible=True,
     )
     if not is_root:
       ui_elements.append(ui_element)

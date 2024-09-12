@@ -19,7 +19,6 @@ import logging
 import time
 from typing import Any
 
-from android_env import env_interface
 from android_world.env import adb_utils
 from android_world.env import android_world_controller
 from android_world.env import json_action
@@ -30,7 +29,7 @@ def execute_adb_action(
     action: json_action.JSONAction,
     screen_elements: list[Any],  # list[UIElement]
     screen_size: tuple[int, int],
-    env: env_interface.AndroidEnvInterface,
+    env: android_world_controller.AndroidWorldController,
 ) -> None:
   """Execute an action based on a JSONAction object.
 
@@ -188,15 +187,9 @@ def execute_adb_action(
     print('Invalid action type')
 
 
-def _get_a11y_forest(env: env_interface.AndroidEnvInterface):
-  if isinstance(env, android_world_controller.AndroidWorldController):
-    return env.get_a11y_forest()
-  return android_world_controller.get_a11y_tree(env)
-
-
 def find_and_click_element(
     element_text: str,
-    env: env_interface.AndroidEnvInterface,
+    env: android_world_controller.AndroidWorldController,
     case_sensitive: bool = False,
 ):
   """Identifies element with element_text and clicks it.
@@ -210,26 +203,18 @@ def find_and_click_element(
   # Find text.
   action = _wait_and_find_click_element(element_text, env, case_sensitive)
 
-  # Send action.
-  forest = _get_a11y_forest(env)
-
-  ui_elements = representation_utils.forest_to_ui_elements(
-      forest, exclude_invisible_elements=True
-  )
+  ui_elements = env.get_ui_elements()
   screen_size = (0, 0)  # Unused, but required.
   execute_adb_action(action, ui_elements, screen_size, env)
 
 
 def _wait_and_find_click_element(
     target_text: str,
-    env: env_interface.AndroidEnvInterface,
+    env: android_world_controller.AndroidWorldController,
     case_sensitive: bool,
 ) -> json_action.JSONAction:
   """Wait for the screen to update until "element_text" appears."""
-  forest = _get_a11y_forest(env)
-  ui_elements = representation_utils.forest_to_ui_elements(
-      forest, exclude_invisible_elements=True
-  )
+  ui_elements = env.get_ui_elements()
   element, distance = _find_target_element(
       ui_elements, target_text, case_sensitive
   )
@@ -238,10 +223,7 @@ def _wait_and_find_click_element(
   while current - start < 10:
     if distance == 0:
       return json_action.JSONAction(action_type='click', index=element)
-    forest = _get_a11y_forest(env)
-    ui_elements = representation_utils.forest_to_ui_elements(
-        forest, exclude_invisible_elements=True
-    )
+    ui_elements = env.get_ui_elements()
     element, distance = _find_target_element(
         ui_elements, target_text, case_sensitive
     )

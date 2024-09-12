@@ -19,9 +19,9 @@ import re
 import time
 from typing import Iterator
 
-from android_env import env_interface
 from android_world.env import actuation
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 
 
 def clean_phone_number(phone_number: str) -> str:
@@ -39,7 +39,7 @@ def clean_phone_number(phone_number: str) -> str:
 def add_contact(
     name: str,
     phone_number: str,
-    env: env_interface.AndroidEnvInterface,
+    env: android_world_controller.AndroidWorldController,
     ui_delay_sec: float = 1.0,
 ):
   """Adds a contact with the specified name and phone number.
@@ -78,7 +78,7 @@ class Contact:
 
 
 def list_contacts(
-    env: env_interface.AndroidEnvInterface,
+    env: android_world_controller.AndroidWorldController,
 ) -> list[Contact]:
   """Lists all contacts available in the Android environment.
 
@@ -107,6 +107,6 @@ def list_contacts(
   )
 
 
-def clear_contacts(env: env_interface.AndroidEnvInterface):
+def clear_contacts(env: android_world_controller.AndroidWorldController):
   """Clears all contacts on the device."""
   adb_utils.clear_app_data("com.android.providers.contacts", env)

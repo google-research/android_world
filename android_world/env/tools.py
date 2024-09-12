@@ -19,9 +19,9 @@ import json
 import time
 from typing import Optional, Union
 
-from android_env import env_interface
 from android_world.env import actuation
 from android_world.env import adb_utils
+from android_world.env import android_world_controller
 from android_world.utils import contacts_utils
 
 
@@ -37,7 +37,7 @@ class AndroidToolController:
 
   def __init__(
       self,
-      env: env_interface.AndroidEnvInterface,
+      env: android_world_controller.AndroidWorldController,
   ):
     """Initializes the controller with an Android environment instance.
 
