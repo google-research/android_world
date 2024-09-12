@@ -16,6 +16,7 @@
 
 import dataclasses
 from typing import Any, Optional
+import xml.etree.ElementTree as ET
 
 
 @dataclasses.dataclass
@@ -158,3 +159,58 @@ def forest_to_ui_elements(
         else:
           elements.append(_accessibility_node_to_ui_element(node, screen_size))
   return elements
+
+
+def _parse_ui_hierarchy(xml_string: str) -> dict[str, Any]:
+  """Parses the UI hierarchy XML into a dictionary structure."""
+  root = ET.fromstring(xml_string)
+
+  def parse_node(node):
+    result = node.attrib
+    result['children'] = [parse_node(child) for child in node]
+    return result
+
+  return parse_node(root)
+
+
+def xml_dump_to_ui_elements(xml_string: str) -> list[UIElement]:
+  """Converts a UI hierarchy XML dump from uiautomator dump to UIElements."""
+  parsed_hierarchy = _parse_ui_hierarchy(xml_string)
+  ui_elements = []
+
+  def process_node(node, is_root):
+    bounds = node.get('bounds')
+    if bounds:
+      x_min, y_min, x_max, y_max = map(
+          int, bounds.strip('[]').replace('][', ',').split(',')
+      )
+      bbox = BoundingBox(x_min, x_max, y_min, y_max)
+    else:
+      bbox = None
+
+    ui_element = UIElement(
+        text=node.get('text'),
+        content_description=node.get('content-desc'),
+        class_name=node.get('class'),
+        bbox=bbox,
+        bbox_pixels=bbox,
+        is_checked=node.get('checked') == 'true',
+        is_checkable=node.get('checkable') == 'true',
+        is_clickable=node.get('clickable') == 'true',
+        is_enabled=node.get('enabled') == 'true',
+        is_focused=node.get('focused') == 'true',
+        is_focusable=node.get('focusable') == 'true',
+        is_long_clickable=node.get('long-clickable') == 'true',
+        is_scrollable=node.get('scrollable') == 'true',
+        is_selected=node.get('selected') == 'true',
+        package_name=node.get('package'),
+        resource_id=node.get('resource-id'),
+    )
+    if not is_root:
+      ui_elements.append(ui_element)
+
+    for child in node.get('children', []):
+      process_node(child, is_root=False)
+
+  process_node(parsed_hierarchy, is_root=True)
+  return ui_elements

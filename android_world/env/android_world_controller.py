@@ -15,6 +15,7 @@
 """Controller for Android that adds UI tree information to the observation."""
 
 import contextlib
+import enum
 import os
 import time
 from typing import Any
@@ -121,6 +122,16 @@ OBSERVATION_KEY_FOREST = 'forest'
 OBSERVATION_KEY_UI_ELEMENTS = 'ui_elements'
 
 
+class A11yMethod(enum.Enum):
+  """Method to get a11y tree."""
+
+  # Custom gRPC wrapper that uses a11y forwarder app.
+  A11Y_FORWARDER_APP = 'a11y_forwarder_app'
+
+  # From `uiautomator dump``.
+  UIAUTOMATOR = 'uiautomator'
+
+
 class AndroidWorldController(base_wrapper.BaseWrapper):
   """Controller for an Android instance that adds accessibility tree data.
 
@@ -131,26 +142,23 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
   element.
   """
 
-  def __init__(self, env: env_interface.AndroidEnvInterface):
-    self._env = a11y_grpc_wrapper.A11yGrpcWrapper(
-        env,
-        install_a11y_forwarding=True,
-        start_a11y_service=True,
-        enable_a11y_tree_info=True,
-        latest_a11y_info_only=True,
-    )
-    self._env.reset()  # Initializes required server services in a11y wrapper.
-
-  def _process_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
-    """Adds a11y tree info to the observation."""
-    forest = self.get_a11y_forest()
-    ui_elements = representation_utils.forest_to_ui_elements(
-        forest,
-        exclude_invisible_elements=True,
-    )
-    timestep.observation[OBSERVATION_KEY_FOREST] = forest
-    timestep.observation[OBSERVATION_KEY_UI_ELEMENTS] = ui_elements
-    return timestep
+  def __init__(
+      self,
+      env: env_interface.AndroidEnvInterface,
+      a11y_method: A11yMethod = A11yMethod.A11Y_FORWARDER_APP,
+  ):
+    if a11y_method == A11yMethod.A11Y_FORWARDER_APP:
+      self._env = a11y_grpc_wrapper.A11yGrpcWrapper(
+          env,
+          install_a11y_forwarding=True,
+          start_a11y_service=True,
+          enable_a11y_tree_info=True,
+          latest_a11y_info_only=True,
+      )
+      self._env.reset()  # Initializes required server services in a11y wrapper.
+    else:
+      self._env = env
+    self._a11y_method = a11y_method
 
   @property
   def device_screen_size(self) -> tuple[int, int]:
@@ -195,6 +203,33 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
       )
       self.refresh_env()
       return get_a11y_tree(self._env)
+
+  def get_ui_elements(self) -> list[representation_utils.UIElement]:
+    """Returns the most recent UI elements from the device."""
+    if self._a11y_method == A11yMethod.A11Y_FORWARDER_APP:
+      return representation_utils.forest_to_ui_elements(
+          self.get_a11y_forest(),
+          exclude_invisible_elements=True,
+      )
+    else:
+      return representation_utils.xml_dump_to_ui_elements(
+          adb_utils.uiautomator_dump(self._env)
+      )
+
+  def _process_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
+    """Adds a11y tree info to the observation."""
+    if self._a11y_method == A11yMethod.A11Y_FORWARDER_APP:
+      forest = self.get_a11y_forest()
+      ui_elements = representation_utils.forest_to_ui_elements(
+          forest,
+          exclude_invisible_elements=True,
+      )
+    else:
+      forest = None
+      ui_elements = self.get_ui_elements()
+    timestep.observation[OBSERVATION_KEY_FOREST] = forest
+    timestep.observation[OBSERVATION_KEY_UI_ELEMENTS] = ui_elements
+    return timestep
 
   def pull_file(
       self, remote_db_file_path: str, timeout_sec: Optional[float] = None
