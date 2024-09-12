@@ -66,7 +66,7 @@ def _get_element_text(
 
 def _plot_element_cartoon(
     elements: list[representation_utils.UIElement],
-    screenshot: np.ndarray,
+    screenshot: np.ndarray | None = None,
     max_text_length: int = 30,
 ) -> tuple[plt.Axes, plt.Axes]:
   """Plots UI element bboxes and associated properties.
@@ -83,18 +83,28 @@ def _plot_element_cartoon(
     Plot of screen.
   """
   _, axs = plt.subplots(1, 2, figsize=(13, 12))
-  axs[1].imshow(screenshot)
+  if screenshot is not None:
+    axs[1].imshow(screenshot)
   ax = axs[0]
 
   for element in elements:
     bbox = copy.deepcopy(element.bbox_pixels)
     if bbox is None:
       continue
-    # Normalize.
-    bbox.x_min /= screenshot.shape[1]
-    bbox.x_max /= screenshot.shape[1]
-    bbox.y_min /= screenshot.shape[0]
-    bbox.y_max /= screenshot.shape[0]
+
+    if screenshot is not None:
+      # Normalize.
+      bbox.x_min /= screenshot.shape[1]
+      bbox.x_max /= screenshot.shape[1]
+      bbox.y_min /= screenshot.shape[0]
+      bbox.y_max /= screenshot.shape[0]
+    else:
+      # Pick reasonable values.
+      bbox.x_min /= 1080
+      bbox.x_max /= 1080
+      bbox.y_min /= 2400
+      bbox.y_max /= 2400
+
     if bbox:
       width = bbox.x_max - bbox.x_min
       height = bbox.y_max - bbox.y_min
