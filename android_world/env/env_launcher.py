@@ -15,7 +15,6 @@
 """Launches the environment used in the benchmark."""
 
 import resource
-from typing import Optional
 
 from absl import logging
 from android_world.env import adb_utils
@@ -98,9 +97,6 @@ def load_and_setup_env(
     freeze_datetime: bool = True,
     adb_path: str = android_world_controller.DEFAULT_ADB_PATH,
     grpc_port: int = 8554,
-    controller: Optional[
-        android_world_controller.AndroidWorldController
-    ] = None,
 ) -> interface.AsyncEnv:
   """Create environment with `get_env()` and perform env setup and validation.
 
@@ -120,15 +116,10 @@ def load_and_setup_env(
       2023, to ensure consistent benchmarking.
     adb_path: The location of the adb binary.
     grpc_port: The port for gRPC communication with the emulator.
-    controller: The controller to use. If None, a new controller will be
-      created.
 
   Returns:
     An interactable Android environment.
   """
-  if controller is None:
-    env = _get_env(console_port, adb_path, grpc_port)
-  else:
-    env = interface.AsyncAndroidEnv(controller)
+  env = _get_env(console_port, adb_path, grpc_port)
   setup_env(env, emulator_setup, freeze_datetime)
   return env
