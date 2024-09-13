@@ -14,6 +14,7 @@
 
 """Utilities for evaluating automation agents."""
 
+import collections
 import datetime
 import hashlib
 import os
@@ -273,16 +274,20 @@ def _run_task(
     return result
 
 
-def _get_task_info(episodes: list[dict[str, Any]]) -> tuple[set[str], set[str]]:
+def _get_task_info(
+    episodes: list[dict[str, Any]],
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, list[dict[str, Any]]]]:
   """Gets task info from episodes.
 
   Args:
     episodes: Episodes to get info from.
 
   Returns:
-    A tuple of completed and failed task names.
+    A tuple of completed and failed task lookup tables.
   """
-  completed, failed = [], []
+
+  completed = collections.defaultdict(list)
+  failed = collections.defaultdict(list)
   for episode in episodes:
     instance_name = (
         episode[constants.EpisodeConstants.TASK_TEMPLATE]
@@ -290,10 +295,10 @@ def _get_task_info(episodes: list[dict[str, Any]]) -> tuple[set[str], set[str]]:
         + str(episode[constants.EpisodeConstants.INSTANCE_ID])
     )
     if episode.get(constants.EpisodeConstants.EXCEPTION_INFO) is not None:
-      failed.append(instance_name)
+      failed[instance_name].append(episode)
     else:
-      completed.append(instance_name)
-  return set(completed), set(failed)
+      completed[instance_name].append(episode)
+  return completed, failed
 
 
 def _run_task_suite(
@@ -326,9 +331,10 @@ def _run_task_suite(
       constants.EpisodeConstants.RUN_TIME,
       constants.EpisodeConstants.EXCEPTION_INFO,
   ]
-  episodes_metadata = checkpointer.load(fields=metadata_fields)
-  completed_tasks, failed_tasks = _get_task_info(episodes_metadata)
-
+  completed_tasks, failed_tasks = _get_task_info(
+      checkpointer.load(fields=metadata_fields)
+  )
+  episodes_metadata: list[dict[str, Any]] = []
   correct, total = 0, 0
   for name, instances in suite.items():
     msg = 'Running task: ' + name
@@ -338,12 +344,21 @@ def _run_task_suite(
       instance_name = (
           instance.name + checkpointer_lib.INSTANCE_SEPARATOR + str(i)
       )
+      # Transferring from old checkpoint.
+      if instance_name in completed_tasks:
+        completed_episodes: list[dict[str, Any]] = completed_tasks[
+            instance_name
+        ]
+        episodes_metadata.extend(completed_episodes)
+      if instance_name in failed_tasks:
+        episodes_metadata.extend(failed_tasks[instance_name])
       already_processed = (
           instance_name in completed_tasks and instance_name not in failed_tasks
       )
       if already_processed:
         print(f'Skipping already processed task {instance_name}')
         continue
+
       episode = _run_task(instance, run_episode, env, demo_mode=demo_mode)
       episode[constants.EpisodeConstants.AGENT_NAME] = agent_name
       episode[constants.EpisodeConstants.INSTANCE_ID] = i
@@ -647,6 +662,7 @@ def process_episodes(
     result.insert(0, 'task_num', list(range(len(result) - 1)) + [0])
     result.task_num = result.task_num.astype(int)
     pd.set_option('display.max_columns', 100)
+    pd.set_option('display.max_rows', 1000)
     pd.set_option('display.width', 1000)
     print(f'\n\n{result}')
 

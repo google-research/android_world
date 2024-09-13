@@ -650,6 +650,67 @@ class RunTaskSuiteTest(absltest.TestCase):
     mock_checkpointer.load.assert_called_once()
     mock_checkpointer.save.assert_not_called()
 
+  @mock.patch.object(time, 'sleep', autospec=True)
+  @mock.patch.object(interface, 'AsyncAndroidEnv')
+  @mock.patch.object(adb_utils, 'send_android_intent')
+  @mock.patch.object(checkpointer, 'Checkpointer')
+  def test_result_suite_equal_in_number(
+      self,
+      mock_checkpointer,
+      unused_mock_send_android_intent,
+      mock_env,
+      unused_mock_sleep,
+  ):
+    mock_checkpointer.load.return_value = [
+        {
+            'instance_id': 0,
+            'is_successful': 0,
+            'goal': 'Current state eval',
+            'task_template': 'FakeCurrentStateEval',
+        },
+        {
+            'instance_id': 0,
+            'is_successful': 1,
+            'goal': 'ADB eval',
+            'task_template': 'FakeAdbEval',
+        },
+    ]
+    mock_run_e2e = mock.MagicMock()
+    suite = suite_utils.Suite(
+        **{
+            'FakeCurrentStateEval': [
+                test_utils.FakeCurrentStateEval(
+                    test_utils.FakeCurrentStateEval.generate_random_params()
+                ),
+            ],
+            'FakeAdbEval': [
+                test_utils.FakeAdbEval(
+                    test_utils.FakeAdbEval.generate_random_params()
+                )
+            ],
+        },
+    )
+    suite.suite_family = 'android'
+
+    result = suite_utils._run_task_suite(
+        suite, mock_run_e2e, mock_env, mock_checkpointer
+    )
+    self.assertLen(result, 2)
+
+    suite2 = suite_utils.Suite(
+        **{
+            'FakeAdbEval': [
+                test_utils.FakeAdbEval(
+                    test_utils.FakeAdbEval.generate_random_params()
+                )
+            ],
+        },
+    )
+    result2 = suite_utils._run_task_suite(
+        suite2, mock_run_e2e, mock_env, mock_checkpointer
+    )
+    self.assertLen(result2, 1)
+
 
 if __name__ == '__main__':
   absltest.main()
