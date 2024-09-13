@@ -14,7 +14,6 @@
 
 """T3A: Text-only Autonomous Agent for Android."""
 
-import time
 from android_world.agents import agent_utils
 from android_world.agents import base_agent
 from android_world.agents import infer
@@ -273,9 +272,6 @@ def _summarize_prompt(
 class T3A(base_agent.EnvironmentInteractingAgent):
   """Text only autonomous agent for Android."""
 
-  # Wait a few seconds for the screen to stablize after executing an action.
-  WAIT_AFTER_ACTION_SECONDS = 2.0
-
   def __init__(
       self,
       env: interface.AsyncEnv,
@@ -446,10 +442,9 @@ Action: {"action_type": "status", "goal_status": "infeasible"}"""
           step_data,
       )
 
-    time.sleep(self.WAIT_AFTER_ACTION_SECONDS)
-
-    state = self.env.get_state()
+    state = self.get_post_transition_state()
     ui_elements = state.ui_elements
+
     after_element_list = _generate_ui_elements_description_list_full(
         ui_elements,
         self.env.logical_screen_size,
