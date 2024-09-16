@@ -65,7 +65,6 @@ DIRECTION = 'direction'
 APP_NAME = 'app_name'
 GOAL_STATUS = 'goal_status'
 
-
 @dataclasses.dataclass()
 class JSONAction:
   """Represents a parsed JSON action.
