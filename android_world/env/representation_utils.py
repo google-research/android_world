@@ -134,7 +134,7 @@ def _normalize_bounding_box(
 
 
 def forest_to_ui_elements(
-    forest: android_accessibility_forest_pb2.AndroidAccessibilityForest,
+    forest: android_accessibility_forest_pb2.AndroidAccessibilityForest | Any,
     exclude_invisible_elements: bool = False,
     screen_size: Optional[tuple[int, int]] = None,
 ) -> list[UIElement]:
@@ -220,9 +220,9 @@ def xml_dump_to_ui_elements(xml_string: str) -> list[UIElement]:
 
 
 def resize_forest_bounds(
-    forest: android_accessibility_forest_pb2.AndroidAccessibilityForest,
+    forest: android_accessibility_forest_pb2.AndroidAccessibilityForest | Any,
     factor: int,
-) -> android_accessibility_forest_pb2.AndroidAccessibilityForest:
+) -> android_accessibility_forest_pb2.AndroidAccessibilityForest | Any:
   """Creates a new accessibility forest with reduced bounds in screen by a factor of `factor`.
 
   This includes reducing bounds for both windows and nodes.
