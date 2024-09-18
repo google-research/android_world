@@ -184,7 +184,9 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
 
   def generate(
       self,
-      contents: content_types.ContentsType,
+      contents: (
+          content_types.ContentsType | list[str | np.ndarray | Image.Image]
+      ),
       safety_settings: safety_types.SafetySettingOptions | None = None,
       generation_config: generation_types.GenerationConfigType | None = None,
   ) -> tuple[str, Any]:
@@ -203,6 +205,8 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
     counter = self.max_retry
     retry_delay = 1.0
     response = None
+    if isinstance(contents, list):
+      contents = self.convert_content(contents)
     while counter > 0:
       try:
         response = self.llm.generate_content(
@@ -210,7 +214,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
             safety_settings=safety_settings,
             generation_config=generation_config,
         )
-        return response.as_text(), response
+        return response.text, response
       except Exception as e:  # pylint: disable=broad-exception-caught
         counter -= 1
         print('Error calling LLM, will retry in {retry_delay} seconds')
@@ -220,6 +224,21 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
           time.sleep(retry_delay)
           retry_delay *= 2
     raise RuntimeError(f'Error calling LLM. {response}.')
+
+  def convert_content(
+      self,
+      contents: list[str | np.ndarray | Image.Image],
+  ) -> content_types.ContentsType:
+    """Converts a list of contents to a ContentsType."""
+    converted = []
+    for item in contents:
+      if isinstance(item, str):
+        converted.append(item)
+      elif isinstance(item, np.ndarray):
+        converted.append(Image.fromarray(item))
+      elif isinstance(item, Image.Image):
+        converted.append(item)
+    return converted
 
 
 class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
