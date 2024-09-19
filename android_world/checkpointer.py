@@ -116,14 +116,17 @@ class IncrementalCheckpointer(Checkpointer):
     data = []
     for filename in directories:
       if filename.endswith('.pkl.gz'):
-        task_group_id = filename[:-7]  # Remove ".pkl.gz" extension
-        task_group = self._load_task_group(task_group_id)
-        if fields is not None:
-          task_group = [
-              {field: episode[field] for field in fields}
-              for episode in task_group
-          ]
-        data.extend(task_group)
+        try:
+          task_group_id = filename[:-7]  # Remove ".pkl.gz" extension
+          task_group = self._load_task_group(task_group_id)
+          if fields is not None:
+            task_group = [
+                {field: episode[field] for field in fields}
+                for episode in task_group
+            ]
+          data.extend(task_group)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+          print(f'Unable to load {filename} with exception: {e}')
     return data
 
   def _load_task_group(self, task_group_id: str) -> list[Episode]:
