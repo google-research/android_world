@@ -86,8 +86,10 @@ def setup_env(
   """Performs environment setup and validation."""
   _increase_file_descriptor_limit()
   if emulator_setup:
+    logging.info('Setting up apps on the emulator.')
     setup.setup_apps(env)
   if freeze_datetime:
+    logging.info('Freezing datetime.')
     datetime_utils.setup_datetime(env.controller)
 
 
