@@ -19,6 +19,7 @@ import dataclasses
 import datetime
 import os
 import random
+import re
 import shutil
 import string
 from typing import Iterator
@@ -302,7 +303,7 @@ def tmp_directory_from_device(
     FileNotFoundError: If the remote directory does not exist.
     RuntimeError: If there is an adb communication error.
   """
-  directory_name = os.path.split(device_path)[-1]
+  directory_name = re.sub(r"\W", "", device_path)
   tmp_directory = os.path.join(TMP_LOCAL_LOCATION, directory_name)
   logging.info(
       "Copying %s directory to local tmp %s", device_path, tmp_directory

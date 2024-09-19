@@ -84,16 +84,16 @@ class FilesTest(parameterized.TestCase):
         ),
     )
 
-    tmp_local_directory = os.path.join(file_utils.TMP_LOCAL_LOCATION, 'dir')
+    tmp_local_directory = f'{file_utils.TMP_LOCAL_LOCATION}/remotedir'
     with file_utils.tmp_directory_from_device(
-        '/remote/dir', self.mock_env
+        '/remotedir', self.mock_env
     ) as tmp_directory:
       self.assertEqual(tmp_local_directory, tmp_directory)
       self.mock_env.execute_adb_call.assert_has_calls([
           mock.call(
               adb_pb2.AdbRequest(
                   pull=adb_pb2.AdbRequest.Pull(
-                      path=os.path.join('/remote/dir/', file_name)
+                      path=os.path.join('/remotedir/', file_name)
                   ),
                   timeout_sec=None,
               )
