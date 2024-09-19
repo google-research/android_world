@@ -14,7 +14,6 @@
 
 """Tools for processing and representing accessibility trees."""
 
-import copy
 import dataclasses
 from typing import Any, Optional
 import xml.etree.ElementTree as ET
@@ -217,53 +216,3 @@ def xml_dump_to_ui_elements(xml_string: str) -> list[UIElement]:
 
   process_node(parsed_hierarchy, is_root=True)
   return ui_elements
-
-
-def resize_forest_bounds(
-    forest: android_accessibility_forest_pb2.AndroidAccessibilityForest | Any,
-    factor: int,
-) -> android_accessibility_forest_pb2.AndroidAccessibilityForest | Any:
-  """Creates a new accessibility forest with reduced bounds in screen by a factor of `factor`.
-
-  This includes reducing bounds for both windows and nodes.
-
-  Args:
-      forest: The original accessibility forest.
-      factor: The factor to change the bounds by.
-
-  Returns:
-      A new accessibility forest with modified bounds.
-  """
-
-  def reduce_bounds(bounds):
-    """Helper function to create new bounds reduced by half."""
-    return type(bounds)(
-        left=bounds.left // factor,
-        top=bounds.top // factor,
-        right=bounds.right // factor,
-        bottom=bounds.bottom // factor,
-    )
-
-  def copy_node_with_reduced_bounds(node):
-    """Create a copy of the node with reduced bounds."""
-    new_node = type(node)()
-    new_node.CopyFrom(node)
-    if hasattr(new_node, 'bounds_in_screen'):
-      new_node.bounds_in_screen.CopyFrom(reduce_bounds(node.bounds_in_screen))
-    return new_node
-
-  new_forest = copy.deepcopy(forest)
-
-  for window in new_forest.windows:
-    # Reduce bounds for the window itself
-    if hasattr(window, 'bounds_in_screen'):
-      window.bounds_in_screen.CopyFrom(reduce_bounds(window.bounds_in_screen))
-
-    # Reduce bounds for all nodes in the window
-    new_nodes = []
-    for node in window.tree.nodes:
-      new_nodes.append(copy_node_with_reduced_bounds(node))
-    window.tree.ClearField('nodes')
-    window.tree.nodes.extend(new_nodes)
-
-  return new_forest

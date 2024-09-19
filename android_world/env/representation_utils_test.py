@@ -17,7 +17,6 @@ from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
-from android_env.proto.a11y import android_accessibility_forest_pb2
 from android_world.env import representation_utils
 
 
@@ -114,62 +113,6 @@ class TestAccessibilityNodeToUIElement(parameterized.TestCase):
           ui_element.bbox_pixels, screen_size
       )
     self.assertEqual(ui_element.bbox, expected_normalized_bbox)
-
-
-class TestResizeForestBounds(absltest.TestCase):
-
-  def setUp(self):
-    super().setUp()
-    # Create a mock forest for testing
-    self.forest = android_accessibility_forest_pb2.AndroidAccessibilityForest()
-
-    # Add a window
-    window = self.forest.windows.add()
-    window.bounds_in_screen.left = 0
-    window.bounds_in_screen.top = 0
-    window.bounds_in_screen.right = 1000
-    window.bounds_in_screen.bottom = 2000
-
-    # Add a node to the window
-    node = window.tree.nodes.add()
-    node.bounds_in_screen.left = 100
-    node.bounds_in_screen.top = 200
-    node.bounds_in_screen.right = 300
-    node.bounds_in_screen.bottom = 400
-
-  def test_resize_forest_bounds(self):
-    # Resize the forest by a factor of 2
-    resized_forest = representation_utils.resize_forest_bounds(self.forest, 2)
-
-    # Check the window bounds
-    self.assertEqual(resized_forest.windows[0].bounds_in_screen.left, 0)
-    self.assertEqual(resized_forest.windows[0].bounds_in_screen.top, 0)
-    self.assertEqual(resized_forest.windows[0].bounds_in_screen.right, 500)
-    self.assertEqual(resized_forest.windows[0].bounds_in_screen.bottom, 1000)
-
-    # Check the node bounds
-    self.assertEqual(
-        resized_forest.windows[0].tree.nodes[0].bounds_in_screen.left, 50
-    )
-    self.assertEqual(
-        resized_forest.windows[0].tree.nodes[0].bounds_in_screen.top, 100
-    )
-    self.assertEqual(
-        resized_forest.windows[0].tree.nodes[0].bounds_in_screen.right, 150
-    )
-    self.assertEqual(
-        resized_forest.windows[0].tree.nodes[0].bounds_in_screen.bottom, 200
-    )
-
-    # Ensure the original forest is unchanged
-    self.assertEqual(self.forest.windows[0].bounds_in_screen.right, 1000)
-    self.assertEqual(self.forest.windows[0].bounds_in_screen.bottom, 2000)
-    self.assertEqual(
-        self.forest.windows[0].tree.nodes[0].bounds_in_screen.right, 300
-    )
-    self.assertEqual(
-        self.forest.windows[0].tree.nodes[0].bounds_in_screen.bottom, 400
-    )
 
 
 if __name__ == '__main__':
