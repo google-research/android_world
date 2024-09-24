@@ -144,7 +144,7 @@ def advance_system_time(
   current_time = datetime.datetime.strptime(
       adb_utils.issue_generic_request(
           ['shell', 'date'], env
-      ).generic.output.decode()[:-1],
+      ).generic.output.decode().strip(),
       '%a %b %d %H:%M:%S %Z %Y',
   )
 
