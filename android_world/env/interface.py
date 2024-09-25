@@ -112,6 +112,26 @@ class AsyncEnv(abc.ABC):
     """Displays a message on the screen."""
 
   @abc.abstractmethod
+  def ask_question(
+      self, question: str, timeout_seconds: float = -1.0
+  ) -> str | None:
+    """Asks a question to a hypothetical user in the environment.
+
+    Common uses are to ask a question to clarify the user-provided goal, to ask
+    for help when the agent is stuck, or when there is ambiguity in the current
+    screen.
+
+    Args:
+      question: The question to ask the user.
+      timeout_seconds: The timeout in seconds to wait for a response. If
+        negative, then wait indefinitely.
+
+    Returns:
+      The response from the user or None if the user did not answer within the
+      timeout.
+    """
+
+  @abc.abstractmethod
   def execute_action(self, action: json_action.JSONAction) -> None:
     """Executes action on the environment."""
 
@@ -289,6 +309,11 @@ class AsyncAndroidEnv(AsyncEnv):
         env=self.controller,
         extras={'task_type_string': header, 'goal_string': message},
     )
+
+  def ask_question(
+      self, question: str, timeout_seconds: float = -1.0
+  ) -> str | None:
+    raise NotImplementedError('ask_question is not implemented.')
 
   @property
   def foreground_activity_name(self) -> str:
