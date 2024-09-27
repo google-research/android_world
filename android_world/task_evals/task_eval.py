@@ -126,6 +126,9 @@ class TaskEval(abc.ABC):
 
   def initialize_device_time(self, env: interface.AsyncEnv) -> None:
     """Initializes the device time."""
+    datetime_utils.toggle_auto_settings(
+        env.controller, datetime_utils.Toggle.OFF
+    )
     datetime_utils.set_datetime(env.controller, self.device_time)
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:  # pylint: disable=unused-argument

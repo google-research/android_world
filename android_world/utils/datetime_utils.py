@@ -15,6 +15,7 @@
 """Manages date and time settings on an Android device using ADB commands."""
 
 import datetime
+import enum
 import random
 import time
 import zoneinfo
@@ -94,6 +95,36 @@ def create_random_october_2023_unix_ts(
   )
 
 
+class Toggle(enum.Enum):
+  ON = '1'
+  OFF = '0'
+
+
+def toggle_auto_settings(
+    env: env_interface.AndroidEnvInterface, toggle: Toggle
+) -> None:
+  """Disables the automatic date, time, and timezone settings.
+
+  This is to maintain benchmark consistency and prevent external time updates.
+
+  Args:
+    env: AndroidEnv instance.
+    toggle: Whether to enable or disable the settings.
+  """
+  adb_utils.put_settings(
+      adb_pb2.AdbRequest.SettingsRequest.Namespace.GLOBAL,
+      'auto_time',
+      toggle.value,
+      env,
+  )
+  adb_utils.put_settings(
+      adb_pb2.AdbRequest.SettingsRequest.Namespace.GLOBAL,
+      'auto_time_zone',
+      toggle.value,
+      env,
+  )
+
+
 def setup_datetime(env: env_interface.AndroidEnvInterface) -> None:
   """Prepares the Android device's date and time settings for benchmarking.
 
@@ -106,7 +137,7 @@ def setup_datetime(env: env_interface.AndroidEnvInterface) -> None:
     env: AndroidEnv instance.
   """
   adb_utils.set_root_if_needed(env)
-  _disable_auto_settings(env)
+  toggle_auto_settings(env, Toggle.OFF)
   _enable_24_hour_format(env)
   _set_timezone_to_utc(env)
   time.sleep(5.0)  # Takes a while to fully propagate.
@@ -151,25 +182,6 @@ def advance_system_time(
   # Set new system time.
   adb_utils.issue_generic_request(
       ['shell', 'date', (current_time + delta).strftime('%m%d%H%M%y.%S')], env
-  )
-
-
-def _disable_auto_settings(env: env_interface.AndroidEnvInterface) -> None:
-  """Disables the automatic date, time, and timezone settings.
-
-  This is to maintain benchmark consistency and prevent external time updates.
-
-  Args:
-    env: AndroidEnv instance.
-  """
-  adb_utils.put_settings(
-      adb_pb2.AdbRequest.SettingsRequest.Namespace.GLOBAL, 'auto_time', '0', env
-  )
-  adb_utils.put_settings(
-      adb_pb2.AdbRequest.SettingsRequest.Namespace.GLOBAL,
-      'auto_time_zone',
-      '0',
-      env,
   )
 
 

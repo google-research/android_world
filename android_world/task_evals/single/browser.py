@@ -16,12 +16,14 @@
 
 import os
 import random
+import time
 from typing import Any
 from android_world.env import adb_utils
 from android_world.env import device_constants
 from android_world.env import interface
 from android_world.task_evals import task_eval
 from android_world.task_evals.utils import user_data_generation
+from android_world.utils import datetime_utils
 from android_world.utils import file_utils
 
 
@@ -44,6 +46,13 @@ class BrowserTask(task_eval.TaskEval):
       'Open the file task.html in Downloads in the file manager; when prompted'
       ' open it with Chrome.'
   )
+
+  def initialize_device_time(self, env: interface.AsyncEnv) -> None:
+    """Initializes the device time."""
+    datetime_utils.toggle_auto_settings(
+        env.controller, datetime_utils.Toggle.ON
+    )
+    time.sleep(1.0)
 
   def initialize_task(self, env: interface.AsyncEnv):
     super().initialize_task(env)
@@ -77,6 +86,9 @@ class BrowserTask(task_eval.TaskEval):
     adb_utils.clear_app_data(
         adb_utils.extract_package_name(adb_utils.get_adb_activity('chrome')),
         env.controller,
+    )
+    datetime_utils.toggle_auto_settings(
+        env.controller, datetime_utils.Toggle.OFF
     )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
