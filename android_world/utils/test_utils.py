@@ -160,6 +160,9 @@ class AdbEvalTestBase(absltest.TestCase):
     self.mock_set_datetime = mock.patch.object(
         datetime_utils, 'set_datetime'
     ).start()
+    self.mock_set_datetime = mock.patch.object(
+        datetime_utils, 'setup_datetime'
+    ).start()
     self.mock_advance_system_time = mock.patch.object(
         datetime_utils, 'advance_system_time'
     ).start()

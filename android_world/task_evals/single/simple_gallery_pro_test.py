@@ -24,6 +24,7 @@ from android_world.task_evals.single import simple_gallery_pro
 from android_world.task_evals.utils import receipt_generator
 from android_world.task_evals.utils import user_data_generation
 from android_world.utils import app_snapshot
+from android_world.utils import datetime_utils
 from android_world.utils import fake_adb_responses
 from PIL import Image
 
@@ -64,6 +65,12 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
         mock.patch.object(
             app_snapshot,
             "restore_snapshot",
+        )
+    )
+    self.mock_setup_datetime = self.enter_context(
+        mock.patch.object(
+            datetime_utils,
+            "setup_datetime",
         )
     )
 

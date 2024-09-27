@@ -17,7 +17,6 @@
 import datetime
 import enum
 import random
-import time
 import zoneinfo
 
 from android_env import env_interface
@@ -140,7 +139,6 @@ def setup_datetime(env: env_interface.AndroidEnvInterface) -> None:
   toggle_auto_settings(env, Toggle.OFF)
   _enable_24_hour_format(env)
   _set_timezone_to_utc(env)
-  time.sleep(5.0)  # Takes a while to fully propagate.
 
 
 def set_datetime(
