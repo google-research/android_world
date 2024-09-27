@@ -76,7 +76,7 @@ class UIElement:
   resource_id: Optional[str] = None
 
 
-def _accessibility_node_to_ui_element(
+def accessibility_node_to_ui_element(
     node: Any,
     screen_size: Optional[tuple[int, int]] = None,
 ) -> UIElement:
@@ -158,7 +158,7 @@ def forest_to_ui_elements(
         if exclude_invisible_elements and not node.is_visible_to_user:
           continue
         else:
-          elements.append(_accessibility_node_to_ui_element(node, screen_size))
+          elements.append(accessibility_node_to_ui_element(node, screen_size))
   return elements
 
 

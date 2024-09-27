@@ -100,7 +100,7 @@ class TestAccessibilityNodeToUIElement(parameterized.TestCase):
     node = mock.MagicMock()
     node.bounds_in_screen = node_bounds
 
-    ui_element = representation_utils._accessibility_node_to_ui_element(
+    ui_element = representation_utils.accessibility_node_to_ui_element(
         node, screen_size
     )
     self.assertEqual(ui_element.bbox_pixels.x_min, node_bounds.left)
