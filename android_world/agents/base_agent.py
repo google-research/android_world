@@ -72,6 +72,8 @@ class EnvironmentInteractingAgent(abc.ABC):
       )
     self._transition_pause = transition_pause
 
+    self._max_steps = None
+
   @property
   def transition_pause(self) -> float | None:
     return self._transition_pause
@@ -87,6 +89,9 @@ class EnvironmentInteractingAgent(abc.ABC):
   @env.setter
   def env(self, env: interface.AsyncEnv) -> None:
     self._env = env
+
+  def set_max_steps(self, max_steps: int) -> None:
+    self._max_steps = max_steps
 
   def reset(self, go_home: bool = False) -> None:
     """Resets the agent."""
