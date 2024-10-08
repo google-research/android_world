@@ -45,11 +45,11 @@ def get_font_path() -> str:
   for font_name in _FONT_PATHS:
     try:
       font_path = ImageFont.truetype(font_name).path
-      return font_path
+      return font_path  # pytype: disable=bad-return-type  # pillow-102-upgrade
     except IOError:
       continue
   try:
-    return ImageFont.truetype().path
+    return ImageFont.truetype().path  # pytype: disable=bad-return-type  # pillow-102-upgrade
   except IOError as exc:
     raise RuntimeError("No suitable font found.") from exc
 
