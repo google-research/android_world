@@ -33,7 +33,7 @@ class SetupTest(absltest.TestCase):
     )
 
   @mock.patch.object(tools, "AndroidToolController")
-  @mock.patch.object(setup, "_download_and_install_apk")
+  @mock.patch.object(setup, "download_and_install_apk")
   @mock.patch.object(app_snapshot, "save_snapshot")
   def test_setup_apps(self, mock_save_snapshot, mock_install_apk, unused_tools):
     env = mock.create_autospec(interface.AsyncEnv)
@@ -46,7 +46,9 @@ class SetupTest(absltest.TestCase):
 
     for app_class in setup._APPS:
       if app_class.apk_names:  # 1P apps do not have APKs.
-        mock_install_apk.assert_any_call(app_class.apk_names[0], env)
+        mock_install_apk.assert_any_call(
+            app_class.apk_names[0], env.controller.env
+        )
       mock_app_setups[app_class].assert_any_call(env)
       mock_save_snapshot.assert_any_call(app_class.app_name, env.controller)
 
@@ -63,8 +65,8 @@ class InstallApksTest(absltest.TestCase):
   def setUp(self):
     super().setUp()
     self.env = mock.create_autospec(interface.AsyncEnv)
-    self.mock_download_and_install_apk = self.enter_context(
-        mock.patch.object(setup, "_download_and_install_apk")
+    self.mockdownload_and_install_apk = self.enter_context(
+        mock.patch.object(setup, "download_and_install_apk")
     )
     self.apps = [
         _App(apk_names=["apk1", "apk2"], app_name="App1"),
@@ -74,12 +76,15 @@ class InstallApksTest(absltest.TestCase):
     setup._APPS = self.apps
 
   def test_install_all_apks_success(self):
-    self.mock_download_and_install_apk.return_value = None
+    self.mockdownload_and_install_apk.return_value = None
 
     setup._install_all_apks(self.env)
 
-    expected_calls = [mock.call("apk1", self.env), mock.call("apk3", self.env)]
-    self.mock_download_and_install_apk.assert_has_calls(
+    expected_calls = [
+        mock.call("apk1", self.env.controller.env),
+        mock.call("apk3", self.env.controller.env),
+    ]
+    self.mockdownload_and_install_apk.assert_has_calls(
         expected_calls, any_order=True
     )
 
@@ -90,16 +95,16 @@ class InstallApksTest(absltest.TestCase):
         raise errors.AdbControllerError
       return None
 
-    self.mock_download_and_install_apk.side_effect = side_effect
+    self.mockdownload_and_install_apk.side_effect = side_effect
 
     setup._install_all_apks(self.env)
 
     expected_calls = [
-        mock.call("apk1", self.env),
-        mock.call("apk2", self.env),
-        mock.call("apk3", self.env),
+        mock.call("apk1", self.env.controller.env),
+        mock.call("apk2", self.env.controller.env),
+        mock.call("apk3", self.env.controller.env),
     ]
-    self.mock_download_and_install_apk.assert_has_calls(expected_calls)
+    self.mockdownload_and_install_apk.assert_has_calls(expected_calls)
 
 
 if __name__ == "__main__":

@@ -146,11 +146,12 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
       self,
       env: env_interface.AndroidEnvInterface,
       a11y_method: A11yMethod = A11yMethod.A11Y_FORWARDER_APP,
+      install_a11y_forwarding_app: bool = True,
   ):
     if a11y_method == A11yMethod.A11Y_FORWARDER_APP:
       self._env = a11y_grpc_wrapper.A11yGrpcWrapper(
           env,
-          install_a11y_forwarding=True,
+          install_a11y_forwarding=install_a11y_forwarding_app,
           start_a11y_service=True,
           enable_a11y_tree_info=True,
           latest_a11y_info_only=True,

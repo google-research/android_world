@@ -24,6 +24,7 @@ It does the following:
 import os
 
 from absl import logging
+from android_env import env_interface
 from android_env.components import errors
 from android_world.env import adb_utils
 from android_world.env import interface
@@ -61,10 +62,12 @@ _APPS = (
 )
 
 
-def _download_and_install_apk(apk: str, env: interface.AsyncEnv) -> None:
-  """Downloads all APKs from remote location and installs them."""
+def download_and_install_apk(
+    apk: str, raw_env: env_interface.AndroidEnvInterface
+) -> None:
+  """Downloads APK from remote location and installs it."""
   path = apps.download_app_data(apk)
-  adb_utils.install_apk(path, env.controller)
+  adb_utils.install_apk(path, controller)
 
 
 def _install_all_apks(env: interface.AsyncEnv) -> None:
@@ -76,7 +79,7 @@ def _install_all_apks(env: interface.AsyncEnv) -> None:
     apk_installed = False
     for apk_name in app.apk_names:
       try:
-        _download_and_install_apk(apk_name, env)
+        download_and_install_apk(apk_name, env.controller.env)
         apk_installed = True
         break
       except errors.AdbControllerError:
