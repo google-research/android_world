@@ -100,10 +100,26 @@ def _is_timer_set(
   return False
 
 
+def _close_clock_app(env: interface.AsyncEnv):
+  """Closes the clock app."""
+  adb_utils.clear_app_data(
+      adb_utils.extract_package_name(adb_utils.get_adb_activity("clock")),
+      env.controller,
+  )
+
+
 class _ClockEval(task_eval.TaskEval):
   """Base class for clock tasks."""
 
   app_names = ("clock",)
+
+  def initialize_task(self, env: interface.AsyncEnv):
+    super().initialize_task(env)
+    _close_clock_app(env)
+
+  def tear_down(self, env: interface.AsyncEnv):
+    super().tear_down(env)
+    _close_clock_app(env)
 
 
 class ClockTimerEntry(_ClockEval):
