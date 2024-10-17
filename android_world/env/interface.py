@@ -242,40 +242,48 @@ class AsyncAndroidEnv(AsyncEnv):
       sleep_duration: float = 0.5,
       timeout: float = 6.0,
   ) -> State:
-    """Checks if the UI elements remain stable over a number of checks and gets state.
+    """Checks if the UI elements remain stable over a number of checks and returns the state.
 
     Args:
         stability_threshold: Number of consecutive checks where UI elements must
           remain the same to consider UI stable.
-        sleep_duration: Time in seconds to wait between checks.
+        sleep_duration: Minimum time in seconds between each check.
         timeout: Maximum time in seconds to wait for UI to become stable before
           giving up.
 
     Returns:
-        True if UI is considered stable, False if it never stabilizes within the
-        timeout.
+        The current state of the UI if stability is achieved within the timeout.
     """
     if not self._prior_state:
       self._prior_state = self._get_state()
+    if stability_threshold <= 0:
+      raise ValueError('Stability threshold must be a positive integer.')
 
-    stable_checks = 0
-    elapsed_time = 0.0
-    current_state = self._get_state()
+    stable_checks = 1
+    start_time = time.time()
+    deadline = start_time + timeout
 
-    while stable_checks < stability_threshold and elapsed_time < timeout:
+    while stable_checks < stability_threshold and time.time() < deadline:
+      iteration_start_time = time.time()
+      current_state = self._get_state()
+
       if self._prior_state.ui_elements == current_state.ui_elements:
         stable_checks += 1
         if stable_checks == stability_threshold:
           break  # Exit early if stability is achieved.
       else:
-        stable_checks = 0  # Reset if any change is detected
+        stable_checks = 1  # Reset if any change is detected
         self._prior_state = current_state
 
-      time.sleep(sleep_duration)
-      elapsed_time += sleep_duration
-      current_state = self._get_state()
+      elapsed_time = time.time() - iteration_start_time
+      remaining_sleep = sleep_duration - elapsed_time
+      if remaining_sleep > 0:
+        sleep_time = min(remaining_sleep, deadline - time.time())
+        if sleep_time > 0:
+          time.sleep(sleep_time)
+      # If remaining_sleep <= 0, proceed immediately to the next iteration
 
-    return current_state
+    return current_state  # pylint: disable=undefined-variable
 
   def get_state(self, wait_to_stabilize: bool = False) -> State:
     if wait_to_stabilize:

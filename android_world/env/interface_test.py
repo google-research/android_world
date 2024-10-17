@@ -40,13 +40,10 @@ class InterfaceTest(absltest.TestCase):
         env._get_stable_state(
             stability_threshold=3, sleep_duration=0.1, timeout=1
         ),
-        states[3],
+        states[2],
     )
 
-  @mock.patch("time.sleep", return_value=None)
-  def test_ui_stability_false_due_to_timeout(
-      self, unused_unused_mocked_time_sleep
-  ):
+  def test_ui_stability_false_due_to_timeout(self):
     changing_ui_elements = [
         representation_utils.UIElement(text=f"Element{i}") for i in range(10)
     ]
@@ -58,10 +55,9 @@ class InterfaceTest(absltest.TestCase):
         for elem in changing_ui_elements
     ]
     env._get_state = mock.MagicMock(side_effect=states)
-
     self.assertEqual(
         env._get_stable_state(
-            stability_threshold=3, sleep_duration=0.5, timeout=2
+            stability_threshold=3, sleep_duration=0.1, timeout=0.41
         ),
         states[5],
     )
@@ -82,11 +78,12 @@ class InterfaceTest(absltest.TestCase):
         for elem in fluctuating_ui_elements
     ]
     env._get_state = mock.MagicMock(side_effect=states)
+    cur = env._get_stable_state(
+        stability_threshold=3, sleep_duration=0.5, timeout=2.5
+    )
     self.assertEqual(
-        env._get_stable_state(
-            stability_threshold=3, sleep_duration=0.5, timeout=2.5
-        ),
-        states[6],
+        cur,
+        states[5],
     )
 
 
