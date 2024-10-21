@@ -90,7 +90,6 @@ def _install_all_apks(env: interface.AsyncEnv) -> None:
           f"Failed to download and install APK for {app.app_name}"
       )
 
-
 def setup_apps(env: interface.AsyncEnv) -> None:
   """Sets up apps for Android World.
 
