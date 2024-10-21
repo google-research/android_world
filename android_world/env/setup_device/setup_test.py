@@ -78,7 +78,8 @@ class InstallApksTest(absltest.TestCase):
   def test_install_all_apks_success(self):
     self.mockdownload_and_install_apk.return_value = None
 
-    setup._install_all_apks(self.env)
+    for app in self.apps:
+      setup.maybe_install_app(app, self.env)
 
     expected_calls = [
         mock.call("apk1", self.env.controller.env),
@@ -97,7 +98,8 @@ class InstallApksTest(absltest.TestCase):
 
     self.mockdownload_and_install_apk.side_effect = side_effect
 
-    setup._install_all_apks(self.env)
+    for app in self.apps:
+      setup.maybe_install_app(app, self.env)
 
     expected_calls = [
         mock.call("apk1", self.env.controller.env),

@@ -22,6 +22,7 @@ It does the following:
 """
 
 import os
+from typing import Type
 
 from absl import logging
 from android_env import env_interface
@@ -70,25 +71,39 @@ def download_and_install_apk(
   adb_utils.install_apk(path, controller)
 
 
-def _install_all_apks(env: interface.AsyncEnv) -> None:
+def setup_app(app: Type[apps.AppSetup], env: interface.AsyncEnv) -> None:
+  """Sets up a single app."""
+  try:
+    logging.info("Setting up app %s", app.app_name)
+    app.setup(env)
+  except ValueError as e:
+    logging.warning(
+        "Failed to automatically setup app %s: %s.\n\nYou will need to"
+        " manually setup the app.",
+        app.app_name,
+        e,
+    )
+  app_snapshot.save_snapshot(app.app_name, env.controller)
+
+
+def maybe_install_app(
+    app: Type[apps.AppSetup], env: interface.AsyncEnv
+) -> None:
   """Installs all APKs for Android World."""
-  print("Downloading app data and installing apps. This make take a few mins.")
-  for app in _APPS:
-    if not app.apk_names:  # Ignore 1p apps that don't have an APK.
+  if not app.apk_names:  # Ignore 1p apps that don't have an APK.
+    return
+  print(f"Installing app: {app.app_name}.")
+  apk_installed = False
+  for apk_name in app.apk_names:
+    try:
+      download_and_install_apk(apk_name, env.controller.env)
+      apk_installed = True
+      break
+    except errors.AdbControllerError:
+      # Try apk compiled for a different architecture, e.g., Mac M1.
       continue
-    apk_installed = False
-    for apk_name in app.apk_names:
-      try:
-        download_and_install_apk(apk_name, env.controller.env)
-        apk_installed = True
-        break
-      except errors.AdbControllerError:
-        # Try apk compiled for a different architecture, e.g., Mac M1.
-        continue
-    if not apk_installed:
-      raise RuntimeError(
-          f"Failed to download and install APK for {app.app_name}"
-      )
+  if not apk_installed:
+    raise RuntimeError(f"Failed to download and install APK for {app.app_name}")
 
 
 def setup_apps(env: interface.AsyncEnv) -> None:
@@ -105,21 +120,10 @@ def setup_apps(env: interface.AsyncEnv) -> None:
   adb_utils.press_home_button(env.controller)
   adb_utils.set_root_if_needed(env.controller)
 
-  _install_all_apks(env)
-
   print(
-      "Setting up applications on Android device. Please do not interact with"
-      " device while installation is running."
+      "Installing and setting up applications on Android device. Please do not"
+      " interact with device while installation is running."
   )
   for app in _APPS:
-    try:
-      logging.info("Setting up app %s", app.app_name)
-      app.setup(env)
-    except ValueError as e:
-      logging.warning(
-          "Failed to automatically setup app %s: %s.\n\nYou will need to"
-          " manually setup the app.",
-          app.app_name,
-          e,
-      )
-    app_snapshot.save_snapshot(app.app_name, env.controller)
+    maybe_install_app(app, env)
+    setup_app(app, env)
