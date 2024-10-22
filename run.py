@@ -149,6 +149,12 @@ _MINIWOB_ADDITIONAL_GUIDELINES = [
     ),
 ]
 
+_REAL_DEVICE_NAME = flags.DEFINE_string(
+    'real_device_name',
+    None,
+    'The real device name as shown in `adb devices` to run the agent on.',
+)
+
 
 def _get_agent(
     env: interface.AsyncEnv,
@@ -200,6 +206,7 @@ def _main() -> None:
       console_port=_DEVICE_CONSOLE_PORT.value,
       emulator_setup=_EMULATOR_SETUP.value,
       adb_path=_ADB_PATH.value,
+      real_device_name=_REAL_DEVICE_NAME.value,
   )
   env_launcher.verify_api_level(env)
 

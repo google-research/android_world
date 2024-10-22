@@ -68,6 +68,8 @@ def _generate_random_action(
       action_details['text'] = ''.join(
           random.choices(text_characters, k=10)
       )  # Random text of length 10
+    elif action_type == json_action.SWIPE:
+      action_details['direction'] = random.choice(scroll_directions)
   elif action_type == json_action.SCROLL:
     action_details['direction'] = random.choice(scroll_directions)
 
