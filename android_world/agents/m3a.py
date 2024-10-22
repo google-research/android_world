@@ -367,6 +367,7 @@ class M3A(base_agent.EnvironmentInteractingAgent):
     step_data = {
         'raw_screenshot': None,
         'before_screenshot_with_som': None,
+        'before_ui_elements': [],
         'after_screenshot_with_som': None,
         'action_prompt': None,
         'action_output': None,
@@ -385,6 +386,7 @@ class M3A(base_agent.EnvironmentInteractingAgent):
     physical_frame_boundary = self.env.physical_frame_boundary
 
     before_ui_elements = state.ui_elements
+    step_data['before_ui_elements'] = before_ui_elements
     before_ui_elements_list = _generate_ui_elements_description_list(
         before_ui_elements, logical_screen_size
     )
