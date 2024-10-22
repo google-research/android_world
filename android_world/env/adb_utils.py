@@ -136,6 +136,8 @@ _DEFAULT_URIS: dict[str, str] = {
     'gallery': 'content://media/external/images/media/',
 }
 
+_DEFAULT_DUMP_FILE = '/sdcard/window_dump.xml'
+
 
 def check_ok(response: adb_pb2.AdbResponse, message=None) -> None:
   """Check an ADB response and raise RuntimeError if not OK.
@@ -1633,12 +1635,76 @@ def set_root_if_needed(
   return issue_generic_request(['root'], env, timeout_sec)
 
 
+def _dump_ui_tree(
+    env: env_interface.AndroidEnvInterface,
+) -> adb_pb2.AdbResponse:
+  """Dumps the UI tree from the device."""
+  dump_request = adb_pb2.AdbRequest(
+      uiautomator=adb_pb2.AdbRequest.UIAutomatorRequest(file=_DEFAULT_DUMP_FILE)
+  )
+  logging.info('Dumping a11y tree from UIAutomator.')
+  dump_response = env.execute_adb_call(dump_request)
+  logging.debug('Dump response: %s', dump_response)
+  return dump_response
+
+
+def switch_on_device_screen(
+    env: env_interface.AndroidEnvInterface,
+) -> adb_pb2.AdbResponse:
+  """Switches on the device screen."""
+  screen_on_request = adb_pb2.AdbRequest(
+      generic=adb_pb2.AdbRequest.GenericRequest(
+          args=['shell', 'input', 'keyevent', 'KEYCODE_POWER']
+      )
+  )
+  logging.info('Switching on the device screen.')
+  screen_on_response = env.execute_adb_call(screen_on_request)
+  return screen_on_response
+
+
+def _read_ui_tree_from_device(
+    env: env_interface.AndroidEnvInterface,
+) -> adb_pb2.AdbResponse:
+  """Reads the UI tree from the device."""
+  tree_request = adb_pb2.AdbRequest(
+      generic=adb_pb2.AdbRequest.GenericRequest(
+          args=['shell', 'cat', _DEFAULT_DUMP_FILE]
+      )
+  )
+  logging.info(
+      'Reading a11y tree from the dump file: %s.', _DEFAULT_DUMP_FILE
+  )
+  tree_response = env.execute_adb_call(tree_request)
+  logging.debug('Tree response: %s', tree_response)
+  return tree_response
+
+
 def uiautomator_dump(env) -> str:
   """Issues a uiautomator dump request and returns the UI hierarchy."""
-  dump_args = 'shell uiautomator dump /sdcard/window_dump.xml'
-  issue_generic_request(dump_args, env)
 
-  read_args = 'shell cat /sdcard/window_dump.xml'
-  response = issue_generic_request(read_args, env)
+  # UIAutomator may not return output if the device screen is off.
+  retries = 1
+  dump_response = _dump_ui_tree(env)
+  for _ in range(retries):
+    if dump_response.status != adb_pb2.AdbResponse.Status.OK:
+      # If fails, try to switch on the device screen.
+      _ = switch_on_device_screen(env)
+      dump_response = _dump_ui_tree(env)
+    else:
+      break
 
-  return response.generic.output.decode('utf-8')
+  if dump_response.status != adb_pb2.AdbResponse.Status.OK:
+    raise ValueError(
+        f'Could not dump a11y tree from UIAutomator: {dump_response}.'
+    )
+
+  # If the ui is successfully dumped, it will be in a file
+  # /sdcard/window_dump.xml. Run another adb shell command to get the file
+  # content.
+  tree_response = _read_ui_tree_from_device(env)
+  if tree_response.status != adb_pb2.AdbResponse.Status.OK:
+    raise ValueError(
+        f'Could not read a11y tree from dump file: {tree_response}.'
+    )
+
+  return tree_response.generic.output.decode('utf-8')

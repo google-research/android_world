@@ -149,6 +149,18 @@ _MINIWOB_ADDITIONAL_GUIDELINES = [
     ),
 ]
 
+_REAL_DEVICE_NAME = flags.DEFINE_string(
+    'real_device_name',
+    None,
+    'The real device name as shown in `adb devices` to run the agent on.',
+)
+
+_USE_UIAUTOMATOR = flags.DEFINE_boolean(
+    'use_uiautomator',
+    False,
+    'Whether to use uiautomator instead of a11y forwarder app.',
+)
+
 
 def _get_agent(
     env: interface.AsyncEnv,
@@ -200,6 +212,8 @@ def _main() -> None:
       console_port=_DEVICE_CONSOLE_PORT.value,
       emulator_setup=_EMULATOR_SETUP.value,
       adb_path=_ADB_PATH.value,
+      real_device_name=_REAL_DEVICE_NAME.value,
+      use_uiautomator=_USE_UIAUTOMATOR.value,
   )
   env_launcher.verify_api_level(env)
 
