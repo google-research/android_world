@@ -104,7 +104,7 @@ def _ui_element_logical_corner(
 def add_ui_element_mark(
     screenshot: np.ndarray,
     ui_element: representation_utils.UIElement,
-    index: int,
+    index: int | str,
     logical_screen_size: tuple[int, int],
     physical_frame_boundary: tuple[int, int, int, int],
     orientation: int,
@@ -114,7 +114,7 @@ def add_ui_element_mark(
   Args:
     screenshot: The screenshot as a numpy ndarray.
     ui_element: The UI element to be marked.
-    index: The numeric index for the UI element.
+    index: The index for the UI element.
     logical_screen_size: The logical screen size.
     physical_frame_boundary: The physical coordinates in portrait orientation
       for the upper left and lower right corner for the frame.

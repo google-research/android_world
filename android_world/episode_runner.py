@@ -73,6 +73,7 @@ def run_episode(
     termination_fn = lambda env: False
 
   agent.reset(start_on_home_screen)
+  agent.set_max_steps(max_n_steps)
 
   output = []
   for step_n in range(max_n_steps):
