@@ -62,8 +62,13 @@ class FilesTest(parameterized.TestCase):
   @mock.patch.object(os.path, 'exists')
   @mock.patch.object(file_utils, 'check_directory_exists')
   @mock.patch.object(shutil, 'rmtree')
+  @mock.patch.object(tempfile, 'mkdtemp')
   def test_tmp_directory_from_device(
-      self, mock_rmtree, mock_check_directory_exists, mock_path_exists
+      self,
+      mock_mkdtemp,
+      mock_rmtree,
+      mock_check_directory_exists,
+      mock_path_exists,
   ):
     """Test if tmp_directory_from_device correctly copies a directory and handles exceptions."""
     mock_response = adb_pb2.AdbResponse(status=adb_pb2.AdbResponse.Status.OK)
@@ -84,7 +89,8 @@ class FilesTest(parameterized.TestCase):
         ),
     )
 
-    tmp_local_directory = f'{file_utils.TMP_LOCAL_LOCATION}/remotedir'
+    tmp_local_directory = '/tmp/random/dir'
+    mock_mkdtemp.return_value = tmp_local_directory
     with file_utils.tmp_directory_from_device(
         '/remotedir', self.mock_env
     ) as tmp_directory:
@@ -103,12 +109,6 @@ class FilesTest(parameterized.TestCase):
       self.assertCountEqual(os.listdir(tmp_directory), file_names)
       mock_rmtree.assert_not_called()
     mock_rmtree.assert_called_with(tmp_local_directory)
-
-    # Test FileExistsError
-    mock_path_exists.return_value = True
-    with self.assertRaises(FileExistsError):
-      with file_utils.tmp_directory_from_device('/remote/dir', self.mock_env):
-        pass
 
     # Test FileNotFoundError
     mock_path_exists.return_value = False

@@ -19,9 +19,9 @@ import dataclasses
 import datetime
 import os
 import random
-import re
 import shutil
 import string
+import tempfile
 from typing import Iterator
 from typing import Optional
 
@@ -303,16 +303,13 @@ def tmp_directory_from_device(
     FileNotFoundError: If the remote directory does not exist.
     RuntimeError: If there is an adb communication error.
   """
-  directory_name = re.sub(r"\W", "", device_path)
-  tmp_directory = os.path.join(TMP_LOCAL_LOCATION, directory_name)
+  tmp_directory = tempfile.mkdtemp()
   logging.info(
       "Copying %s directory to local tmp %s", device_path, tmp_directory
   )
 
   adb_utils.set_root_if_needed(env, timeout_sec)
 
-  if os.path.exists(tmp_directory):
-    raise FileExistsError(f"{tmp_directory} already exists.")
   if not check_directory_exists(device_path, env):
     raise FileNotFoundError(f"{device_path} does not exist.")
   try:
