@@ -492,7 +492,7 @@ class RecipeApp(AppSetup):
   """Class for setting up Broccoli Recipe app."""
 
   apk_names = ("com.flauschcode.broccoli_1020600.apk",)
-  app_name = "broccoli"
+  app_name = "broccoli app"
 
   @classmethod
   def setup(cls, env: interface.AsyncEnv) -> None:
@@ -593,7 +593,7 @@ class OpenTracksApp(AppSetup):
   """Class for setting up OpenTracks app."""
 
   apk_names = ("de.dennisguse.opentracks_5705.apk",)
-  app_name = "activity tracker"
+  app_name = "open tracks sports tracker"
 
   @classmethod
   def setup(cls, env: interface.AsyncEnv) -> None:

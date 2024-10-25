@@ -63,6 +63,11 @@ _APPS = (
 )
 
 
+def get_app_mapping(app_name: str) -> Type[apps.AppSetup]:
+  mapping = {app.app_name: app for app in _APPS}
+  return mapping[app_name]
+
+
 def download_and_install_apk(
     apk: str, raw_env: env_interface.AndroidEnvInterface
 ) -> None:
