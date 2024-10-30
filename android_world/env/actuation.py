@@ -99,6 +99,7 @@ def execute_adb_action(
     adb_utils.press_keyboard_generic(action.keycode, env)
 
   elif action.action_type == 'scroll':
+
     screen_width, screen_height = screen_size
     if action.index:
       x_min, y_min, x_max, y_max = (
