@@ -191,19 +191,24 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
     # pylint: enable=protected-access
     # pytype: enable=attribute-error
 
+  def _get_a11y_forest(
+      self,
+  ) -> android_accessibility_forest_pb2.AndroidAccessibilityForest:
+    return get_a11y_tree(self._env)
+
   def get_a11y_forest(
       self,
   ) -> android_accessibility_forest_pb2.AndroidAccessibilityForest:
     """Returns the most recent a11y forest from the device."""
     try:
-      return get_a11y_tree(self._env)
+      return self._get_a11y_forest()
     except RuntimeError:
       print(
           'Could not get a11y tree. Reconnecting to Android, reinitializing'
           ' AndroidEnv, and restarting a11y forwarding.'
       )
       self.refresh_env()
-      return get_a11y_tree(self._env)
+      return self._get_a11y_forest()
 
   def get_ui_elements(self) -> list[representation_utils.UIElement]:
     """Returns the most recent UI elements from the device."""
