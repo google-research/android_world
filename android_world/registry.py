@@ -15,7 +15,7 @@
 """Registers the task classes."""
 
 import types
-from typing import Any
+from typing import Any, Final
 
 from android_world.task_evals import task_eval
 from android_world.task_evals.composite import markor_sms
@@ -60,13 +60,13 @@ class TaskRegistry:
   """Registry of tasks."""
 
   # The AndroidWorld family.
-  ANDROID_WORLD_FAMILY = 'android_world'  # Entire suite.
-  ANDROID_FAMILY = 'android'  # Subset.
-  INFORMATION_RETRIEVAL_FAMILY = 'information_retrieval'  # Subset.
+  ANDROID_WORLD_FAMILY: Final[str] = 'android_world'  # Entire suite.
+  ANDROID_FAMILY: Final[str] = 'android'  # Subset.
+  INFORMATION_RETRIEVAL_FAMILY: Final[str] = 'information_retrieval'  # Subset.
 
   # The MiniWoB family.
-  MINIWOB_FAMILY = 'miniwob'
-  MINIWOB_FAMILY_SUBSET = 'miniwob_subset'
+  MINIWOB_FAMILY: Final[str] = 'miniwob'
+  MINIWOB_FAMILY_SUBSET: Final[str] = 'miniwob_subset'
 
   # Task registries; they contain a mapping from each task name to its class,
   # to construct instances of a task.

@@ -28,7 +28,7 @@ TASK_REGISTRY_SUBSET = {}
 # The names of the HTML files, modulo the .html suffix, corresponding to the
 # supported tasks that can be run. All tasks have been verified to be correct
 # and achievable on an Android device by a human.
-_NAMES = [
+_NAMES = (
     ## Original MiniWoB++ tasks:
     # keep-sorted start
     'bisect-angle',
@@ -149,10 +149,10 @@ _NAMES = [
     # 'use-spinner',  # Slider implementation not working.
     # The menu responsiveness breaks and task does not behave as intended.
     # 'click-menu'
-]
+)
 
 # Subset of tasks used in Synapse paper (https://arxiv.org/pdf/2306.07863.pdf).
-_NAMES_SUBSET = [
+_NAMES_SUBSET = (
     'book-flight',
     'choose-date',
     'choose-list',
@@ -217,7 +217,7 @@ _NAMES_SUBSET = [
     'use-autocomplete',
     'use-slider',
     'use-spinner',
-]
+)
 
 
 def _create_class_name(html_file_name: str) -> str:
