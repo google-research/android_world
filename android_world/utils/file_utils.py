@@ -453,8 +453,8 @@ def get_file_list_with_metadata(
 ) -> list[FileWithMetadata]:
   """Get the list of all (regular) files with metadata in a given directory.
 
-  Right now we only list regular files in the given directory and only grab
-  file name, full directory and change time in metadata.
+  Right now we only list regular files in the given directory and only grab file
+  name, full directory and change time in metadata.
 
   Args:
     directory_path: The directory to list all its files.
@@ -463,21 +463,17 @@ def get_file_list_with_metadata(
 
   Returns:
     A list of files with metadata.
-
   Raises:
     RuntimeError: If the input directory path is not valid or shell ls fails.
   """
   if not check_directory_exists(directory_path, env):
     raise RuntimeError(f"{directory_path} is not a valid directory.")
-
   # Run [adb shell ls] to list all files in the given directory.
   try:
     ls_response = adb_utils.issue_generic_request(
         f"shell ls {directory_path} -ll -au", env, timeout_sec
     )
-
     adb_utils.check_ok(ls_response, "Failed to list files in directory.")
-
     files = []
     # Each file (including links and directories) will be listed in format as
     # follows,
@@ -487,15 +483,18 @@ def get_file_list_with_metadata(
       # In shell output, the first character is used to indicate file type and
       # "-" means the file is a regular file.
       if file_details.startswith("-"):
+        parts = file_details.split(None, 8)
+        if len(parts) < 9:
+          raise RuntimeError(f"Failed to parse file details: {file_details}")
+
+        file_name = parts[8]  # This will preserve spaces in the filename
         files.append(
             FileWithMetadata(
-                file_name=file_details.split(" ")[-1],
-                full_path=os.path.join(
-                    directory_path, file_details.split(" ")[-1]
-                ),
-                file_size=int(file_details.split(" ")[-5]),
+                file_name=file_name,
+                full_path=os.path.join(directory_path, file_name),
+                file_size=int(parts[4]),
                 change_time=datetime.datetime.fromisoformat(
-                    " ".join(file_details.split(" ")[-4:-2])[:-3]
+                    " ".join(parts[5:7])[:-3]
                 ),
             )
         )

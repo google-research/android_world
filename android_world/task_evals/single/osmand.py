@@ -416,8 +416,8 @@ class OsmAndTrack(_OsmTaskEval):
     )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
-    with env.controller.pull_file(
-        os.path.join(_DEVICE_FILES, 'tracks')
+    with file_utils.tmp_directory_from_device(
+        os.path.join(_DEVICE_FILES, 'tracks'), env.controller
     ) as tracks_directory:
       for track_file in os.listdir(tracks_directory):
         if _track_matches(

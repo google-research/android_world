@@ -148,7 +148,7 @@ def delete_all_rows_from_table(
   if not table_exists(table_name, remote_db_file_path, env):
     # If the database was never created, opening the app may create it.
     adb_utils.launch_app(app_name, env.controller)
-    time.sleep(2.0)
+    time.sleep(7.0)
 
   with env.controller.pull_file(
       remote_db_file_path, timeout_sec
