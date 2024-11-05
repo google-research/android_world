@@ -261,6 +261,10 @@ class SimpleSMSSendSms(task_eval.TaskEval):
         )
         == "com.simplemobiletools.smsmessenger"
     )
+    if _check_if_stuck_at_sending(env):
+      raise ValueError(
+          "Message could not be sent due to Android/emulator issue."
+      )
     return 1.0 if sms_was_sent and in_correct_app else 0.0
 
   @classmethod
@@ -272,3 +276,12 @@ class SimpleSMSSendSms(task_eval.TaskEval):
         "number": number,
         "message": message,
     }
+
+
+def _check_if_stuck_at_sending(env: interface.AsyncEnv) -> bool:
+  """Checks if the app is stuck at the sending screen."""
+  state = env.get_state()
+  for element in state.ui_elements:
+    if element.text is not None and element.text.startswith("Sending"):
+      return True
+  return False
