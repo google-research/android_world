@@ -4,7 +4,9 @@
 
 <p align="center">
 <a href="https://google-research.github.io/android_world/">Website</a> •
-<a href="https://arxiv.org/pdf/2405.14573">Paper</a>
+<a href="https://arxiv.org/pdf/2405.14573">Paper</a> •
+<a href="https://google-research.github.io/android_world/task_list.html">Tasks</a> •
+<a href="https://docs.google.com/spreadsheets/d/1cchzP9dlTZ3WXQTfYNhh3avxoLipqHN75v1Tb86uhHo/edit?gid=0#gid=0">Leaderboard</a>
 </p>
 
 ![Overview](assets/overview.png)
@@ -140,5 +142,21 @@ In the current workflow, the agent tries to complete a task in a for loop. In ea
 ## Adding new tasks
 
 Please see [the guide](https://github.com/google-research/android_world/blob/main/docs/tasks_guide.md) on adding new tasks to AndroidWorld.
+
+## Citation
+
+If you use our environment or data, please cite our paper:
+
+```
+@misc{rawles2024androidworlddynamicbenchmarkingenvironment,
+      title={AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents},
+      author={Christopher Rawles and Sarah Clinckemaillie and Yifan Chang and Jonathan Waltz and Gabrielle Lau and Marybeth Fair and Alice Li and William Bishop and Wei Li and Folawiyo Campbell-Ajala and Daniel Toyama and Robert Berry and Divya Tyamagundlu and Timothy Lillicrap and Oriana Riva},
+      year={2024},
+      eprint={2405.14573},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2405.14573},
+}
+```
 
 *This is not an officially supported Google product.*
