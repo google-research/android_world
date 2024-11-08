@@ -73,7 +73,7 @@ def download_and_install_apk(
 ) -> None:
   """Downloads APK from remote location and installs it."""
   path = apps.download_app_data(apk)
-  adb_utils.install_apk(path, controller)
+  adb_utils.install_apk(path, raw_env)
 
 
 def setup_app(app: Type[apps.AppSetup], env: interface.AsyncEnv) -> None:
