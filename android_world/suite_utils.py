@@ -562,7 +562,7 @@ def _extract_task_metadata() -> pd.DataFrame:
 
 def _print_results_by_tag(result_df: pd.DataFrame) -> None:
   exploded_df = result_df.explode('tags').reset_index()
-  exploded_df.tags.replace(regex=r'', value='untagged', inplace=True)
+  exploded_df.replace(regex={'tags': r''}, value='untagged', inplace=True)  # pytype: disable=wrong-arg-types
   return (
       exploded_df.groupby(['tags', 'difficulty'], as_index=False)
       .agg(

@@ -116,7 +116,7 @@ class TaskEval(abc.ABC):
         try:
           app_snapshot.restore_snapshot(app_name, env.controller)
         except RuntimeError as error:
-          logging.warn("Skipping app snapshot loading : %s", error)
+          logging.warning("Skipping app snapshot loading : %s", error)
 
   @classmethod
   def set_device_time(cls, env: interface.AsyncEnv) -> None:
