@@ -213,6 +213,7 @@ def _wait_and_find_click_element(
     target_text: str,
     env: android_world_controller.AndroidWorldController,
     case_sensitive: bool,
+    dist_threshold: int = 1,  # Allow one character difference.
 ) -> json_action.JSONAction:
   """Wait for the screen to update until "element_text" appears."""
   ui_elements = env.get_ui_elements()
@@ -222,7 +223,7 @@ def _wait_and_find_click_element(
   start = time.time()
   current = time.time()
   while current - start < 10:
-    if distance == 0:
+    if distance <= dist_threshold:
       return json_action.JSONAction(action_type='click', index=element)
     ui_elements = env.get_ui_elements()
     element, distance = _find_target_element(
