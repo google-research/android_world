@@ -29,6 +29,27 @@ INSTANCE_SEPARATOR = '_'
 Episode = dict[str, Any]
 
 
+def sort_key(filename: str) -> tuple[str, int|str]:
+  """Returns the sort key for a filenames.
+
+  Attempts to sort by the filename and then by the instance number. However,
+  if the instance number is not an integer, it will be sorted as a string.
+
+  Args:
+    filename: The filename to sort.
+  """
+  parts = filename.split(INSTANCE_SEPARATOR, maxsplit=1)
+  if len(parts) == 1:
+    # When there is no instance number, sort by filename.
+    return (parts[0], 0)
+  name, num = parts
+  try:
+    num = int(num)
+  except ValueError:
+    num = 0
+  return (name, num)
+
+
 def _gzip_pickle(data: Any) -> bytes:
   """Pickle and gzip compress an object in memory.
 
@@ -111,7 +132,7 @@ class IncrementalCheckpointer(Checkpointer):
     """Loads all task groups from disk."""
     # Keep same order as runtime.
     directories = os.listdir(self.directory)
-    directories.sort(key=lambda x: x.split(INSTANCE_SEPARATOR)[0])
+    directories.sort(key=sort_key)
 
     data = []
     for filename in directories:
