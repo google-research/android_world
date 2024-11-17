@@ -264,6 +264,7 @@ def _run_task(
         constants.EpisodeConstants.EPISODE_LENGTH: len(
             interaction_results.step_data[constants.STEP_NUMBER]
         ),
+        constants.EpisodeConstants.AUX_DATA: interaction_results.aux_data,
         constants.EpisodeConstants.SCREEN_CONFIG: _get_screen_config(task),
         constants.EpisodeConstants.EXCEPTION_INFO: None,
         constants.EpisodeConstants.SEED: task.params[
@@ -309,6 +310,7 @@ def _run_task_suite(
     demo_mode: bool = False,
     agent_name: str = '',
     return_full_episode_data: bool = False,
+    process_episodes_fn=None,
 ) -> list[dict[str, Any]]:
   """Runs e2e system on suite.
 
@@ -321,6 +323,8 @@ def _run_task_suite(
     agent_name: The name of the agent.
     return_full_episode_data: Whether to return full episode data instead of
       just metadata.
+    process_episodes_fn: The function to process episode data. Usually to
+      compute metrics. Deafaults to process_episodes from this file.
 
   Returns:
     Metadata for each episode, including the scripted reward.
@@ -333,10 +337,14 @@ def _run_task_suite(
       constants.EpisodeConstants.EPISODE_LENGTH,
       constants.EpisodeConstants.RUN_TIME,
       constants.EpisodeConstants.EXCEPTION_INFO,
+      constants.EpisodeConstants.AUX_DATA,
   ]
   completed_tasks, failed_tasks = _get_task_info(
       checkpointer.load(fields=metadata_fields)
   )
+  if process_episodes_fn is None:
+    process_episodes_fn = process_episodes
+
   if (completed_tasks or failed_tasks) and return_full_episode_data:
     raise ValueError(
         'Cannot return full episode data when resuming from a checkpoint.'
@@ -376,7 +384,7 @@ def _run_task_suite(
         full_episode_data.append(episode)
 
       episodes_metadata.append({k: episode[k] for k in metadata_fields})
-      process_episodes(episodes_metadata, print_summary=True)
+      process_episodes_fn(episodes_metadata, print_summary=True)
 
       if episode[constants.EpisodeConstants.EXCEPTION_INFO] is not None:
         # Don't include episode in tally if execution/eval logic errored out.
@@ -396,6 +404,7 @@ def run(
     checkpointer: checkpointer_lib.Checkpointer = checkpointer_lib.NullCheckpointer(),
     demo_mode: bool = False,
     return_full_episode_data: bool = False,
+    process_episodes_fn=None,
 ) -> list[dict[str, Any]]:
   """Create suite and runs eval suite.
 
@@ -410,6 +419,8 @@ def run(
       task instruction as a notification.
     return_full_episode_data: Whether to return full episode data instead of
       just metadata.
+    process_episodes_fn: The function to process episode data. Usually to
+      compute metrics. Deafaults to process_episodes from this file.
 
   Returns:
     Step-by-step data from each episode.
@@ -446,6 +457,7 @@ def run(
       demo_mode=demo_mode,
       agent_name=agent.name,
       return_full_episode_data=return_full_episode_data,
+      process_episodes_fn=process_episodes_fn,
   )
 
   return results
@@ -517,6 +529,7 @@ def _create_failed_result(
       constants.EpisodeConstants.RUN_TIME: run_time,
       constants.EpisodeConstants.EPISODE_LENGTH: np.nan,
       constants.EpisodeConstants.EXCEPTION_INFO: exception,
+      constants.EpisodeConstants.AUX_DATA: None,
   }
 
 
