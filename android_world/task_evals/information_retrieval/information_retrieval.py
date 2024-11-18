@@ -34,10 +34,8 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
   Each information retrieval task is dynamically generated using the task
   parameters and success criteria are tailored to the specific requirements of
   the task. The class supports initializing tasks with app-specific states and
-  handling conditional task logic based on the initial state's app context,
-  particularly for apps like SimpleCalendarProApp.
+  handling conditional task logic based on the initial state's app context.
   """
-
   template = ''
   complexity = 1
   schema = {}
@@ -52,67 +50,75 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
   def task(self) -> task_pb2.Task:
     return self._task
 
-  def __init__(
-      self,
-      params: dict[str, Any],
-  ):
+  def is_calendar_task(self) -> bool:
+    return self.task.relevant_state.state.HasField('calendar')
+
+  def is_tasks_task(self) -> bool:
+    return self.task.relevant_state.state.HasField('tasks_app')
+
+  def is_sports_task(self) -> bool:
+    return self.task.relevant_state.state.HasField('sports_activity_app')
+
+  def is_notes_task(self) -> bool:
+    return self.task.relevant_state.state.HasField('notes_app')
+
+  def __init__(self, params: dict[str, Any]):
     super().__init__(params)
-    # Need to make a copy of the task template so that future runs aren't
-    # affected.
     self._task = task_pb2.Task()
     self._task.CopyFrom(self.task_template)
     self.template = self.task.prompt
     self.complexity = self.task.complexity
-    if self.task.relevant_state.state.HasField('calendar'):
+
+    print('crcr self.task.relevant_state.state', self.task.relevant_state.state)
+    print(
+        'crcr',
+        self.is_calendar_task,
+        self.is_tasks_task(),
+        self.is_sports_task(),
+        self.is_notes_task(),
+    )
+
+    # Set app names based on task type
+    if self.is_calendar_task():
       self.app_names = (self.task.relevant_state.state.calendar.app_name,)
-    if self.task.relevant_state.state.HasField('tasks_app'):
+    if self.is_tasks_task():
       self.app_names = ('tasks',)
-    if self.task.relevant_state.state.HasField('sports_activity_app'):
+    if self.is_sports_task():
       self.app_names = ('open tracks sports tracker',)
-    if self.task.relevant_state.state.HasField('notes_app'):
+    if self.is_notes_task():
       self.app_names = ('joplin',)
 
-  def initialize_task(
-      self,
-      env: interface.AsyncEnv,
-  ) -> None:
+  def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
     proto_utils.initialize_proto(self.task, self.params)
     _maybe_replace_date(self.params)
+
+    # Initialize app-specific state
+    relevant_state = self.task.relevant_state.state
+    exclusions = list(self.task.relevant_state.exclusion_conditions)
+
     if (
-        self.task.relevant_state.state.HasField('calendar')
-        and self.task.relevant_state.state.calendar.app_name
-        == 'simple calendar pro'
+        self.is_calendar_task()
+        and relevant_state.calendar.app_name == 'simple calendar pro'
     ):
       calendar_utils_ir.setup_task_state(
-          self.task.relevant_state.state.calendar,
-          list(self.task.relevant_state.exclusion_conditions),
-          env,
+          relevant_state.calendar, exclusions, env
       )
-    if self.task.relevant_state.state.HasField('tasks_app'):
-      task_app_utils.setup_task_state(
-          self.task.relevant_state.state.tasks_app,
-          list(self.task.relevant_state.exclusion_conditions),
-          env,
-      )
-    if self.task.relevant_state.state.HasField('sports_activity_app'):
+    if self.is_tasks_task():
+      task_app_utils.setup_task_state(relevant_state.tasks_app, exclusions, env)
+    if self.is_sports_task():
       activity_app_utils.setup_task_state(
-          self.task.relevant_state.state.sports_activity_app,
-          list(self.task.relevant_state.exclusion_conditions),
-          env,
+          relevant_state.sports_activity_app, exclusions, env
       )
-    if self.task.relevant_state.state.HasField('notes_app'):
+    if self.is_notes_task():
       joplin_app_utils.setup_task_state(
-          self.task.relevant_state.state.notes_app,
-          list(self.task.relevant_state.exclusion_conditions),
-          env,
+          relevant_state.notes_app, exclusions, env
       )
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     if not env.interaction_cache:
       return 0.0
-
     try:
       answers_are_equal = proto_utils.check_agent_answer(
           env.interaction_cache, self.task
@@ -122,10 +128,14 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
       return 0.0
 
   def tear_down(self, env: interface.AsyncEnv) -> None:
-    calendar_utils.clear_calendar_db(env)
-    task_app_utils.clear_task_db(env)
-    activity_app_utils.clear_db(env)
-    joplin_app_utils.clear_dbs(env)
+    if self.is_calendar_task():
+      calendar_utils.clear_calendar_db(env)
+    if self.is_tasks_task():
+      task_app_utils.clear_task_db(env)
+    if self.is_sports_task():
+      activity_app_utils.clear_db(env)
+    if self.is_notes_task():
+      joplin_app_utils.clear_dbs(env)
     super().tear_down(env)
 
 
