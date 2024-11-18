@@ -101,6 +101,39 @@ def _ui_element_logical_corner(
   raise ValueError('Unsupported orientation.')
 
 
+def get_ui_element_bbox_pixels(
+    ui_element: representation_utils.UIElement,
+    logical_screen_size: tuple[int, int],
+    physical_frame_boundary: tuple[int, int, int, int],
+    orientation: int,
+) -> representation_utils.BoundingBox | None:
+  """Get bounding box in physical coordinates for a given UI element."""
+  if ui_element.bbox_pixels:
+    upper_left_logical, lower_right_logical = (
+        _ui_element_logical_corner(ui_element, orientation)
+    )
+    upper_left_physical = _logical_to_physical(
+        upper_left_logical,
+        logical_screen_size,
+        physical_frame_boundary,
+        orientation,
+    )
+    lower_right_physical = _logical_to_physical(
+        lower_right_logical,
+        logical_screen_size,
+        physical_frame_boundary,
+        orientation,
+    )
+    return representation_utils.BoundingBox(
+        x_min=upper_left_physical[0],
+        y_min=upper_left_physical[1],
+        x_max=lower_right_physical[0],
+        y_max=lower_right_physical[1],
+    )
+  else:
+    return None
+
+
 def add_ui_element_mark(
     screenshot: np.ndarray,
     ui_element: representation_utils.UIElement,
