@@ -95,7 +95,7 @@ Run the `minimal_task_runner.py` script to see the basic mechanics of AndroidWor
 python minimal_task_runner.py --task=ContactsAddContact
 ```
 
-If you don't specify a task, a random task will be selected. *NOTE: If you want to try open-source apps, i.e not included with Android OS, please run `--perform_emulator_setup` in the script below.*
+If you don't specify a task, a random task will be selected. *NOTE: If you want to try open-source apps, i.e. not included with Android OS, please run `--perform_emulator_setup` in the script below.*
 
 ## Run the benchmark
 
@@ -118,7 +118,7 @@ If a run fails part-way through, you can resume it by re-running the script with
 ## Running MiniWoB++ tasks
 
 To run the MiniWoB++ web-based tasks in AndroidWorld, simply set
-`--suite_family=miniwob` in the command above.
+`--suite_family=miniwob` and `--perform_emulator_setup` in the command above.
 
 A key advantage of running MiniWoB++ tasks is that common input elements are
 rendered as native, commonly used Android UI widgets, rather than as HTML. Thus agents must learn to use universal
