@@ -202,7 +202,7 @@ class _OsmTaskEval(task_eval.TaskEval):
 class OsmAndFavorite(_OsmTaskEval):
   """Task for checking that there is a favorite location marker in OsmAnd."""
 
-  complexity = 1
+  complexity = 1.3
   schema = {
       'type': 'object',
       'properties': {
@@ -280,7 +280,7 @@ class OsmAndMarker(_OsmTaskEval, sqlite_validators.SQLiteApp):
   table_name = 'map_markers'
   row_type = sqlite_schema_utils.OsmAndMapMarker
   app_name_with_db = 'osmand'
-  complexity = 1
+  complexity = 2.0
   schema = {
       'type': 'object',
       'properties': {
@@ -382,7 +382,7 @@ def _track_points(
 class OsmAndTrack(_OsmTaskEval):
   """Task for checking for a track with specified waypoints saved in OsmAnd."""
 
-  complexity = 1
+  complexity = 12
   schema = {
       'type': 'object',
       'properties': {

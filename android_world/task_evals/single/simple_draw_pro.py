@@ -29,7 +29,7 @@ class SimpleDrawProCreateDrawing(task_eval.TaskEval):
   """Task for checking that a new drawing has been created with a specific name."""
 
   app_names = ("simple draw pro",)
-  complexity = 1
+  complexity = 1.8
   schema = file_validators.CreateFile.schema
   template = (
       "Create a new drawing in Simple Draw Pro. Name it {file_name}. Save it in"

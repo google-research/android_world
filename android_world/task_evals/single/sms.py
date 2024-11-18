@@ -115,6 +115,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
   """Task for checking a reply was sent."""
 
+  complexity = 1.2
   template = "Reply to {number} with message: {message} in Simple SMS Messenger"
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
@@ -157,6 +158,7 @@ class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
 class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
   """Task for checking that the clipboard contents were sent as an SMS."""
 
+  complexity = 1.2
   template = (
       "Send a message to {number} with the clipboard content in Simple SMS"
       " Messenger"
@@ -170,7 +172,7 @@ class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
 class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
   """Task for checking that a received address is forward to someone else."""
 
-  complexity = 2
+  complexity = 1.8
   template = (
       "Text the address of the event to {name1} that {name2} just sent me in"
       " Simple SMS Messenger"
@@ -243,6 +245,7 @@ class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
 class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
   """Task for checking that a message was resent."""
 
+  complexity = 1.2
   template = "Resend the message I just sent to {name} in Simple SMS Messenger"
 
   schema = {

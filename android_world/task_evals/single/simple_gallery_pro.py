@@ -30,7 +30,7 @@ class SaveCopyOfReceiptTaskEval(task_eval.TaskEval):
 
   app_names = ("simple gallery pro",)
 
-  complexity = 1
+  complexity = 1.6
 
   template = (
       "In Simple Gallery Pro, copy {file_name} in DCIM and save a copy with the"

@@ -70,7 +70,7 @@ class Markor(task_eval.TaskEval):
 class MarkorMoveNote(Markor):
   """Task for checking that a file has been moved in Markor."""
 
-  complexity = 2
+  complexity = 1.4
   schema = file_validators.MoveFile.schema
   template = (
       "In Markor, move the note {file_name} from {source_folder} to"
@@ -126,7 +126,7 @@ class MarkorMoveNote(Markor):
 class MarkorCreateFolder(Markor):
   """Task for checking that a new folder in Markor has been created with a specific name."""
 
-  complexity = 2
+  complexity = 1
   schema = {
       "type": "object",
       "properties": {
@@ -170,7 +170,7 @@ class MarkorCreateFolder(Markor):
 class MarkorEditNote(Markor):
   """Task for editing an existing note in Markor."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -286,7 +286,7 @@ class MarkorEditNote(Markor):
 class MarkorDeleteNote(Markor):
   """Task for checking that a note in Markor has been deleted."""
 
-  complexity = 2
+  complexity = 1
   schema = file_validators.DeleteFile.schema
   template = "Delete the note in Markor named {file_name}."
 
@@ -318,7 +318,7 @@ class MarkorDeleteNote(Markor):
 class MarkorDeleteNewestNote(Markor):
   """Task for deleting the newest note in Markor."""
 
-  complexity = 2
+  complexity = 1
   schema = {}
   template = "Delete the newest note in Markor."
 
@@ -380,7 +380,7 @@ class MarkorDeleteAllNotes(Markor):
   # files one-by-one which envolves many steps (more than 10), but there is also
   # an optimal approach by first long pressing one file, then tapping to select
   # all others and deleting them all together.
-  complexity = 2
+  complexity = 1.4
   schema = {}
   template = "Delete all my notes in Markor."
 
@@ -417,7 +417,7 @@ class MarkorCreateNote(Markor):
   """Task for checking that a new note in Markor has been created with a specific name and text."""
 
   app_names = ("markor",)
-  complexity = 2
+  complexity = 1.6
   schema = file_validators.CreateFile.schema
   template = (
       "Create a new note in Markor named {file_name} with the following text:"
@@ -453,7 +453,7 @@ class MarkorCreateNote(Markor):
 class MarkorCreateNoteFromClipboard(Markor):
   """Task for creating a note using text in clipboard in Markor."""
 
-  complexity = 2
+  complexity = 1.4
   schema = {
       "type": "object",
       "properties": {
@@ -510,8 +510,7 @@ class MarkorCreateNoteFromClipboard(Markor):
 class MarkorMergeNotes(Markor):
   """Task for merging three existing notes into a new one."""
 
-  # This task involves more than 20 steps.
-  complexity = 3
+  complexity = 7.8
   schema = {
       "type": "object",
       "properties": {
@@ -653,7 +652,7 @@ class MarkorMergeNotes(Markor):
 class MarkorChangeNoteContent(Markor):
   """Task for changing an existing note's content and renaming it."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -732,7 +731,7 @@ class MarkorChangeNoteContent(Markor):
 class MarkorAddNoteHeader(Markor):
   """Task for adding a header to an existing note and renaming it."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -821,7 +820,7 @@ class MarkorTranscribeReceipt(task_eval.TaskEval):
   """
 
   app_names = ("simple gallery pro", "markor")
-  complexity = 2
+  complexity = 1.8
   template = (
       "Create a file in Markor, called receipt.md with the transactions from"
       " the receipt.png. Use Simple Gallery to view the receipt. Please enter"
@@ -932,7 +931,6 @@ class MarkorTranscribeVideo(Markor):
             vlc.generate_file_name() for _ in range(random.randint(5, 20))
         ],
     }
-
 
 _NOTE_TITLES = [
     "grocery_list_weekly.md",

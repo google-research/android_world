@@ -39,9 +39,9 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
   """
 
   template = ''
-  complexity = 1
   schema = {}
   app_names = ()
+  complexity = 1.0  # Overridden in the registry.
 
   @property
   @abc.abstractmethod

@@ -189,7 +189,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
   """
 
   app_names = ("simple sms messenger",)
-  complexity = 1
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {

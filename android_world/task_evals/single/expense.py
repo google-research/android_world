@@ -121,6 +121,7 @@ class _ExpenseDeleteMultiple(_Expense, sqlite_validators.DeleteMultipleRows):
 class ExpenseDeleteSingle(_ExpenseDeleteMultiple):
   """Task to delete a single expense in an expense tracking app."""
 
+  complexity = 1
   n_rows = 1
   n_rows_noise = 0
 
@@ -128,6 +129,7 @@ class ExpenseDeleteSingle(_ExpenseDeleteMultiple):
 class ExpenseDeleteMultiple(_ExpenseDeleteMultiple):
   """Task to delete multiple expenses in an expense tracking app."""
 
+  complexity = 2
   n_rows = 3
   n_rows_noise = 0
 
@@ -135,6 +137,7 @@ class ExpenseDeleteMultiple(_ExpenseDeleteMultiple):
 class ExpenseDeleteMultiple2(_ExpenseDeleteMultiple):
   """Harder task to delete multiple expenses in an expense tracking app."""
 
+  complexity = 3.4
   n_rows = 3
   n_rows_noise = 50
 
@@ -142,7 +145,7 @@ class ExpenseDeleteMultiple2(_ExpenseDeleteMultiple):
 class _ExpenseDeleteDuplicates(_Expense, sqlite_validators.DeleteDuplicateRows):
   """Deduplicate expenses in the expense tracking app with some noise."""
 
-  complexity = 2
+  complexity = 1.2
   n_rows = 1  # Number of unique expenses to duplicate for the task
   n_rows_noise = 5  # Number of additional unique expenses to include as noise
 
@@ -194,6 +197,7 @@ class ExpenseDeleteDuplicates2(_ExpenseDeleteDuplicates):
 
   n_rows = 1
   n_rows_noise = 40
+  complexity = 1.8
 
   @classmethod
   def generate_random_params(cls) -> dict[str, Any]:
@@ -308,6 +312,7 @@ class _ExpenseAddMultiple(_Expense, sqlite_validators.AddMultipleRows):
 class ExpenseAddSingle(_ExpenseAddMultiple):
   """Task to add a single expense in the Expense Tracking App."""
 
+  complexity = 1.2
   n_rows = 1
   n_rows_noise = 10
 
@@ -315,6 +320,7 @@ class ExpenseAddSingle(_ExpenseAddMultiple):
 class ExpenseAddMultiple(_ExpenseAddMultiple):
   """Task to add multiple expenses in the Expense Tracking App."""
 
+  complexity = 4
   n_rows = 3
   n_rows_noise = 10
 
@@ -356,7 +362,7 @@ class ExpenseAddMultipleFromMarkor(_ExpenseAddMultiple):
 class ExpenseAddMultipleFromGallery(_ExpenseAddMultiple):
   """Task to add multiple expenses from Gallery into Expense Tracking app."""
 
-  complexity = 3
+  complexity = 2
   n_rows = 3
   n_rows_noise = 10
 
