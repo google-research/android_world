@@ -100,15 +100,16 @@ class AudioRecorderRecordAudioWithFileName(_AudioRecorder):
         params, device_constants.AUDIORECORDER_DATA
     )
 
+  def _clear_audio_recorder_data(self, env: interface.AsyncEnv) -> None:
+    """Clears all audio recorder data on device."""
+    file_utils.clear_directory(
+        device_constants.AUDIORECORDER_DATA, env.controller
+    )
+
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)
     self.create_file_task.initialize_task(env)
-    file_name = self.params["file_name"] + ".m4a"
-    file_utils.remove_single_file(
-        file_name,
-        device_constants.AUDIORECORDER_DATA,
-        env.controller,
-    )
+    self._clear_audio_recorder_data(env)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
@@ -160,3 +161,4 @@ class AudioRecorderRecordAudioWithFileName(_AudioRecorder):
   def tear_down(self, env: interface.AsyncEnv) -> None:
     super().tear_down(env)
     self.create_file_task.tear_down(env)
+    self._clear_audio_recorder_data(env)
