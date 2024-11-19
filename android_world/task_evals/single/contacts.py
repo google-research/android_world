@@ -27,6 +27,7 @@ from android_world.utils import fuzzy_match_lib
 class ContactsAddContact(contacts_validators.AddContact):
   """Task for adding a new contact."""
 
+  complexity = 1.2
   app_names = ("contacts",)
   template = "Create a new contact for {name}. Their number is {number}."
 
@@ -141,7 +142,7 @@ class ContactsNewContactDraft(task_eval.TaskEval):
   """Task for entering contact info, but *not* hitting save."""
 
   app_names = ("contacts",)
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {

@@ -451,7 +451,7 @@ def run(
   return results
 
 
-def _allocate_step_budget(task_complexity: int) -> int:
+def _allocate_step_budget(task_complexity: float) -> int:
   """Allocates number of steps dynamically based on the complexity score.
 
   Args:

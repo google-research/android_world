@@ -37,9 +37,9 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
   handling conditional task logic based on the initial state's app context.
   """
   template = ''
-  complexity = 1
   schema = {}
   app_names = ()
+  complexity = 1.0  # Overridden in the registry.
 
   @property
   @abc.abstractmethod

@@ -28,6 +28,15 @@ from google.protobuf import text_format
 
 TaskType = TypeVar('TaskType', bound=information_retrieval.InformationRetrieval)
 
+_DEFAULT_COMPLEXITY = 1.0
+_COMPLEXITY_OVERRIDES = {
+    'SportsTrackerActivitiesOnDate': 2,
+    'SportsTrackerActivityDuration': 1.2,
+    'SportsTrackerTotalDistanceForCategoryOverInterval': 2.2,
+    'SportsTrackerTotalDurationForCategoryThisWeek': 1.6,
+    'TasksDueNextWeek': 1.2,
+}
+
 
 class InformationRetrievalRegistry(Generic[TaskType]):
   """Information retrieval registry; it dynamically creates tasks."""
@@ -94,6 +103,8 @@ class InformationRetrievalRegistry(Generic[TaskType]):
         {
             'generate_random_params': generate_random_params,
             'task_template': task_template,
+            'complexity': _COMPLEXITY_OVERRIDES.get(
+                task_proto.name, _DEFAULT_COMPLEXITY
+            ),
         },
     )
-

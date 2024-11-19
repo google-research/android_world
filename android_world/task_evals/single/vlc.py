@@ -86,7 +86,7 @@ class VlcCreatePlaylist(_VLC):
   """Task to create a playlist in VLC."""
 
   app_names = ['vlc']
-  complexity = 2
+  complexity = 2.8
   schema = {
       'type': 'object',
       'properties': {
@@ -163,7 +163,7 @@ class VlcCreateTwoPlaylists(task_eval.TaskEval):
   """Task to create two playlists in VLC."""
 
   app_names = ['vlc']
-  complexity = 3
+  complexity = 4.8
   schema = {
       'type': 'object',
       'properties': {

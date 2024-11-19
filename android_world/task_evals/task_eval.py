@@ -45,7 +45,7 @@ class TaskEval(abc.ABC):
 
   @property
   @abc.abstractmethod
-  def complexity(self) -> int:
+  def complexity(self) -> float:
     """The complexity of the task.
 
     We use heuristics to dynamically allocate number of steps based on the

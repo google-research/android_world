@@ -99,6 +99,9 @@ If you don't specify a task, a random task will be selected. *NOTE: If you want 
 
 ## Run the benchmark
 
+Note: **Task Step Limits Update**
+As of 11/18/2024, the max_steps/step_budget for each task in AndroidWorld have been updated to approximately **2x the human average completion time**. This adjustment ensures agents have sufficient time to complete tasks, while also reducing overhead of running thebenchmark. [Here](https://docs.google.com/spreadsheets/d/1KF-vY0Uy47o0mnursvs-HmS6hreU6U3rPrAjgEfjMK4/edit?usp=sharing) are the per-task updates.
+
 ```bash
 python run.py \
   --suite_family=android_world \

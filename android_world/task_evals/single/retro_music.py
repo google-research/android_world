@@ -121,7 +121,7 @@ class RetroCreatePlaylist(task_eval.TaskEval):
   """Task to create a playlist in Retro Music."""
 
   app_names = ['retro music']
-  complexity = 2
+  complexity = 2.4
   schema = {
       'type': 'object',
       'properties': {
@@ -190,6 +190,8 @@ class RetroCreatePlaylist(task_eval.TaskEval):
 class RetroPlayingQueue(RetroCreatePlaylist):
   """Task to create a playing queue in Retro Music."""
 
+  complexity = 3.2
+
   @property
   def goal(self) -> str:
     names = ', '.join(f.split('.')[0] for f in self.params['files'])
@@ -206,6 +208,8 @@ class RetroPlayingQueue(RetroCreatePlaylist):
 
 class RetroSavePlaylist(RetroCreatePlaylist):
   """Task to create a playlist and save it in Retro Music."""
+
+  complexity = 5
 
   @property
   def goal(self) -> str:

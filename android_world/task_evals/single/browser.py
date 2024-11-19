@@ -327,6 +327,8 @@ class BrowserMaze(BrowserTask):
 class BrowserMultiply(BrowserTask):
   """Task for multiplying multiple numbers together."""
 
+  complexity = 2.2
+
   @property
   def goal(self) -> str:
     return (

@@ -109,7 +109,7 @@ class RecipeDeleteSingleRecipe(_RecipeDeleteMultipleRecipes):
 class RecipeDeleteSingleWithRecipeWithNoise(_RecipeDeleteMultipleRecipes):
   """Delete single recipe in Broccoli Recipe App with noise."""
 
-  complexity = 3
+  complexity = 2
   n_rows = 1
   n_rows_noise = 29
 
@@ -117,7 +117,7 @@ class RecipeDeleteSingleWithRecipeWithNoise(_RecipeDeleteMultipleRecipes):
 class RecipeDeleteMultipleRecipes(_RecipeDeleteMultipleRecipes):
   """Delete multiple recipes in Broccoli Recipe App."""
 
-  complexity = 2
+  complexity = 2.4
   n_rows = 3
   n_rows_noise = 0
 
@@ -125,7 +125,7 @@ class RecipeDeleteMultipleRecipes(_RecipeDeleteMultipleRecipes):
 class RecipeDeleteMultipleRecipesWithNoise(_RecipeDeleteMultipleRecipes):
   """Delete multiple recipes in Broccoli Recipe App with noise."""
 
-  complexity = 3
+  complexity = 3.4
   n_rows = 3
   n_rows_noise = 29
 
@@ -133,7 +133,7 @@ class RecipeDeleteMultipleRecipesWithNoise(_RecipeDeleteMultipleRecipes):
 class RecipeDeleteMultipleRecipesWithConstraint(_RecipeDeleteMultipleRecipes):
   """Delete multiple recipes in Broccoli Recipe App based on ingredient."""
 
-  complexity = 3
+  complexity = 4
   n_rows = 3
   n_rows_noise = 29
 
@@ -229,7 +229,7 @@ class RecipeDeleteDuplicateRecipes(
 class RecipeDeleteDuplicateRecipes2(RecipeDeleteDuplicateRecipes):
   """Medium hard deduplication task, with more noise events."""
 
-  complexity = 3
+  complexity = 2.4
   n_rows = 1
   n_rows_noise = 10
 
@@ -272,7 +272,7 @@ class RecipeDeleteDuplicateRecipes2(RecipeDeleteDuplicateRecipes):
 class RecipeDeleteDuplicateRecipes3(RecipeDeleteDuplicateRecipes):
   """Harder deduplication task, with more noise events and agent must scroll."""
 
-  complexity = 4
+  complexity = 3.4
   n_rows = 1
   n_rows_noise = 30
 
@@ -412,7 +412,7 @@ class _RecipeAddMultipleRecipes(sqlite_validators.AddMultipleRows, _RecipeApp):
 class RecipeAddSingleRecipe(_RecipeAddMultipleRecipes):
   """Task to delete a single recipe in Broccoli Recipe App."""
 
-  complexity = 2
+  complexity = 2.4
   n_rows = 1
   n_rows_noise = 10
 
@@ -420,7 +420,7 @@ class RecipeAddSingleRecipe(_RecipeAddMultipleRecipes):
 class RecipeAddMultipleRecipes(_RecipeAddMultipleRecipes):
   """Task to delete multiple recipes in Broccoli Recipe App."""
 
-  complexity = 4
+  complexity = 6.8
   n_rows = 3
   n_rows_noise = 10
 
@@ -428,7 +428,7 @@ class RecipeAddMultipleRecipes(_RecipeAddMultipleRecipes):
 class RecipeAddMultipleRecipesFromMarkor(_RecipeAddMultipleRecipes):
   """Task to add multiple recipes from a text file to Broccoli Recipe App."""
 
-  complexity = 4
+  complexity = 4.8
   n_rows = 3
   n_rows_noise = 10
 
@@ -458,10 +458,9 @@ class RecipeAddMultipleRecipesFromMarkor(_RecipeAddMultipleRecipes):
 class RecipeAddMultipleRecipesFromMarkor2(RecipeAddMultipleRecipesFromMarkor):
   """Harder add recipe task, that involves navigating a large text file."""
 
-  complexity = 4
   n_rows = 3
   n_rows_noise = 40
-  complexity = 3
+  complexity = 5.2
 
   @property
   def goal(self) -> str:
@@ -520,7 +519,7 @@ class RecipeAddMultipleRecipesFromImage(_RecipeAddMultipleRecipes):
   """Task to add multiple recipes from an image file to Broccoli Recipe App."""
 
   app_names = (_APP_NAME, 'simple gallery pro')
-  complexity = 4
+  complexity = 2.6
   n_rows = 3
   n_rows_noise = 10
 

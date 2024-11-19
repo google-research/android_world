@@ -35,7 +35,7 @@ class _AudioRecorder(task_eval.TaskEval):
 class AudioRecorderRecordAudio(_AudioRecorder):
   """Task for checking that one audio recording has been completed."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {},
