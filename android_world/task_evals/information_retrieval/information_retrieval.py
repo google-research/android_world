@@ -69,15 +69,6 @@ class InformationRetrieval(task_eval.TaskEval, abc.ABC):
     self.template = self.task.prompt
     self.complexity = self.task.complexity
 
-    print('crcr self.task.relevant_state.state', self.task.relevant_state.state)
-    print(
-        'crcr',
-        self.is_calendar_task,
-        self.is_tasks_task(),
-        self.is_sports_task(),
-        self.is_notes_task(),
-    )
-
     # Set app names based on task type
     if self.is_calendar_task():
       self.app_names = (self.task.relevant_state.state.calendar.app_name,)
