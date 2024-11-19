@@ -73,6 +73,10 @@ def remove_single_file(
           ["shell", "rm", "-r", os.path.join(base_path, target)],
           env,
       )
+  else:
+    logging.warn(
+        "Base path %s does not exist, ignoring remove_single_file.", base_path
+    )
 
 
 def clear_directory(
