@@ -395,8 +395,13 @@ def copy_file_to_device(
         timeout_sec=timeout_sec,
     )
   push_response = env.execute_adb_call(push_request)
+
+  # ' and whitespace are special characters in adb commands that need to be
+  # escaped.
+  escaped_path = remote_file_path.replace(" ", r"\ ").replace("'", r"\'")
+
   adb_utils.issue_generic_request(
-      ["shell", "chmod", "777", remote_file_path], env
+      ["shell", "chmod", "777", escaped_path], env
   )
   return push_response
 
