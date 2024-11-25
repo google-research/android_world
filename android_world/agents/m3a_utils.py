@@ -21,6 +21,8 @@ from android_world.env import representation_utils
 import cv2
 import numpy as np
 
+TRIGGER_SAFETY_CLASSIFIER = 'Triggered LLM safety classifier.'
+
 
 def _logical_to_physical(
     logical_coordinates: tuple[int, int],
