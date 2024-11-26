@@ -31,11 +31,13 @@ class EpisodeResult:
     done: Whether the agent indicated the task is complete.
     step_data: Environment and agent data for each step.
     env_reward: Reward returned by environment, if applicable.
+    aux_data: Additional data from the episode which may be used for metrics.
   """
 
   done: bool
   step_data: dict[str, Any]
   env_reward: Optional[float] = None
+  aux_data: Optional[dict[str, Any]] = None
 
 
 def run_episode(
