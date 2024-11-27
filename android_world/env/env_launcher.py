@@ -17,7 +17,6 @@
 import resource
 
 from absl import logging
-from android_world.env import adb_utils
 from android_world.env import android_world_controller
 from android_world.env import interface
 from android_world.env.setup_device import setup
@@ -37,16 +36,6 @@ def _get_env(
       console_port, adb_path, grpc_port
   )
   return interface.AsyncAndroidEnv(controller)
-
-
-def verify_api_level(env: interface.AsyncEnv) -> None:
-  """Verifies that the emulator's API level is expected."""
-  level = adb_utils.get_api_level(env.controller)
-  if level != _ANDROID_WORLD_API_LEVEL:
-    raise ValueError(
-        f'Emulator API level must be {_ANDROID_WORLD_API_LEVEL}, but found'
-        f' {level}.'
-    )
 
 
 def _increase_file_descriptor_limit(limit: int = 32768):

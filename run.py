@@ -201,7 +201,6 @@ def _main() -> None:
       emulator_setup=_EMULATOR_SETUP.value,
       adb_path=_ADB_PATH.value,
   )
-  env_launcher.verify_api_level(env)
 
   n_task_combinations = _N_TASK_COMBINATIONS.value
   task_registry = registry.TaskRegistry()

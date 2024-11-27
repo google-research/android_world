@@ -90,7 +90,6 @@ def _main() -> None:
       emulator_setup=_EMULATOR_SETUP.value,
       adb_path=_ADB_PATH.value,
   )
-  env_launcher.verify_api_level(env)
   env.reset(go_home=True)
   task_registry = registry.TaskRegistry()
   aw_registry = task_registry.get_registry(task_registry.ANDROID_WORLD_FAMILY)
