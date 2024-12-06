@@ -61,6 +61,7 @@ def execute_adb_action(
       else:
         adb_utils.long_press(x, y, env)
     elif x is not None and y is not None:
+      x, y = int(x), int(y)
       if action.action_type == 'click':
         adb_utils.tap_screen(x, y, env)
       elif action.action_type == 'double_tap':

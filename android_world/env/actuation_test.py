@@ -143,6 +143,14 @@ class ExecuteAdbActionTest(absltest.TestCase):
       )
       mock_tap_screen.assert_called_once_with(50, 50, self.mock_env)
 
+  def test_click_by_coordinate_floats(self):
+    action = json_action.JSONAction(action_type='click', x=50.2, y=50.3)
+    with mock.patch.object(adb_utils, 'tap_screen') as mock_tap_screen:
+      actuation.execute_adb_action(
+          action, self.screen_elements, self.screen_size, self.mock_env
+      )
+      mock_tap_screen.assert_called_once_with(50, 50, self.mock_env)
+
   def test_input_text(self):
     action = json_action.JSONAction(
         action_type='input_text', text='test input', x=50, y=50
