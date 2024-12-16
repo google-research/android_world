@@ -635,8 +635,12 @@ def launch_app(
 
   activity = get_adb_activity(app_name)
   if activity is None:
-    logging.error('Failed to launch app: %r', app_name)
-    return None
+    #  If the app name is not in the mapping, assume it is a package name.
+    response = issue_generic_request(
+        ['shell', 'monkey', '-p', app_name, '1'], env, timeout_sec=5
+    )
+    logging.info('Launching app by package name, response: %r', response)
+    return app_name
   start_activity(activity, extra_args=[], env=env, timeout_sec=5)
   return app_name
 
