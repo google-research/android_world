@@ -544,11 +544,41 @@ def get_adb_activity(app_name: str) -> Optional[str]:
       return activity
 
 
-def get_all_apps(
+def get_all_package_names(
     env: env_interface.AndroidEnvInterface,
     timeout_sec: Optional[float] = _DEFAULT_TIMEOUT_SECS,
 ) -> list[str]:
   """Returns all packages installed on the device.
+
+  Args:
+    env: The AndroidEnv interface.
+    timeout_sec: A timeout to use for this operation.
+
+  Returns:
+    A list of installed package names.
+  """
+  response = env.execute_adb_call(
+      adb_pb2.AdbRequest(
+          package_manager=adb_pb2.AdbRequest.PackageManagerRequest(
+              list=adb_pb2.AdbRequest.PackageManagerRequest.List(
+                  packages=adb_pb2.AdbRequest.PackageManagerRequest.List.Packages()
+              )
+          ),
+          timeout_sec=timeout_sec,
+      )
+  )
+  if response.status != adb_pb2.AdbResponse.Status.OK:
+    logging.error('Failed to issue package manager request.')
+
+  package_names = list(response.package_manager.list.items)
+  return package_names
+
+
+def get_all_apps(
+    env: env_interface.AndroidEnvInterface,
+    timeout_sec: Optional[float] = _DEFAULT_TIMEOUT_SECS,
+) -> list[str]:
+  """Returns all apps installed on the device.
 
   Note: the output list will not be exhaustive as it is currently based on a
   mapping we define, so any apps not included in that mapping will not be
@@ -562,27 +592,12 @@ def get_all_apps(
   Returns:
     A list of app names.
   """
-  response = env.execute_adb_call(
-      adb_pb2.AdbRequest(
-          package_manager=adb_pb2.AdbRequest.PackageManagerRequest(
-              list=adb_pb2.AdbRequest.PackageManagerRequest.List(
-                  packages=adb_pb2.AdbRequest.PackageManagerRequest.List.Packages()
-              )
-          ),
-          timeout_sec=timeout_sec,
-      )
-  )
-  if response.status != adb_pb2.AdbResponse.Status.OK:
-    logging.error(
-        'Failed to issue package manager request',
-    )
-
+  packages = get_all_package_names(env, timeout_sec)
   package_to_app = {
       v.split('/')[0]: k.split('|')[0] for k, v in _PATTERN_TO_ACTIVITY.items()
   }
-
   app_names = []
-  for package in response.package_manager.list.items:
+  for package in packages:
     if package in package_to_app:
       app_names.append(package_to_app[package])
 
