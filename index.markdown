@@ -19,7 +19,11 @@ title: "AndroidWorld: A Dynamic Benchmarking Environment for Autonomous Agents"
 a.rounded-button, a.rounded-button:visited, a.rounded-button:hover, a.rounded-button:active {
   color: #fff;
 }
-  
+p.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 span.icon {
     padding-right: 10px;
 }
@@ -34,7 +38,7 @@ Chris Rawles<sup  style="font-size:10px">*1</sup>, Yifan Chang<sup style="font-s
 <sup style="font-size:10px">*</sup>Lead contributor
 <sup style="font-size:10px"> †</sup>Equal contribution 
 </p>
-<p align="center">
+<p align="center" class="button-container">
 <a class="rounded-button" href="https://arxiv.org/pdf/2405.14573"><span class="icon"><i class="ai ai-arxiv"></i></span><span>Paper</span></a>
 <a class="rounded-button" href="https://github.com/google-research/android_world"><span class="icon"><i class="fa-brands fa-github"></i></span><span>Code</span></a>
 <a class="rounded-button" href="{{ '/task_list.html' | relative_url }}"><span class="icon"><i class="fa-regular fa-images"></i></span><span>Data</span></a>
