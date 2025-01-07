@@ -52,7 +52,7 @@ jobs:
         # Update: 11/18/2024: This may need to be continually updated, when protobuf updates (from
         # AndroidEnv), i.e. if there is an errror: "Runtime version cannot be older than the linked
         # gencode version."
-        pip install protobuf==5.28.1
+        pip install protobuf==5.29.0
         pip --version
         pip install pytest-xdist
         pip install -e .[dev]
