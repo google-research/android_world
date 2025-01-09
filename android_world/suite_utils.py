@@ -311,6 +311,7 @@ def _run_task_suite(
     agent_name: str = '',
     return_full_episode_data: bool = False,
     process_episodes_fn=None,
+    check_episode_fn: Callable[[dict[str, Any]], bool] | None = None,
 ) -> list[dict[str, Any]]:
   """Runs e2e system on suite.
 
@@ -325,6 +326,7 @@ def _run_task_suite(
       just metadata.
     process_episodes_fn: The function to process episode data. Usually to
       compute metrics. Deafaults to process_episodes from this file.
+    check_episode_fn: The function to check episode data.
 
   Returns:
     Metadata for each episode, including the scripted reward.
@@ -376,6 +378,12 @@ def _run_task_suite(
         continue
 
       episode = _run_task(instance, run_episode, env, demo_mode=demo_mode)
+      if (
+          episode.get(constants.EpisodeConstants.EXCEPTION_INFO) is None
+          and check_episode_fn is not None
+      ):
+        if not check_episode_fn(episode):
+          continue
       episode[constants.EpisodeConstants.AGENT_NAME] = agent_name
       episode[constants.EpisodeConstants.INSTANCE_ID] = i
       checkpointer.save_episodes([episode], instance_name)
@@ -405,6 +413,7 @@ def run(
     demo_mode: bool = False,
     return_full_episode_data: bool = False,
     process_episodes_fn=None,
+    check_episode_fn: Callable[[dict[str, Any]], bool] | None = None,
 ) -> list[dict[str, Any]]:
   """Create suite and runs eval suite.
 
@@ -421,6 +430,7 @@ def run(
       just metadata.
     process_episodes_fn: The function to process episode data. Usually to
       compute metrics. Deafaults to process_episodes from this file.
+    check_episode_fn: The function to check episode data.
 
   Returns:
     Step-by-step data from each episode.
@@ -458,6 +468,7 @@ def run(
       agent_name=agent.name,
       return_full_episode_data=return_full_episode_data,
       process_episodes_fn=process_episodes_fn,
+      check_episode_fn=check_episode_fn,
   )
 
   return results
