@@ -18,7 +18,7 @@ import copy
 import logging
 import time
 from typing import Any
-
+from android_env import env_interface
 from android_world.env import adb_utils
 from android_world.env import android_world_controller
 from android_world.env import json_action
@@ -29,7 +29,7 @@ def execute_adb_action(
     action: json_action.JSONAction,
     screen_elements: list[Any],  # list[UIElement]
     screen_size: tuple[int, int],
-    env: android_world_controller.AndroidWorldController,
+    env: env_interface.AndroidEnvInterface,
 ) -> None:
   """Execute an action based on a JSONAction object.
 
