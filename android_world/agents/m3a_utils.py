@@ -15,6 +15,7 @@
 """Utils for M3A."""
 
 import base64
+import math
 import re
 from typing import Any, Optional
 from android_world.env import representation_utils
@@ -111,8 +112,8 @@ def get_ui_element_bbox_pixels(
 ) -> representation_utils.BoundingBox | None:
   """Get bounding box in physical coordinates for a given UI element."""
   if ui_element.bbox_pixels:
-    upper_left_logical, lower_right_logical = (
-        _ui_element_logical_corner(ui_element, orientation)
+    upper_left_logical, lower_right_logical = _ui_element_logical_corner(
+        ui_element, orientation
     )
     upper_left_physical = _logical_to_physical(
         upper_left_logical,
@@ -171,30 +172,45 @@ def add_ui_element_mark(
         physical_frame_boundary,
         orientation,
     )
+    x_scale = screenshot.shape[1] / physical_frame_boundary[2]
+    y_scale = screenshot.shape[0] / physical_frame_boundary[3]
+    iso_scale = math.sqrt(x_scale * x_scale + y_scale * y_scale)
+    upper_left_physical = (
+        int(upper_left_physical[0] * x_scale),
+        int(upper_left_physical[1] * y_scale),
+    )
+    lower_right_physical = (
+        int(lower_right_physical[0] * x_scale),
+        int(lower_right_physical[1] * y_scale),
+    )
 
     cv2.rectangle(
         screenshot,
         upper_left_physical,
         lower_right_physical,
         color=(0, 255, 0),
-        thickness=2,
+        thickness=int(2 * iso_scale),
     )
     screenshot[
-        upper_left_physical[1] + 1 : upper_left_physical[1] + 25,
-        upper_left_physical[0] + 1 : upper_left_physical[0] + 35,
+        upper_left_physical[1]
+        + int(1 * y_scale) : upper_left_physical[1]
+        + int(25 * y_scale),
+        upper_left_physical[0]
+        + int(1 * x_scale) : upper_left_physical[0]
+        + int(35 * x_scale),
         :,
     ] = (255, 255, 255)
     cv2.putText(
         screenshot,
         str(index),
         (
-            upper_left_physical[0] + 1,
-            upper_left_physical[1] + 20,
+            upper_left_physical[0] + int(1 * x_scale),
+            upper_left_physical[1] + int(20 * y_scale),
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
+        0.7 * iso_scale,
         (0, 0, 0),
-        thickness=2,
+        thickness=int(2 * iso_scale),
     )
 
 
