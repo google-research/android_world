@@ -239,7 +239,7 @@ def _run_task(
     interaction_results = run_episode(task)
     task_successful = task.is_successful(env)
   except Exception:  # pylint: disable=broad-exception-caught
-    print('~' * 80 + '\n' + f'SKIPPING {task.name}.')
+    print('~' * 80 + '\n' + f'SKIPPING {task.name} as it fails to initialize.')
     traceback.print_exc()
     return _create_failed_result(
         task.name, task.goal, traceback.format_exc(), time.time() - start
