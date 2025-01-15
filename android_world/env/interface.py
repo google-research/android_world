@@ -46,11 +46,13 @@ class State:
     forest: Raw UI forest; see android_world_controller.py for more info.
     ui_elements: Processed children and stateful UI elements extracted from
       forest.
+    auxiliaries: Additional information about the state.
   """
 
   pixels: np.ndarray
   forest: Any
   ui_elements: list[representation_utils.UIElement]
+  auxiliaries: dict[str, Any] | None = None
 
   @classmethod
   def create_and_infer_elements(
@@ -203,6 +205,7 @@ def _process_timestep(timestep: dm_env.TimeStep) -> State:
       ui_elements=timestep.observation[
           android_world_controller.OBSERVATION_KEY_UI_ELEMENTS
       ],
+      auxiliaries={},
   )
 
 
