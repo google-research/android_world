@@ -16,10 +16,9 @@
 
 import dataclasses
 from typing import Any, Callable, Optional
-
-from android_env import env_interface
 from android_world import constants
 from android_world.agents import base_agent
+from android_world.env import interface
 import termcolor
 
 
@@ -45,9 +44,7 @@ def run_episode(
     agent: base_agent.EnvironmentInteractingAgent,
     max_n_steps: int = 10,
     start_on_home_screen: bool = False,
-    termination_fn: (
-        Callable[[env_interface.AndroidEnvInterface], float] | None
-    ) = None,
+    termination_fn: Callable[[interface.AsyncEnv], float] | None = None,
 ) -> EpisodeResult:
   """Runs an agent on goal, e.g., "turn off wifi".
 
@@ -83,7 +80,7 @@ def run_episode(
     print('Completed step {:d}.'.format(step_n + 1))
     assert constants.STEP_NUMBER not in result.data
     output.append(result.data | {constants.STEP_NUMBER: step_n})
-    if termination_fn(agent.env.controller):
+    if termination_fn(agent.env):
       print('Environment ends episode.')
       return EpisodeResult(
           done=True,
