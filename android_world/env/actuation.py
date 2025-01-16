@@ -74,11 +74,14 @@ def execute_adb_action(
   elif action.action_type == 'input_text':
     text = action.text
     if text:
-      # First focus on enter text UI element.
-      click_action = copy.deepcopy(action)
-      click_action.action_type = 'click'
-      execute_adb_action(click_action, screen_elements, screen_size, env)
-      time.sleep(1.0)
+      if action.index is not None or (
+          action.x is not None and action.y is not None
+      ):
+        # First focus on enter text UI element.
+        click_action = copy.deepcopy(action)
+        click_action.action_type = 'click'
+        execute_adb_action(click_action, screen_elements, screen_size, env)
+        time.sleep(1.0)
       adb_utils.type_text(text, env, timeout_sec=10)
       adb_utils.press_enter_button(env)
     else:
