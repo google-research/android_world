@@ -14,7 +14,9 @@
 
 """Utils for M3A."""
 
+import ast
 import base64
+import json
 import math
 import re
 from typing import Any, Optional
@@ -268,7 +270,35 @@ def parse_reason_action_output(
       r'Action:(.*)', raw_reason_action_output, flags=re.DOTALL
   )
   action = action_result.group(1).strip() if action_result else None
+  if action:
+    extracted = extract_json(action)
+    if extracted is not None:
+      action = json.dumps(extracted)
+
   return reason, action
+
+
+def extract_json(s: str) -> Optional[dict[str, Any]]:
+  """Extracts JSON from string.
+
+  Args:
+    s: A string with a JSON in it. E.g., "{'hello': 'world'}" or from CoT:
+      "let's think step-by-step, ..., {'hello': 'world'}".
+
+  Returns:
+    JSON object.
+  """
+  pattern = r'\{.*?\}'
+  match = re.search(pattern, s, re.DOTALL)
+  if match:
+    try:
+      return ast.literal_eval(match.group())
+    except (SyntaxError, ValueError) as error:
+      print(f'Cannot extract JSON, skipping due to error {error}')
+      return None
+  else:
+    print(f'No JSON match in {s}')
+    return None
 
 
 def _generate_screenshot_table(task_result: dict[str, Any], i: int) -> str:
