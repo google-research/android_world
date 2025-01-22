@@ -281,7 +281,7 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
     return self.predict_mm(text_prompt, [])
 
   def predict_mm(
-      self, text_prompt: str, images: list[np.ndarray]
+      self, text_prompt: str, images: list[np.ndarray], temperature: float = 0.0
   ) -> tuple[str, Optional[bool], Any]:
     headers = {
         'Content-Type': 'application/json',
@@ -290,7 +290,7 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
 
     payload = {
         'model': self.model,
-        'temperature': self.temperature,
+        'temperature': temperature,
         'messages': [{
             'role': 'user',
             'content': [
