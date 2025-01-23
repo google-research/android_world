@@ -277,8 +277,9 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
   def predict(
       self,
       text_prompt: str,
+      temperature: float = 0.0
   ) -> tuple[str, Optional[bool], Any]:
-    return self.predict_mm(text_prompt, [])
+    return self.predict_mm(text_prompt, [], temperature)
 
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray], temperature: float = 0.0
