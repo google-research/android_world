@@ -87,7 +87,6 @@ See demo videos on our [website](https://google-research.github.io/android_world
     # macOS
     brew install ffmpeg
     ```
-Here's the updated Known Issues section:
 
 ### Known Issues
 
