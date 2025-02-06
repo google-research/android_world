@@ -87,6 +87,25 @@ See demo videos on our [website](https://google-research.github.io/android_world
     # macOS
     brew install ffmpeg
     ```
+Here's the updated Known Issues section:
+
+### Known Issues
+
+**Protobuf Version Compatibility**
+
+While running `android_world`, if you encounter an error like:
+
+```bash
+ImportError: cannot import name 'runtime_version' from 'google.protobuf'
+```
+
+Fix by installing a specific protobuf version:
+
+```bash
+pip install protobuf==5.29.0
+```
+
+This is a temporary workaround for dependency conflicts between AndroidEnv and other packages. See [`.github/pytest.yml`](https://github.com/google-research/android_world/tree/main/.github/workflows) for the exact version that should be used to fix the issue.
 
 ## Quickstart
 
