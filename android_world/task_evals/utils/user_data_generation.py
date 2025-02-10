@@ -411,26 +411,34 @@ def _draw_text(text: str, font_size: int = 24) -> Image.Image:
   Returns:
       The image object with the text.
   """
-
-  # Split the text into lines to calculate image size
+  font = ImageFont.truetype(get_font_path(), font_size)
   lines = text.split("\n")
-  max_line_width = max([len(line) for line in lines])
 
-  # Image dimensions based on text length
-  img_width = max_line_width * font_size // 2
-  img_height = len(lines) * font_size + 20  # Adding some padding
+  # Calculate dimensions using font metrics
+  max_width = 0
+  total_height = 0
+  for line in lines:
+    bbox = font.getbbox(line)
+    max_width = max(max_width, bbox[2])
+    if line.strip():  # For non-empty lines
+      total_height += bbox[3]
+    else:  # For empty lines (paragraph breaks)
+      total_height += font_size // 2
+
+  img_width = max_width + 20
+  img_height = total_height + 20
 
   img = Image.new("RGB", (img_width, img_height), color=(255, 255, 255))
   d = ImageDraw.Draw(img)
 
-  # Load a font
-  font = ImageFont.truetype(get_font_path(), font_size)
-
-  # Initial Y position
   y_text = 10
   for line in lines:
-    d.text((10, y_text), line, fill=(0, 0, 0), font=font)
-    y_text += font_size  # Move text to next line
+    if line.strip():
+      d.text((10, y_text), line, fill=(0, 0, 0), font=font)
+      bbox = font.getbbox(line)
+      y_text += bbox[3]
+    else:
+      y_text += font_size // 2
 
   return img
 
