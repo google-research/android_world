@@ -104,7 +104,7 @@ class JSONAction:
   def __post_init__(self):
     if self.action_type not in _ACTION_TYPES:
       raise ValueError(f'Invalid action type: {self.action_type}')
-    if self.index is not None:
+    if self.index is not None and self.index != 'WINDOW':
       self.index = int(self.index)
       if self.x is not None or self.y is not None:
         raise ValueError('Either an index or a <x, y> should be provided.')
