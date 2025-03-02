@@ -228,7 +228,7 @@ class MarkorEditNote(Markor):
         [
             "shell",
             "cat",
-            os.path.join(
+            file_utils.convert_to_posix_path(
                 device_constants.MARKOR_DATA, self.params["file_name"]
             ),
         ],
@@ -615,7 +615,7 @@ class MarkorMergeNotes(Markor):
             [
                 "shell",
                 "cat",
-                os.path.join(
+                file_utils.convert_to_posix_path(
                     device_constants.MARKOR_DATA, self.params["new_file_name"]
                 ),
             ],
@@ -712,7 +712,7 @@ class MarkorChangeNoteContent(Markor):
     ):
       return 0.0
     content_updated = file_utils.check_file_content(
-        os.path.join(device_constants.MARKOR_DATA, self.params["new_name"]),
+        file_utils.convert_to_posix_path(device_constants.MARKOR_DATA, self.params["new_name"]),
         self.params["updated_content"],
         env.controller,
     )
@@ -794,7 +794,7 @@ class MarkorAddNoteHeader(Markor):
     ):
       return 0.0
     correct = file_utils.check_file_content(
-        os.path.join(device_constants.MARKOR_DATA, self.params["new_name"]),
+        file_utils.convert_to_posix_path(device_constants.MARKOR_DATA, self.params["new_name"]),
         self.params["header"] + "\n\n" + self.params["original_content"] + "\n",
         env.controller,
         exact_match=True,
@@ -841,9 +841,10 @@ class MarkorTranscribeReceipt(task_eval.TaskEval):
     """Initializes the task for creating a receipt markdown file."""
     super().initialize_task(env)
     self.create_file_task.initialize_task(env)
-    self.img.save("/tmp/receipt.png")
+    receipt_img_path = file_utils.convert_to_posix_path(file_utils.get_local_tmp_directory(), 'receipt.png')
+    self.img.save(receipt_img_path)
     file_utils.copy_data_to_device(
-        "/tmp/receipt.png",
+        receipt_img_path,
         device_constants.GALLERY_DATA,
         env.controller,
     )

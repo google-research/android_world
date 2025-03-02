@@ -27,14 +27,14 @@ def _app_data_path(app_name: str) -> str:
   package_name = adb_utils.extract_package_name(
       adb_utils.get_adb_activity(app_name)
   )
-  return os.path.join("/data/data/", package_name)
+  return file_utils.convert_to_posix_path("/data/data/", package_name)
 
 
 def _snapshot_path(app_name: str) -> str:
   package_name = adb_utils.extract_package_name(
       adb_utils.get_adb_activity(app_name)
   )
-  return os.path.join(device_constants.SNAPSHOT_DATA, package_name)
+  return file_utils.convert_to_posix_path(device_constants.SNAPSHOT_DATA, package_name)
 
 
 def clear_snapshot(

@@ -49,6 +49,7 @@ def parse_message(row: str) -> dict[str, str]:
   """
   parsed_dict = {}
 
+  row = row.strip()
   body_start = row.find("body=")
 
   if body_start != -1:

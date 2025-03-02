@@ -21,6 +21,7 @@ from typing import Optional, Type
 from android_world.env import adb_utils
 from android_world.env import interface
 from android_world.task_evals.utils import sqlite_schema_utils
+from android_world.utils import file_utils
 
 
 def execute_query(
@@ -83,7 +84,7 @@ def get_rows_from_remote_device(
   with env.controller.pull_file(
       remote_db_file_path, timeout_sec
   ) as local_db_directory:
-    local_db_path = os.path.join(
+    local_db_path = file_utils.convert_to_posix_path(
         local_db_directory, os.path.split(remote_db_file_path)[1]
     )
     for _ in range(n_retries):
@@ -153,7 +154,7 @@ def delete_all_rows_from_table(
   with env.controller.pull_file(
       remote_db_file_path, timeout_sec
   ) as local_db_directory:
-    local_db_path = os.path.join(
+    local_db_path = file_utils.convert_to_posix_path(
         local_db_directory, os.path.split(remote_db_file_path)[1]
     )
 
@@ -193,7 +194,7 @@ def insert_rows_to_remote_db(
   with env.controller.pull_file(
       remote_db_file_path, timeout_sec
   ) as local_db_directory:
-    local_db_path = os.path.join(
+    local_db_path = file_utils.convert_to_posix_path(
         local_db_directory, os.path.split(remote_db_file_path)[1]
     )
 
