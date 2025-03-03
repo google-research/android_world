@@ -26,6 +26,7 @@ from android_world.task_evals.utils import user_data_generation
 from android_world.utils import app_snapshot
 from android_world.utils import datetime_utils
 from android_world.utils import fake_adb_responses
+from android_world.utils import file_utils
 from PIL import Image
 
 
@@ -35,7 +36,7 @@ def _touch_temp_file(file_name):
   Args:
     file_name: The name of the file.
   """
-  path = os.path.join(tempfile.gettempdir(), file_name)
+  path = file_utils.convert_to_posix_path(tempfile.gettempdir(), file_name)
   with open(path, "w") as f:
     f.write("")
 

@@ -16,6 +16,7 @@ import os
 import tempfile
 from absl.testing import absltest
 from android_world.task_evals.utils import user_data_generation
+from android_world.utils import file_utils
 import cv2
 
 
@@ -42,7 +43,7 @@ def get_video_properties(file_path: str) -> tuple[int, float]:
 class TestCreateMpegWithMessages(absltest.TestCase):
 
   def test_video_properties(self):
-    file_path = os.path.join(tempfile.mkdtemp(), "test_video.mp4")
+    file_path = file_utils.convert_to_posix_path(tempfile.mkdtemp(), "test_video.mp4")
     messages = ["Hello", "World"]
     width = 10
     height = 12

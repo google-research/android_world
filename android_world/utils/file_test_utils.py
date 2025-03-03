@@ -20,6 +20,7 @@ import shutil
 import tempfile
 
 from android_env import env_interface
+from android_world.utils import file_utils
 
 
 @contextlib.contextmanager
@@ -31,7 +32,7 @@ def mock_tmp_directory_from_device(
   """Mocks `file_utils.tmp_directory_from_device` for unit testing."""
   del env, timeout_sec
   with tempfile.TemporaryDirectory() as tmp_dir:
-    parent_dir = os.path.join(
+    parent_dir = file_utils.convert_to_posix_path(
         tmp_dir, os.path.split(os.path.split(device_path)[0])[1]
     )
     try:
@@ -75,7 +76,7 @@ def mock_remove_files(directory: str, env: env_interface.AndroidEnvInterface):
   """
   del env
   for filename in os.listdir(directory):
-    file_path = os.path.join(directory, filename)
+    file_path = file_utils.convert_to_posix_path(directory, filename)
     if os.path.isfile(file_path) or os.path.islink(file_path):
       os.unlink(file_path)
     elif os.path.isdir(file_path):

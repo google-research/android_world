@@ -101,9 +101,9 @@ class VlcTestBase(parameterized.TestCase):
     self.env_mock.controller = self.controller
 
     temp_dir = tempfile.mkdtemp()
-    self.test_db_path = os.path.join(temp_dir, 'app_db/vlc_media.db')
+    self.test_db_path = file_utils.convert_to_posix_path(temp_dir, 'app_db/vlc_media.db')
     os.makedirs(
-        os.path.join(os.path.dirname(self.test_db_path), 'app_db'),
+        file_utils.convert_to_posix_path(os.path.dirname(self.test_db_path), 'app_db'),
         exist_ok=True,
     )
 
