@@ -15,6 +15,7 @@
 """Logic for validating an SMS has been sent."""
 
 import random
+import time
 
 from absl import logging
 from android_env import env_interface
@@ -232,6 +233,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
     android_time = self.get_android_time(env.controller)
 
     messages = self.get_sent_messages(env.controller)
+    time.sleep(5)
     logging.info("During initialize_task, messages: %s", messages)
     if was_sent(
         messages,
@@ -248,6 +250,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     messages = self.get_sent_messages(env.controller)
+    time.sleep(5)
     logging.info("During is_successful, messages: %s", messages)
     sms_was_sent = was_sent(
         messages,
