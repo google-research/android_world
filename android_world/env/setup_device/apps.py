@@ -32,16 +32,16 @@ from android_world.utils import file_utils
 import requests
 
 
-APP_DATA = file_utils.convert_to_posix_path(os.path.dirname(__file__), 'app_data')
+APP_DATA = os.path.join(os.path.dirname(__file__), 'app_data')
 
 
 def download_app_data(file_name: str) -> str:
   """Downloads file from a GCS bucket, if not cached, and installs it."""
-  cache_dir = file_utils.convert_to_posix_path(file_utils.get_local_tmp_directory(), 'android_world', 'app_data')
+  cache_dir = "/tmp/android_world/app_data"
   remote_url = (
       f"https://storage.googleapis.com/gresearch/android_world/{file_name}"
   )
-  full_path = file_utils.convert_to_posix_path(cache_dir, file_name)
+  full_path = os.path.join(cache_dir, file_name)
   os.makedirs(cache_dir, exist_ok=True)
   if not os.path.isfile(full_path):
     logging.info("Downloading file_name %s to cache %s", file_name, cache_dir)
@@ -580,7 +580,7 @@ class OsmAndApp(AppSetup):
                   "shell",
                   "chcon",
                   "u:object_r:media_rw_data_file:s0",
-                  file_utils.convert_to_posix_path(cls.DEVICE_MAPS_PATH, map_file),
+                  os.path.join(cls.DEVICE_MAPS_PATH, map_file),
               ],
               env.controller,
           )

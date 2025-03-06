@@ -21,7 +21,7 @@ import os
 import random
 import time
 import traceback
-from typing import Any, Callable, Type
+from typing import Any, Callable, Type, TypeVar
 
 from android_env import env_interface
 from android_world import checkpointer as checkpointer_lib
@@ -40,6 +40,7 @@ import pandas as pd
 _FIXED_SEED = 123
 _TASK_TEMPLATE_COLUMN = 'task_template'
 _TASK_PROMPT_COLUMN = 'task_prompt'
+TaskEvalType = TypeVar('TaskEvalType', bound=task_eval.TaskEval)
 
 
 class Suite(dict[str, list[task_eval.TaskEval]]):
@@ -213,8 +214,8 @@ def _filter_tasks(
 
 
 def _run_task(
-    task: task_eval.TaskEval,
-    run_episode: Callable[[task_eval.TaskEval], episode_runner.EpisodeResult],
+    task: TaskEvalType,
+    run_episode: Callable[[TaskEvalType], episode_runner.EpisodeResult],
     env: interface.AsyncEnv,
     demo_mode: bool,
 ) -> dict[str, Any]:

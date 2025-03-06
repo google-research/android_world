@@ -346,10 +346,9 @@ class GalleryMarkorTest(test_utils.AdbEvalTestBase):
 
     task.initialize_task(mock_env)
 
-    receipt_img_path = file_utils.convert_to_posix_path(file_utils.get_local_tmp_directory(), 'receipt.png')
-    task.img.save.assert_called_once_with(receipt_img_path)
+    task.img.save.assert_called_once_with('/tmp/receipt.png')
     mock_copy_data_to_device.assert_called_once_with(
-        receipt_img_path,
+        '/tmp/receipt.png',
         device_constants.GALLERY_DATA,
         mock_env.controller,
     )

@@ -24,7 +24,6 @@ import string
 import tempfile
 from typing import Iterator
 from typing import Optional
-from pathlib import Path
 
 from absl import logging
 from android_env import env_interface
@@ -33,25 +32,9 @@ from android_env.proto import adb_pb2
 from android_world.env import adb_utils
 from android_world.utils import fuzzy_match_lib
 
-def get_local_tmp_directory() -> str:
-  """Returns the local temporary directory path.
-
-  Returns:
-    str: The local temporary directory path.
-  """
-  return tempfile.gettempdir()
-
-def convert_to_posix_path(*args):
-  """Converts the given path to a posix path.
-  It can also be used to join paths.
-
-  Returns:
-    str: The path in posix format.
-  """
-  return str(Path(*args).as_posix())
 
 # Local temporary location for files copied to or from the device.
-TMP_LOCAL_LOCATION = convert_to_posix_path(get_local_tmp_directory(), "android_world")
+TMP_LOCAL_LOCATION = "/tmp/android_world"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -87,7 +70,7 @@ def remove_single_file(
     file_list = get_file_list_with_metadata(base_path, env)
     if target in [file_info.file_name for file_info in file_list]:
       adb_utils.issue_generic_request(
-          ["shell", "rm", "-r", convert_to_posix_path(base_path, target)],
+          ["shell", "rm", "-r", os.path.join(base_path, target)],
           env,
       )
   else:
@@ -251,7 +234,7 @@ def check_file_or_folder_exists(
 
   all_paths = set(res.generic.output.decode().split("\n"))
 
-  full_target_path = convert_to_posix_path(base_path, target)
+  full_target_path = os.path.join(base_path, target)
   return full_target_path in all_paths
 
 
@@ -344,7 +327,7 @@ def tmp_directory_from_device(
           )
       )
       adb_utils.check_ok(pull_response)
-      with open(convert_to_posix_path(tmp_directory, file.file_name), "wb") as f:
+      with open(os.path.join(tmp_directory, file.file_name), "wb") as f:
         f.write(pull_response.pull.content)
 
     yield tmp_directory
@@ -374,8 +357,8 @@ def tmp_file_from_device(
     RuntimeError: If there is an adb communication error.
   """
   head, tail = os.path.split(device_file)
-  dir_and_file_name = convert_to_posix_path(os.path.basename(head), tail)
-  local_file = convert_to_posix_path(TMP_LOCAL_LOCATION, dir_and_file_name)
+  dir_and_file_name = os.path.join(os.path.basename(head), tail)
+  local_file = os.path.join(TMP_LOCAL_LOCATION, dir_and_file_name)
   try:
     # Need root access to access many directories.
     adb_utils.set_root_if_needed(env, timeout_sec)
@@ -454,14 +437,14 @@ def copy_data_to_device(
   if os.path.isfile(local_path):
     # If the file extension is different, remote_path is likely a directory.
     if os.path.splitext(local_path)[1] != os.path.splitext(remote_path)[1]:
-      remote_path = convert_to_posix_path(remote_path, os.path.basename(local_path))
+      remote_path = os.path.join(remote_path, os.path.basename(local_path))
     return copy_file_to_device(local_path, remote_path, env, timeout_sec)
 
   # Copying a directory over, push every file separately.
   for file_path in os.listdir(local_path):
     current_response = copy_file_to_device(
-        convert_to_posix_path(local_path, file_path),
-        convert_to_posix_path(remote_path, os.path.basename(file_path)),
+        os.path.join(local_path, file_path),
+        os.path.join(remote_path, os.path.basename(file_path)),
         env,
         timeout_sec,
     )
@@ -513,11 +496,11 @@ def get_file_list_with_metadata(
         if len(parts) < 9:
           raise RuntimeError(f"Failed to parse file details: {file_details}")
 
-        file_name = parts[8].strip()  # This will preserve spaces in the filename
+        file_name = parts[8]  # This will preserve spaces in the filename
         files.append(
             FileWithMetadata(
                 file_name=file_name,
-                full_path=convert_to_posix_path(directory_path, file_name),
+                full_path=os.path.join(directory_path, file_name),
                 file_size=int(parts[4]),
                 change_time=datetime.datetime.fromisoformat(
                     " ".join(parts[5:7])[:-3]
