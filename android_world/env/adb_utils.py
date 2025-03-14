@@ -735,6 +735,39 @@ def generate_swipe_command(
   ]
 
 
+def generate_drag_and_drop_command(
+    start_x: int,
+    start_y: int,
+    end_x: int,
+    end_y: int,
+    duration_ms: Optional[int] = None,
+) -> list[str]:
+  """Sends a drag and drop action to the simulator.
+
+  Args:
+    start_x: The x-coordinate of the start of the drag and drop.
+    start_y: The y-coordinate of the start of the drag and drop.
+    end_x: The x-coordinate of the end of the drag and drop.
+    end_y: The y-coordinate of the end of the drag and drop.
+    duration_ms: If given, the duration of time in milliseconds to take to
+      complete the drag and drop.
+
+  Returns:
+    List of adb arguments.
+  """
+  duration_str = str(duration_ms) if duration_ms else ''
+  return [
+      'shell',
+      'input',
+      'draganddrop',
+      str(start_x),
+      str(start_y),
+      str(end_x),
+      str(end_y),
+      duration_str,
+  ]
+
+
 def send_android_intent(
     command: str,
     action: str,

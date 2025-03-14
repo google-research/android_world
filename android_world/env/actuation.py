@@ -101,7 +101,21 @@ def execute_adb_action(
 
   elif action.action_type == 'press_keyboard':
     adb_utils.press_keyboard_generic(action.keycode, env)
-
+  elif action.action_type == 'drag_and_drop':
+    if action.touch_xy is not None and action.lift_xy is not None:
+      command = adb_utils.generate_drag_and_drop_command(
+          action.touch_xy[0],
+          action.touch_xy[1],
+          action.lift_xy[0],
+          action.lift_xy[1],
+          4000,
+      )
+      adb_utils.issue_generic_request(command, env)
+    else:
+      logging.warning(
+          'Drag and drop action indicated, but no coordinates provided. No '
+          'action will be executed.'
+      )
   elif action.action_type == 'scroll':
 
     screen_width, screen_height = screen_size
