@@ -112,7 +112,9 @@ class TaskEval(abc.ABC):
   def _initialize_apps(self, env: interface.AsyncEnv) -> None:
 
     for app_name in self.app_names:
-      if app_name:
+      # Don't need to restore snapshot for clipper app since it doesn't have
+      # any state.
+      if app_name and app_name != "clipper":
         try:
           app_snapshot.restore_snapshot(app_name, env.controller)
         except RuntimeError as error:

@@ -158,6 +158,7 @@ class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
 class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
   """Task for checking that the clipboard contents were sent as an SMS."""
 
+  app_names = ("simple sms messenger", "clipper")
   complexity = 1.2
   template = (
       "Send a message to {number} with the clipboard content in Simple SMS"

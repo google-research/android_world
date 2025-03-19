@@ -453,6 +453,7 @@ class MarkorCreateNote(Markor):
 class MarkorCreateNoteFromClipboard(Markor):
   """Task for creating a note using text in clipboard in Markor."""
 
+  app_names = ("markor", "clipper")
   complexity = 1.4
   schema = {
       "type": "object",

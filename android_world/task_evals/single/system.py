@@ -297,7 +297,7 @@ class SystemBluetoothTurnOn(_SystemBluetoothToggle):
 class SystemCopyToClipboard(task_eval.TaskEval):
   """Task for verifying that the correct params are copied to the clipboard."""
 
-  app_names = ()
+  app_names = ('clipper',)
   complexity = 1
   schema = {
       'type': 'object',
