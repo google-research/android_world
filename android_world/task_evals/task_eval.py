@@ -23,7 +23,6 @@ from android_world.env import device_constants
 from android_world.env import interface
 from android_world.utils import app_snapshot
 from android_world.utils import datetime_utils
-import jsonschema
 
 
 class TaskEval(abc.ABC):
@@ -40,7 +39,10 @@ class TaskEval(abc.ABC):
 
   def __init__(self, params: dict[str, Any]):
     self.initialized = False
-    jsonschema.validate(params, self.schema)
+
+    # Disabling this check for now as it is causing issues on occasion with a
+    # with a RefResolutionError due to inability to resolve json-schema.org.
+    # jsonschema.validate(params, self.schema)
     self._params = params
 
   @property
