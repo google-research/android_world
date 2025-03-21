@@ -102,7 +102,7 @@ def create_suite(
     seed: int | None = None,
     tasks: list[str] | None = None,
     use_identical_params: bool = False,
-    env: interface.AsyncEnv | None = None,
+    env: interface.AsyncEnv | None = None
 ) -> Suite:
   """Creates task suite.
 
