@@ -45,6 +45,7 @@ def run_episode(
     max_n_steps: int = 10,
     start_on_home_screen: bool = False,
     termination_fn: Callable[[interface.AsyncEnv], float] | None = None,
+    print_fn: Callable[[str], None] = print,
 ) -> EpisodeResult:
   """Runs an agent on goal, e.g., "turn off wifi".
 
@@ -62,6 +63,7 @@ def run_episode(
     termination_fn: If provided, a determines whether to terminate an episode.
       For example, for MiniWoB++ tasks, the episode should terminate if there is
       a nonzero reward.
+    print_fn: A function to print log messages to the console or logger.
 
   Returns:
     Data collected during running agent on goal.
@@ -77,22 +79,22 @@ def run_episode(
   output = []
   for step_n in range(max_n_steps):
     result = agent.step(goal)
-    print('Completed step {:d}.'.format(step_n + 1))
+    print_fn('Completed step {:d}.'.format(step_n + 1))
     assert constants.STEP_NUMBER not in result.data
     output.append(result.data | {constants.STEP_NUMBER: step_n})
     if termination_fn(agent.env):
-      print('Environment ends episode.')
+      print_fn('Environment ends episode.')
       return EpisodeResult(
           done=True,
           step_data=_transpose_lod_to_dol(output),
       )
     elif result.done:
-      print('Agent indicates task is done.')
+      print_fn('Agent indicates task is done.')
       return EpisodeResult(
           done=result.done,
           step_data=_transpose_lod_to_dol(output),
       )
-  print(
+  print_fn(
       termcolor.colored(
           'Agent did not indicate task is done. Reached max number of steps.',
           'red',
