@@ -320,7 +320,7 @@ class ExpenseAddSingle(_ExpenseAddMultiple):
 class ExpenseAddMultiple(_ExpenseAddMultiple):
   """Task to add multiple expenses in the Expense Tracking App."""
 
-  complexity = 4
+  complexity = 6
   n_rows = 3
   n_rows_noise = 10
 
@@ -328,7 +328,7 @@ class ExpenseAddMultiple(_ExpenseAddMultiple):
 class ExpenseAddMultipleFromMarkor(_ExpenseAddMultiple):
   """Task to add multiple expenses from Markor into the Expense Tracking app."""
 
-  complexity = 3
+  complexity = 6
   n_rows = 2
   n_rows_noise = 100
 
@@ -362,7 +362,7 @@ class ExpenseAddMultipleFromMarkor(_ExpenseAddMultiple):
 class ExpenseAddMultipleFromGallery(_ExpenseAddMultiple):
   """Task to add multiple expenses from Gallery into Expense Tracking app."""
 
-  complexity = 2
+  complexity = 6
   n_rows = 3
   n_rows_noise = 10
 
