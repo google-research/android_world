@@ -14,7 +14,7 @@
 
 """Launches the environment used in the benchmark."""
 
-import resource
+import platform
 
 from absl import logging
 from android_world.env import android_world_controller
@@ -49,22 +49,25 @@ def _increase_file_descriptor_limit(limit: int = 32768):
     limit: The new file descriptor limit. The default value was determined
       experimentally to not raise too many open files error.
   """
-  try:
-    _, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-    if limit > hard:
-      logging.warning(
-          (
-              "Requested limit %d exceeds the system's hard limit %d. Setting"
-              ' to the maximum allowed value.'
-          ),
-          limit,
-          hard,
-      )
-      limit = hard
-    resource.setrlimit(resource.RLIMIT_NOFILE, (limit, hard))
-    logging.info('File descriptor limit set to %d.', limit)
-  except ValueError as e:
-    logging.exception('Failed to set file descriptor limit: %s', e)
+  system_name = platform.system()
+  if system_name != 'Windows':
+    import resource
+    try:
+      _, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+      if limit > hard:
+        logging.warning(
+            (
+                "Requested limit %d exceeds the system's hard limit %d. Setting"
+                ' to the maximum allowed value.'
+            ),
+            limit,
+            hard,
+        )
+        limit = hard
+      resource.setrlimit(resource.RLIMIT_NOFILE, (limit, hard))
+      logging.info('File descriptor limit set to %d.', limit)
+    except ValueError as e:
+      logging.exception('Failed to set file descriptor limit: %s', e)
 
 
 def setup_env(
