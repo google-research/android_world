@@ -22,6 +22,7 @@ to construct these for common use cases.
 import os
 
 from android_env.proto import adb_pb2
+from android_world.utils import file_utils
 
 
 def create_successful_generic_response(output: str) -> adb_pb2.AdbResponse:
@@ -93,7 +94,7 @@ def create_check_file_or_folder_exists_responses(
   return [
       create_check_directory_exists_response(exists=True),
       create_successful_generic_response(
-          os.path.join(base_path, file_name) + "\n"
+          file_utils.convert_to_posix_path(base_path, file_name) + "\n"
       ),
   ]
 

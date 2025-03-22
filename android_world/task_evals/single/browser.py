@@ -72,11 +72,12 @@ class BrowserTask(task_eval.TaskEval):
     )
 
     html = self.HTML.replace('%%SEED%%', str(self.params['browser_task_seed']))
-    with open('/tmp/task.html', 'w') as f:
+    task_html_path = file_utils.convert_to_posix_path(file_utils.get_local_tmp_directory(), 'task.html')
+    with open(task_html_path, 'w') as f:
       f.write(html)
     file_utils.copy_data_to_device(
-        '/tmp/task.html',
-        os.path.join(device_constants.DOWNLOAD_DATA, 'task.html'),
+        task_html_path,
+        file_utils.convert_to_posix_path(device_constants.DOWNLOAD_DATA, 'task.html'),
         env.controller,
     )
 

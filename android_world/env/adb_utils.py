@@ -1048,7 +1048,7 @@ def extract_broadcast_data(raw_output: str) -> Optional[str]:
     Extracted data as a string, or None if the result is 0.
   """
   if 'Broadcast completed: result=-1, data=' in raw_output:
-    return raw_output.split('data=')[1].strip('"\n')
+    return raw_output.split('data=')[1].strip('"\r\n')
   elif 'Broadcast completed: result=0' in raw_output:
     return None
   else:

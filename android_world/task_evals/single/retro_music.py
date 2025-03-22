@@ -66,7 +66,7 @@ def _get_playlist_data(
   with env.controller.pull_file(
       _PLAYLIST_DB_PATH, timeout_sec=3
   ) as local_db_directory:
-    local_db_path = os.path.join(
+    local_db_path = file_utils.convert_to_posix_path(
         local_db_directory, os.path.split(_PLAYLIST_DB_PATH)[1]
     )
     return sqlite_utils.execute_query(
@@ -86,7 +86,7 @@ def _get_playing_queue(env: interface.AsyncEnv) -> list[str]:
   with env.controller.pull_file(
       _PLAYBACK_DB_PATH, timeout_sec=3
   ) as local_db_directory:
-    local_db_path = os.path.join(
+    local_db_path = file_utils.convert_to_posix_path(
         local_db_directory, os.path.split(_PLAYBACK_DB_PATH)[1]
     )
     result = sqlite_utils.execute_query(
@@ -151,7 +151,7 @@ class RetroCreatePlaylist(task_eval.TaskEval):
 
     for file in self.params['files'] + self.params['noise_files']:
       user_data_generation.write_mp3_file_to_device(
-          os.path.join(device_constants.MUSIC_DATA, file),
+          file_utils.convert_to_posix_path(device_constants.MUSIC_DATA, file),
           env,
           title=file.split('.')[0],
           artist=random.choice(user_data_generation.COMMON_GIVEN_NAMES),
@@ -223,7 +223,7 @@ class RetroSavePlaylist(RetroCreatePlaylist):
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
     playlist_exists = file_utils.check_file_exists(
-        os.path.join(
+        file_utils.convert_to_posix_path(
             device_constants.DOWNLOAD_DATA,
             self.params['playlist_name'] + '.m3u',
         ),
@@ -262,11 +262,11 @@ class RetroPlaylistDuration(RetroCreatePlaylist):
 
     # Guarantee there is an answer.
     durations = _generate_list_with_sum(
-        47.5 * 60 * 1000, len(self.params['files'])
+        int(47.5 * 60 * 1000), len(self.params['files'])
     )
     for file, duration in zip(self.params['files'], durations):
       user_data_generation.write_mp3_file_to_device(
-          os.path.join(device_constants.MUSIC_DATA, file),
+          file_utils.convert_to_posix_path(device_constants.MUSIC_DATA, file),
           env,
           title=file.split('.')[0],
           artist=random.choice(user_data_generation.COMMON_GIVEN_NAMES),
@@ -275,7 +275,7 @@ class RetroPlaylistDuration(RetroCreatePlaylist):
 
     for file in self.params['noise_files']:
       user_data_generation.write_mp3_file_to_device(
-          os.path.join(device_constants.MUSIC_DATA, file),
+          file_utils.convert_to_posix_path(device_constants.MUSIC_DATA, file),
           env,
           title=file.split('.')[0],
           artist=random.choice(user_data_generation.COMMON_GIVEN_NAMES),
