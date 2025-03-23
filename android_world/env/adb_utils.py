@@ -523,7 +523,6 @@ def issue_generic_request(
     args = args.split(' ')
   else:
     args_str = ' '.join(args)
-  logging.info('Issuing generic adb request: %r', args_str)
 
   response = env.execute_adb_call(
       adb_pb2.AdbRequest(

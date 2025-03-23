@@ -17,6 +17,7 @@
 import collections
 import datetime
 import hashlib
+import logging
 import os
 import random
 import time
@@ -236,11 +237,13 @@ def _run_task(
   start = time.time()
   try:
     task.initialize_task(env)
+    logging.info('Running task %s with goal "%s"', task.name, task.goal)
     print(f'Running task {task.name} with goal "{task.goal}"')
     interaction_results = run_episode(task)
     task_successful = task.is_successful(env)
-  except Exception:  # pylint: disable=broad-exception-caught
+  except Exception as e:  # pylint: disable=broad-exception-caught
     print('~' * 80 + '\n' + f'SKIPPING {task.name}.')
+    logging.exception('Exception in task %s: %s', task.name, e)
     traceback.print_exc()
     return _create_failed_result(
         task.name, task.goal, traceback.format_exc(), time.time() - start
