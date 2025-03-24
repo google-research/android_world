@@ -14,7 +14,7 @@
 
 """Launches the environment used in the benchmark."""
 
-import resource
+import platform
 
 from absl import logging
 from android_world.env import android_world_controller
@@ -49,7 +49,13 @@ def _increase_file_descriptor_limit(limit: int = 32768):
     limit: The new file descriptor limit. The default value was determined
       experimentally to not raise too many open files error.
   """
+  system_name = platform.system()
+  if system_name == 'Windows':
+    return
+
   try:
+    import resource  # pylint: disable=g-import-not-at-top
+
     _, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
     if limit > hard:
       logging.warning(
