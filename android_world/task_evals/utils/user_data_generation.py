@@ -54,7 +54,7 @@ def get_font_path() -> str:
     raise RuntimeError("No suitable font found.") from exc
 
 
-_TMP = "/tmp"
+_TMP = file_utils.get_local_tmp_directory()
 
 
 def generate_random_string(length: int) -> str:
@@ -164,7 +164,7 @@ def write_to_gallery(
   """
 
   image = _draw_text(data)
-  temp_storage_location = os.path.join(_TMP, file_name)
+  temp_storage_location = file_utils.convert_to_posix_path(_TMP, file_name)
   image.save(temp_storage_location)
   file_utils.copy_data_to_device(
       temp_storage_location,
@@ -179,7 +179,7 @@ def _copy_data_to_device(
     data: str, file_name: str, location: str, env: interface.AsyncEnv
 ):
   """Copies data to device by first writing locally, then copying.."""
-  temp_storage_location = os.path.join(_TMP, file_name)
+  temp_storage_location = file_utils.convert_to_posix_path(_TMP, file_name)
   with open(temp_storage_location, "w") as temp_file:
     temp_file.write(data)
 
@@ -280,7 +280,7 @@ def write_video_file_to_device(
     messages = ["test" + str(random.randint(0, 1_000_000))]
 
   _create_mpeg_with_messages(
-      os.path.join(_TMP, file_name),
+      file_utils.convert_to_posix_path(_TMP, file_name),
       messages,
       display_time=message_display_time,
       width=width,
@@ -289,7 +289,7 @@ def write_video_file_to_device(
   )
 
   file_utils.copy_data_to_device(
-      os.path.join(_TMP, file_name),
+      file_utils.convert_to_posix_path(_TMP, file_name),
       location,
       env.controller,
   )
@@ -332,7 +332,7 @@ def write_mp3_file_to_device(
     title: The title of the song.
     duration_milliseconds: The duration of the MP3 file in milliseconds.
   """
-  local = os.path.join(_TMP, os.path.basename(remote_path))
+  local = file_utils.convert_to_posix_path(_TMP, os.path.basename(remote_path))
   _create_test_mp3(
       local,
       artist=artist,
@@ -447,7 +447,10 @@ def clear_internal_storage(env: interface.AsyncEnv) -> None:
   """Clears all internal storage directories on device."""
   for directory in EMULATOR_DIRECTORIES:
     file_utils.clear_directory(
-        os.path.join(device_constants.EMULATOR_DATA, directory), env.controller
+        file_utils.convert_to_posix_path(
+            device_constants.EMULATOR_DATA, directory
+        ),
+        env.controller,
     )
 
 

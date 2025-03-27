@@ -14,7 +14,6 @@
 
 """Tasks for the Simple Gallery Pro app."""
 
-import os
 from typing import Any
 from android_world.env import device_constants
 from android_world.env import interface
@@ -43,7 +42,9 @@ class SaveCopyOfReceiptTaskEval(task_eval.TaskEval):
     super().initialize_task(env)
     user_data_generation.clear_device_storage(env)
     receipt_image = self.params["receipt_image"]
-    temp_storage_location = os.path.join("/tmp/", self.params["file_name"])
+    temp_storage_location = file_utils.convert_to_posix_path(
+        file_utils.get_local_tmp_directory(), self.params["file_name"]
+    )
     receipt_image.save(temp_storage_location)
     file_utils.copy_data_to_device(
         temp_storage_location,

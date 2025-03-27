@@ -84,7 +84,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 
     # Texts don't necessarily come in the same order as sent here, so pause here
     # to make sure the most recent text comes last.
-    time.sleep(1)
+    time.sleep(5)
 
     most_recent_message = self._generate_non_goal_message()
     adb_utils.text_emulator(
@@ -95,7 +95,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 
     # Need to pause to make sure re-enabling notifications happens after the
     # last text came in
-    time.sleep(0.3)
+    time.sleep(5)
 
     adb_utils.enable_headsup_notifications(env.controller)
 
@@ -104,7 +104,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
     )
     if (
         most_recent["address"] != self.params["number"]
-        and most_recent["message"] != most_recent_message
+        and most_recent["body"] != most_recent_message
     ):
       raise ValueError(
           "Unexpected initial state - most recent message is not what is"

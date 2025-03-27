@@ -14,12 +14,12 @@
 
 """Utils for testing database logic."""
 
-import os
 import sqlite3
 import tempfile
 
 from android_world.env import device_constants
 from android_world.task_evals.utils import sqlite_schema_utils
+from android_world.utils import file_utils
 
 
 def setup_test_db() -> str:
@@ -28,7 +28,7 @@ def setup_test_db() -> str:
   temp_dir = tempfile.mkdtemp()
 
   # Path for the new database
-  db_path = os.path.join(temp_dir, 'events.db')
+  db_path = file_utils.convert_to_posix_path(temp_dir, 'events.db')
 
   conn = sqlite3.connect(db_path)
   cursor = conn.cursor()

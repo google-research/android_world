@@ -89,7 +89,9 @@ class FilesTest(parameterized.TestCase):
         ),
     )
 
-    tmp_local_directory = '/tmp/random/dir'
+    tmp_local_directory = file_utils.convert_to_posix_path(
+        file_utils.get_local_tmp_directory(), 'random', 'dir'
+    )
     mock_mkdtemp.return_value = tmp_local_directory
     with file_utils.tmp_directory_from_device(
         '/remotedir', self.mock_env
@@ -99,7 +101,9 @@ class FilesTest(parameterized.TestCase):
           mock.call(
               adb_pb2.AdbRequest(
                   pull=adb_pb2.AdbRequest.Pull(
-                      path=os.path.join('/remotedir/', file_name)
+                      path=file_utils.convert_to_posix_path(
+                          '/remotedir/', file_name
+                      )
                   ),
                   timeout_sec=None,
               )
@@ -138,7 +142,9 @@ class FilesTest(parameterized.TestCase):
     self.mock_env.execute_adb_call.return_value = mock_response
     temp_dir = tempfile.mkdtemp()
     file_name = 'file1.txt'
-    create_file_with_contents(os.path.join(temp_dir, file_name), file_contents)
+    create_file_with_contents(
+        file_utils.convert_to_posix_path(temp_dir, file_name), file_contents
+    )
 
     response = file_utils.copy_data_to_device(
         temp_dir, '/remote/dir', self.mock_env
@@ -149,7 +155,9 @@ class FilesTest(parameterized.TestCase):
                 adb_pb2.AdbRequest(
                     push=adb_pb2.AdbRequest.Push(
                         content=file_contents,
-                        path=os.path.join('/remote/dir/', file_name),
+                        path=file_utils.convert_to_posix_path(
+                            '/remote/dir/', file_name
+                        ),
                     ),
                     timeout_sec=None,
                 )
@@ -169,7 +177,7 @@ class FilesTest(parameterized.TestCase):
     file_names = ['file1.txt', 'file2.txt']
     for file_name in file_names:
       create_file_with_contents(
-          os.path.join(temp_dir, file_name), file_contents
+          file_utils.convert_to_posix_path(temp_dir, file_name), file_contents
       )
 
     response = file_utils.copy_data_to_device(
@@ -182,7 +190,9 @@ class FilesTest(parameterized.TestCase):
               adb_pb2.AdbRequest(
                   push=adb_pb2.AdbRequest.Push(
                       content=file_contents,
-                      path=os.path.join('/remote/dir/', file_name),
+                      path=file_utils.convert_to_posix_path(
+                          '/remote/dir/', file_name
+                      ),
                   ),
                   timeout_sec=None,
               )
