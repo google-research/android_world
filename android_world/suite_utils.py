@@ -243,7 +243,11 @@ def _run_task(
     task_successful = task.is_successful(env)
   except Exception as e:  # pylint: disable=broad-exception-caught
     print('~' * 80 + '\n' + f'SKIPPING {task.name}.')
-    logging.exception('Exception in task %s: %s', task.name, e)
+    logging.exception(
+        'Logging exception and skipping task. Will keep running. Task: %s: %s',
+        task.name,
+        e,
+    )
     traceback.print_exc()
     return _create_failed_result(
         task.name, task.goal, traceback.format_exc(), time.time() - start

@@ -103,7 +103,9 @@ def get_a11y_tree(
   return forest
 
 
-_TASK_PATH = '/tmp/default.textproto'
+_TASK_PATH = file_utils.convert_to_posix_path(
+    file_utils.get_local_tmp_directory(), 'default.textproto'
+)
 DEFAULT_ADB_PATH = '~/Android/Sdk/platform-tools/adb'
 
 
