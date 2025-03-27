@@ -24,6 +24,7 @@ from android_world.task_evals.information_retrieval.proto import state_pb2
 from android_world.task_evals.information_retrieval.proto import task_pb2
 from android_world.task_evals.utils import sqlite_schema_utils
 from android_world.task_evals.utils import sqlite_utils
+from android_world.utils import file_utils
 
 _NOTES_TABLE = "notes"
 _NOTES_NORMALIZED_TABLE = "notes_normalized"
@@ -84,7 +85,9 @@ def _get_folder_to_id(
 ) -> dict[str, str]:
   """Gets a mapping from folder title to ID as represented in Folder table."""
   with env.controller.pull_file(_DB_PATH) as local_db_directory:
-    local_db_path = os.path.join(local_db_directory, os.path.split(_DB_PATH)[1])
+    local_db_path = file_utils.convert_to_posix_path(
+        local_db_directory, os.path.split(_DB_PATH)[1]
+    )
     folder_info = sqlite_utils.execute_query(
         f"select * from {_FOLDER_TABLE};",
         local_db_path,
