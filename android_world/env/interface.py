@@ -299,6 +299,9 @@ class AsyncAndroidEnv(AsyncEnv):
       if action.text:
         self.display_message(action.text, header='Agent answered:')
       return
+    if action.action_type == json_action.STATUS:
+      # Do nothing if it is a termination action.
+      return
     state = self.get_state(wait_to_stabilize=False)
     actuation.execute_adb_action(
         action,
