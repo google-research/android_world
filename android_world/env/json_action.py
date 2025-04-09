@@ -65,6 +65,17 @@ DIRECTION = 'direction'
 APP_NAME = 'app_name'
 GOAL_STATUS = 'goal_status'
 
+ACTION_KEYS = [
+    ACTION_TYPE,
+    INDEX,
+    X,
+    Y,
+    TEXT,
+    DIRECTION,
+    APP_NAME,
+    GOAL_STATUS,
+]
+
 
 @dataclasses.dataclass()
 class JSONAction:
