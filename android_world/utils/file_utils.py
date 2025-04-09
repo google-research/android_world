@@ -571,10 +571,11 @@ def check_file_content(
     res = adb_utils.issue_generic_request(
         ["shell", "cat", file_full_path], env, timeout_sec
     )
+    res_content = res.generic.output.decode().replace('\r', '')
     if exact_match:
-      return res.generic.output.decode() == content
+      return res_content == content
     return fuzzy_match_lib.fuzzy_match(
-        res.generic.output.decode().strip(), content
+        res_content.strip(), content
     )
   except errors.AdbControllerError as e:
     print(e)
