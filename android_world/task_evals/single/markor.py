@@ -233,7 +233,7 @@ class MarkorEditNote(Markor):
         ],
         env.controller,
     )
-    file_contents = res.generic.output.decode().strip()
+    file_contents = res.generic.output.decode().replace('\r', '').strip()
     logging.info("Retrieved file contents: %s", file_contents)
 
     if self.params["edit_type"] == "header":
@@ -620,7 +620,7 @@ class MarkorMergeNotes(Markor):
             ],
             env.controller,
         )
-        .generic.output.decode()
+        .generic.output.decode().replace('\r', '')
         .strip()
     )
 

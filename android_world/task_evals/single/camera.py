@@ -61,7 +61,7 @@ class CameraTakeVideo(_Camera):
         env.controller,
     )
     logging.info("before_videos: %s", contents.generic.output.decode())
-    self.before_videos = set(contents.generic.output.decode().split("\n"))
+    self.before_videos = set(contents.generic.output.decode().replace('\r', '').split("\n"))
     logging.info("num before_videos: %s", self.before_videos)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
@@ -71,7 +71,7 @@ class CameraTakeVideo(_Camera):
         env.controller,
     )
     logging.info("before_videos: %s", contents.generic.output.decode())
-    after_videos = set(contents.generic.output.decode().split("\n"))
+    after_videos = set(contents.generic.output.decode().replace('\r', '').split("\n"))
     logging.info("num after_videos: %s", after_videos)
     logging.info(
         "number of after_videos - number of before_videos: %s",
@@ -102,7 +102,7 @@ class CameraTakePhoto(_Camera):
         ["shell", "ls", device_constants.PHOTOS_DATA], env.controller
     )
     logging.info("before_photos: %s", contents.generic.output.decode())
-    self.before_photos = set(contents.generic.output.decode().split("\n"))
+    self.before_photos = set(contents.generic.output.decode().replace('\r', '').split("\n"))
     logging.info("num before_photos: %s", self.before_photos)
 
   def is_successful(self, env: interface.AsyncEnv) -> float:
@@ -111,7 +111,7 @@ class CameraTakePhoto(_Camera):
         ["shell", "ls", device_constants.PHOTOS_DATA], env.controller
     )
     logging.info("after_photos: %s", contents.generic.output.decode())
-    after_photos = set(contents.generic.output.decode().split("\n"))
+    after_photos = set(contents.generic.output.decode().replace('\r', '').split("\n"))
     logging.info("num after_photos: %s", after_photos)
     logging.info(
         "number of after_photos - number of before_photos: %s",

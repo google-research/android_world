@@ -1034,7 +1034,7 @@ def check_airplane_mode(env: env_interface.AndroidEnvInterface) -> bool:
         f' {response.generic.output.decode()}.'
     )
 
-  return response.generic.output.decode().strip('\n') == '1'
+  return response.generic.output.decode().replace('\r', '').strip('\n') == '1'
 
 
 def extract_broadcast_data(raw_output: str) -> Optional[str]:

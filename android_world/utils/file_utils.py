@@ -125,7 +125,7 @@ def clear_directory(
   res = adb_utils.issue_generic_request(
       ["shell", "ls", "-1", directory_path], env
   )
-  folder_contents = res.generic.output.decode().strip()
+  folder_contents = res.generic.output.decode().replace('\r', '').strip()
 
   if folder_contents:
     adb_utils.check_ok(
@@ -258,7 +258,7 @@ def check_file_or_folder_exists(
   if not res.status:
     raise RuntimeError("ADB command failed.")
 
-  all_paths = set(res.generic.output.decode().split("\n"))
+  all_paths = set(res.generic.output.decode().replace('\r', '').split("\n"))
 
   full_target_path = convert_to_posix_path(base_path, target)
   return full_target_path in all_paths

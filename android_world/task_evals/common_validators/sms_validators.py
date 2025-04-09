@@ -77,7 +77,7 @@ def parse_message(row: str) -> dict[str, str]:
 
 def _decode_messages_from_response(response: adb_pb2.AdbResponse) -> list[str]:
   """Decodes the ADB response into a list of messages."""
-  if response.generic.output.decode().startswith("No result found."):
+  if response.generic.output.decode().replace('\r', '').startswith("No result found."):
     return []
   messages = response.generic.output.split(b"\nRow:")
   for i, m in enumerate(messages):
