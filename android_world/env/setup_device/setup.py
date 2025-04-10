@@ -97,7 +97,8 @@ def maybe_install_app(
   """Installs all APKs for Android World."""
   if not app.apk_names:  # Ignore 1p apps that don't have an APK.
     return
-  print(f"Installing app: {app.app_name}.")
+  logging.info("Installing app: %s.", app.app_name)
+
   apk_installed = False
   for apk_name in app.apk_names:
     try:
@@ -125,7 +126,7 @@ def setup_apps(env: interface.AsyncEnv) -> None:
   adb_utils.press_home_button(env.controller)
   adb_utils.set_root_if_needed(env.controller)
 
-  print(
+  logging.info(
       "Installing and setting up applications on Android device. Please do not"
       " interact with device while installation is running."
   )
