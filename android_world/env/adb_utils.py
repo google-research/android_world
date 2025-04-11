@@ -29,6 +29,7 @@ T = TypeVar('T')
 
 _DEFAULT_TIMEOUT_SECS = 10
 
+# pylint: disable=line-too-long
 # Maps app names to the activity that should be launched to open the app.
 _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'google chrome|chrome': (
@@ -120,6 +121,8 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
         'code.name.monkey.retromusic/.activities.MainActivity'
     ),
 })
+# pylint: enable=line-too-long
+
 _ORIENTATIONS = {
     'portrait': '0',
     'landscape': '1',
@@ -1034,7 +1037,7 @@ def check_airplane_mode(env: env_interface.AndroidEnvInterface) -> bool:
         f' {response.generic.output.decode()}.'
     )
 
-  return response.generic.output.decode().strip('\n') == '1'
+  return response.generic.output.decode().replace('\r', '').strip('\n') == '1'
 
 
 def extract_broadcast_data(raw_output: str) -> Optional[str]:

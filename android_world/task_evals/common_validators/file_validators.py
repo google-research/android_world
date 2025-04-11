@@ -217,7 +217,7 @@ class CreateFile(task_eval.TaskEval):
         ],
         env.controller,
     )
-    file_contents = res.generic.output.decode().strip()
+    file_contents = res.generic.output.decode().replace("\r", "").strip()
     match = fuzzy_match_lib.fuzzy_match(file_contents, self.params["text"])
     if not match:
       logging.info("%s does not match %s", file_contents, self.params["text"])
