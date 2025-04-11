@@ -19,6 +19,7 @@ import dataclasses
 import time
 from typing import Any, Optional, Self
 
+from absl import logging
 from android_env.components import action_type
 from android_world.env import actuation
 from android_world.env import adb_utils
@@ -346,7 +347,10 @@ class AsyncAndroidEnv(AsyncEnv):
     return adb_utils.get_logical_screen_size(self.controller)
 
   def close(self) -> None:
-    return self.controller.close()
+    try:
+      self.controller.close()
+    except:  # pylint: disable=bare-except
+      logging.warning('Failed to close controller. Continuing.')
 
   @property
   def orientation(self) -> int:

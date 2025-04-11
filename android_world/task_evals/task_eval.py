@@ -176,6 +176,9 @@ class TaskEval(abc.ABC):
   def tear_down(self, env: interface.AsyncEnv) -> None:  # pylint: disable=unused-argument
     """Tears down the task."""
     self._initialize_apps(env)
-    adb_utils.close_recents(env.controller)
+    try:
+      adb_utils.close_recents(env.controller)
+    except:  # pylint: disable=bare-except
+      logging.exception("Failed to close recent apps. Continuing.")
     self.initialized = False
     logging.info("Tearing down %s", self.name)
