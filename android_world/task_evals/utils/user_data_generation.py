@@ -15,6 +15,7 @@
 """Fake user data; used to populate apps with data."""
 
 import datetime
+import logging
 import os
 import random
 import re
@@ -171,7 +172,12 @@ def write_to_gallery(
       device_constants.GALLERY_DATA,
       env.controller,
   )
-  os.remove(temp_storage_location)
+  try:
+    os.remove(temp_storage_location)
+  except FileNotFoundError:
+    logging.warning(
+        "Local file %s not found, so cannot remove it.", temp_storage_location
+    )
   adb_utils.close_app("simple gallery", env.controller)
 
 
@@ -188,7 +194,12 @@ def _copy_data_to_device(
       location,
       env.controller,
   )
-  os.remove(temp_storage_location)
+  try:
+    os.remove(temp_storage_location)
+  except FileNotFoundError:
+    logging.warning(
+        "Local file %s not found, so cannot remove it.", temp_storage_location
+    )
 
 
 def write_to_markor(
@@ -344,7 +355,10 @@ def write_mp3_file_to_device(
       remote_path,
       env.controller,
   )
-  os.remove(local)
+  try:
+    os.remove(local)
+  except FileNotFoundError:
+    logging.warning("Local file %s not found, so cannot remove it.", local)
 
 
 def dict_to_notes(input_dict: dict[str, tuple[str, str]]) -> str:
