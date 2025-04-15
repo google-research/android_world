@@ -135,6 +135,8 @@ def _maybe_replace_date(params: dict[str, Any]) -> None:
   for param_name, param_value in params.items():
     if param_name == 'seed':
       continue
+    if not isinstance(param_value, str):
+      continue
     try:
       if not param_value:
         continue
