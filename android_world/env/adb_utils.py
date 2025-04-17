@@ -454,7 +454,8 @@ def _split_words_and_newlines(text: str) -> Iterable[str]:
   for i, line in enumerate(lines):
     words = line.split(' ')
     for j, word in enumerate(words):
-      yield word
+      if word:
+        yield word
       if j < len(words) - 1:
         yield '%s'
     if i < len(lines) - 1:
