@@ -466,6 +466,10 @@ def clear_internal_storage(env: interface.AsyncEnv) -> None:
         ),
         env.controller,
     )
+  adb_utils.issue_generic_request(
+            ["shell", "rm", f"{device_constants.EMULATOR_DATA}/*"],
+            env.controller,
+  )
 
 
 def _clear_external_downloads(env: interface.AsyncEnv) -> None:
