@@ -16,6 +16,7 @@
 
 import abc
 import dataclasses
+import logging
 import time
 from typing import Any
 
@@ -100,17 +101,14 @@ class EnvironmentInteractingAgent(abc.ABC):
   def get_post_transition_state(self) -> interface.State:
     """Convenience function to get the agent state after the transition."""
     if self._transition_pause is None:
-      print(
-          'Waiting for screen to stabilize before grabbing state...',
-          end=' ',
-      )
+      logging.info('Waiting for screen to stabilize before grabbing state...')
       start = time.time()
       state = self.env.get_state(wait_to_stabilize=True)
-      print(f'Fetched after {time.time() - start:2.1f} seconds.')
+      logging.info('Fetched after %.1f seconds.', time.time() - start)
       return state
     else:
       time.sleep(self._transition_pause)
-      print(
+      logging.info(
           'Pausing {:2.1f} seconds before grabbing state.'.format(
               self._transition_pause
           )
