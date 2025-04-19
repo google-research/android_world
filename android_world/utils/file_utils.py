@@ -361,7 +361,11 @@ def tmp_directory_from_device(
     yield tmp_directory
 
   finally:
-    shutil.rmtree(tmp_directory)
+    try:
+      shutil.rmtree(tmp_directory)
+    except Exception as e:
+      logging.error("Failed to delete temporary directory: %s with error %s",
+                    tmp_directory, e)
 
 
 @contextlib.contextmanager
