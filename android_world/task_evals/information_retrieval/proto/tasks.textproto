@@ -964,7 +964,7 @@ tasks {
 }
 tasks {
   name: "SimpleCalendarEventsInTimeRange"
-  prompt: "Do I have any events between {start_time} and 8pm {date} in Simple Calendar Pro? Answer with the titles only. Assume the week starts from Sunday. If there are multiples titles, format your answer in a comma separated list."
+  prompt: "Do I have any events between {start_time} and 8pm {date} in Simple Calendar Pro? Assume the week starts from Sunday. Answer with the titles only. If there are multiples titles, format your answer in a comma separated list."
   complexity: 1
   relevant_state {
     state {
