@@ -83,7 +83,6 @@ class TestDeleteFile(test_utils.AdbEvalTestBase):
 
     self.assertEqual(test_utils.perform_task(task, env.base_env), 1.0)
     self.mock_create_file.assert_called()
-    self.mock_remove_files.assert_called()
     self.mock_create_random_files.assert_called()
 
   def test_is_successful_subfolder(self):
@@ -105,7 +104,6 @@ class TestDeleteFile(test_utils.AdbEvalTestBase):
 
     self.assertEqual(test_utils.perform_task(task, env.base_env), 1.0)
     self.mock_create_file.assert_called()
-    self.mock_remove_files.assert_called()
     self.mock_create_random_files.assert_called()
 
   def test_is_not_successful(self):
@@ -128,7 +126,6 @@ class TestDeleteFile(test_utils.AdbEvalTestBase):
 
     self.assertFalse(test_utils.perform_task(task, env.base_env))
     self.mock_create_file.assert_called()
-    self.mock_remove_files.assert_called()
     self.mock_create_random_files.assert_called()
 
 
@@ -163,7 +160,6 @@ class TestMoveFile(test_utils.AdbEvalTestBase):
 
     # Assert that the mock functions were called
     self.mock_create_file.assert_called()
-    self.mock_remove_files.assert_called()
     self.mock_mkdir.assert_called()
     self.mock_create_random_files.assert_called()
 
@@ -188,7 +184,6 @@ class TestMoveFile(test_utils.AdbEvalTestBase):
 
     # Assert that the mock functions were called
     self.mock_create_file.assert_called()
-    self.mock_remove_files.assert_called()
     self.mock_create_random_files.assert_called()
     self.mock_mkdir.assert_called()
 

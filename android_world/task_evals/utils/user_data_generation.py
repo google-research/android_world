@@ -458,18 +458,18 @@ def _draw_text(text: str, font_size: int = 24) -> Image.Image:
 
 
 def clear_internal_storage(env: interface.AsyncEnv) -> None:
-  """Clears all internal storage directories on device."""
-  for directory in EMULATOR_DIRECTORIES:
-    file_utils.clear_directory(
-        file_utils.convert_to_posix_path(
-            device_constants.EMULATOR_DATA, directory
-        ),
-        env.controller,
-    )
-  adb_utils.issue_generic_request(
-            ["shell", "rm", f"{device_constants.EMULATOR_DATA}/*"],
-            env.controller,
-  )
+  """Deletes all files from internal storage, leaving directory structure intact."""
+  adb_command = [
+      "shell",
+      "find",
+      device_constants.EMULATOR_DATA,
+      "-mindepth",
+      "1",
+      "-type",
+      "f",  # Regular file.
+      "-delete",
+  ]
+  adb_utils.issue_generic_request(adb_command, env.controller)
 
 
 def _clear_external_downloads(env: interface.AsyncEnv) -> None:
