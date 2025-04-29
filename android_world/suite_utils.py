@@ -69,6 +69,12 @@ class Suite(dict[str, list[task_eval.TaskEval]]):
     self._suite_family = value
 
 
+def _log_and_print(msg: str, *args: object) -> None:
+  formatted = msg % args if args else msg
+  logging.info(formatted)
+  print(formatted)
+
+
 def _instantiate_task(
     task: Type[task_eval.TaskEval],
     params: dict[str, Any] | None = None,
@@ -237,12 +243,12 @@ def _run_task(
   start = time.time()
   try:
     task.initialize_task(env)
-    logging.info('Running task %s with goal "%s"', task.name, task.goal)
-    print(f'Running task {task.name} with goal "{task.goal}"')
+    _log_and_print('Running task %s with goal "%s"', task.name, task.goal)
+    _log_and_print('Running task %s with goal "%s"', task.name, task.goal)
     interaction_results = run_episode(task)
     task_successful = task.is_successful(env)
   except Exception as e:  # pylint: disable=broad-exception-caught
-    print('~' * 80 + '\n' + f'SKIPPING {task.name}.')
+    _log_and_print('%s\nSKIPPING %s.', '~' * 80, task.name)
     logging.exception(
         'Logging exception and skipping task. Will keep running. Task: %s: %s',
         task.name,
@@ -254,9 +260,10 @@ def _run_task(
     )
   else:
     agent_successful = task_successful if interaction_results.done else 0.0
-    print(
-        f'{"Task Successful ✅" if agent_successful > 0.5 else "Task Failed ❌"};'
-        f' {task.goal}'
+    _log_and_print(
+        '%s; %s',
+        'Task Successful ✅' if agent_successful > 0.5 else 'Task Failed ❌',
+        f' {task.goal}',
     )
 
     if demo_mode:
@@ -364,7 +371,7 @@ def _run_task_suite(
   correct, total = 0, 0
   for name, instances in suite.items():
     msg = 'Running task: ' + name
-    print(msg + '\n' + '=' * len(msg))
+    _log_and_print(msg + '\n' + '=' * len(msg))
 
     for i, instance in enumerate(instances):
       instance_name = (
@@ -382,7 +389,7 @@ def _run_task_suite(
           instance_name in completed_tasks and instance_name not in failed_tasks
       )
       if already_processed:
-        print(f'Skipping already processed task {instance_name}')
+        _log_and_print('Skipping already processed task %s', instance_name)
         continue
 
       episode = _run_task(instance, run_episode, env, demo_mode=demo_mode)
@@ -711,11 +718,11 @@ def process_episodes(
     pd.set_option('display.max_columns', 100)
     pd.set_option('display.max_rows', 1000)
     pd.set_option('display.width', 1000)
-    print(f'\n\n{result}')
+    _log_and_print('\n\n%s', result)  # Use lazy % formatting
 
     # Add a chart that shows mean success rate by tag and difficulty.
     tags_df = _print_results_by_tag(tagged_result_df)
     pd.set_option('display.precision', 2)
-    print(f'\n\n{tags_df}')
+    _log_and_print('\n\n%s', tags_df)
 
   return tagged_result_df
