@@ -20,13 +20,6 @@ jobs:
       with:
         python-version: "3.11"
 
-    # Install AndroidEnv
-    - name: Install AndroidEnv
-      run: |
-        git clone https://github.com/google-deepmind/android_env
-        cd android_env
-        python setup.py install
-
     # Install AndroidWorld
     - name: Install AndroidWorld
       run: |
@@ -48,11 +41,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y fonts-dejavu fonts-liberation ttf-mscorefonts-installer
-        # Workaround for dependency issues with protobuf and google-generativeai.
-        # Update: 11/18/2024: This may need to be continually updated, when protobuf updates (from
-        # AndroidEnv), i.e. if there is an errror: "Runtime version cannot be older than the linked
-        # gencode version."
-        pip install protobuf==5.29.0
         pip --version
         pip install pytest-xdist
         pip install -e .[dev]
