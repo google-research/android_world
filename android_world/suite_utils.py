@@ -244,7 +244,6 @@ def _run_task(
   try:
     task.initialize_task(env)
     _log_and_print('Running task %s with goal "%s"', task.name, task.goal)
-    _log_and_print('Running task %s with goal "%s"', task.name, task.goal)
     interaction_results = run_episode(task)
     task_successful = task.is_successful(env)
   except Exception as e:  # pylint: disable=broad-exception-caught
