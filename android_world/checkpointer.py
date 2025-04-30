@@ -126,7 +126,7 @@ class IncrementalCheckpointer(Checkpointer):
     with open(filename, 'wb') as f:
       compressed = _gzip_pickle(task_episodes)
       f.write(compressed)
-    print(f'Wrote task episodes for {task_name} to {filename}')
+    logging.info('Wrote task episodes for %s to %s', task_name, filename)
 
   def load(self, fields: list[str] | None = None) -> list[Episode]:
     """Loads all task groups from disk."""
@@ -147,7 +147,7 @@ class IncrementalCheckpointer(Checkpointer):
             ]
           data.extend(task_group)
         except Exception as e:  # pylint: disable=broad-exception-caught
-          print(f'Unable to load {filename} with exception: {e}')
+          logging.info('Unable to load %s with exception: %s', filename, e)
     return data
 
   def _load_task_group(self, task_group_id: str) -> list[Episode]:
@@ -210,7 +210,7 @@ class DeprecatedCheckpointer:
     with open(self.filename, 'wb') as f:
       compressed = _gzip_pickle((data, completed_tasks))
       f.write(compressed)
-    print(f'Wrote to {self.filename}')
+    logging.info('Wrote to %s', self.filename)
 
   def load(
       self, fields: list[str] | None = None
