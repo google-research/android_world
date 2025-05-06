@@ -192,7 +192,7 @@ def start_activity(
     logging.error('Failed to launch activity: %r', activity)
     return response
 
-  logging.info('Launch package output %r', response.generic.output)
+  logging.debug('Launch package output %r', response.generic.output)
   return response
 
 
