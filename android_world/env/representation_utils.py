@@ -74,6 +74,7 @@ class UIElement:
   resource_name: Optional[str] = None
   tooltip: Optional[str] = None
   resource_id: Optional[str] = None
+  metadata: Optional[dict[str, Any]] = None
 
 
 def accessibility_node_to_ui_element(

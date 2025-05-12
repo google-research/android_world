@@ -18,7 +18,7 @@ import copy
 import logging
 import time
 from typing import Any
-
+from android_env import env_interface
 from android_world.env import adb_utils
 from android_world.env import android_world_controller
 from android_world.env import json_action
@@ -29,7 +29,7 @@ def execute_adb_action(
     action: json_action.JSONAction,
     screen_elements: list[Any],  # list[UIElement]
     screen_size: tuple[int, int],
-    env: android_world_controller.AndroidWorldController,
+    env: env_interface.AndroidEnvInterface,
 ) -> None:
   """Execute an action based on a JSONAction object.
 
@@ -61,6 +61,7 @@ def execute_adb_action(
       else:
         adb_utils.long_press(x, y, env)
     elif x is not None and y is not None:
+      x, y = int(x), int(y)
       if action.action_type == 'click':
         adb_utils.tap_screen(x, y, env)
       elif action.action_type == 'double_tap':
@@ -73,11 +74,14 @@ def execute_adb_action(
   elif action.action_type == 'input_text':
     text = action.text
     if text:
-      # First focus on enter text UI element.
-      click_action = copy.deepcopy(action)
-      click_action.action_type = 'click'
-      execute_adb_action(click_action, screen_elements, screen_size, env)
-      time.sleep(1.0)
+      if action.index is not None or (
+          action.x is not None and action.y is not None
+      ):
+        # First focus on enter text UI element.
+        click_action = copy.deepcopy(action)
+        click_action.action_type = 'click'
+        execute_adb_action(click_action, screen_elements, screen_size, env)
+        time.sleep(1.0)
       adb_utils.type_text(text, env, timeout_sec=10)
       adb_utils.press_enter_button(env)
     else:
@@ -97,7 +101,21 @@ def execute_adb_action(
 
   elif action.action_type == 'press_keyboard':
     adb_utils.press_keyboard_generic(action.keycode, env)
-
+  elif action.action_type == 'drag_and_drop':
+    if action.touch_xy is not None and action.lift_xy is not None:
+      command = adb_utils.generate_drag_and_drop_command(
+          action.touch_xy[0],
+          action.touch_xy[1],
+          action.lift_xy[0],
+          action.lift_xy[1],
+          4000,
+      )
+      adb_utils.issue_generic_request(command, env)
+    else:
+      logging.warning(
+          'Drag and drop action indicated, but no coordinates provided. No '
+          'action will be executed.'
+      )
   elif action.action_type == 'scroll':
 
     screen_width, screen_height = screen_size
@@ -213,6 +231,7 @@ def _wait_and_find_click_element(
     target_text: str,
     env: android_world_controller.AndroidWorldController,
     case_sensitive: bool,
+    dist_threshold: int = 1,  # Allow one character difference.
 ) -> json_action.JSONAction:
   """Wait for the screen to update until "element_text" appears."""
   ui_elements = env.get_ui_elements()
@@ -222,7 +241,7 @@ def _wait_and_find_click_element(
   start = time.time()
   current = time.time()
   while current - start < 10:
-    if distance == 0:
+    if distance <= dist_threshold:
       return json_action.JSONAction(action_type='click', index=element)
     ui_elements = env.get_ui_elements()
     element, distance = _find_target_element(

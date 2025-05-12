@@ -24,9 +24,19 @@ import random
 from typing import Any, Generic, Type, TypeVar
 from android_world.task_evals.information_retrieval import information_retrieval
 from android_world.task_evals.information_retrieval.proto import task_pb2
+from android_world.utils import file_utils
 from google.protobuf import text_format
 
 TaskType = TypeVar('TaskType', bound=information_retrieval.InformationRetrieval)
+
+_DEFAULT_COMPLEXITY = 1.0
+_COMPLEXITY_OVERRIDES = {
+    'SportsTrackerActivitiesOnDate': 2,
+    'SportsTrackerActivityDuration': 1.2,
+    'SportsTrackerTotalDistanceForCategoryOverInterval': 2.2,
+    'SportsTrackerTotalDurationForCategoryThisWeek': 1.6,
+    'TasksDueNextWeek': 1.2,
+}
 
 
 class InformationRetrievalRegistry(Generic[TaskType]):
@@ -41,7 +51,9 @@ class InformationRetrievalRegistry(Generic[TaskType]):
   def _read_tasks(self) -> task_pb2.Tasks:
     proto = task_pb2.Tasks()
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    local_path = os.path.join(script_dir, 'proto', 'tasks.textproto')
+    local_path = file_utils.convert_to_posix_path(
+        script_dir, 'proto', 'tasks.textproto'
+    )
     with open(local_path, 'r') as f:
       textproto_content = f.read()
     text_format.Merge(textproto_content, proto)
@@ -94,6 +106,8 @@ class InformationRetrievalRegistry(Generic[TaskType]):
         {
             'generate_random_params': generate_random_params,
             'task_template': task_template,
+            'complexity': _COMPLEXITY_OVERRIDES.get(
+                task_proto.name, _DEFAULT_COMPLEXITY
+            ),
         },
     )
-

@@ -19,6 +19,7 @@ import dataclasses
 import time
 from typing import Any, Optional, Self
 
+from absl import logging
 from android_env.components import action_type
 from android_world.env import actuation
 from android_world.env import adb_utils
@@ -46,11 +47,13 @@ class State:
     forest: Raw UI forest; see android_world_controller.py for more info.
     ui_elements: Processed children and stateful UI elements extracted from
       forest.
+    auxiliaries: Additional information about the state.
   """
 
   pixels: np.ndarray
   forest: Any
   ui_elements: list[representation_utils.UIElement]
+  auxiliaries: dict[str, Any] | None = None
 
   @classmethod
   def create_and_infer_elements(
@@ -203,6 +206,7 @@ def _process_timestep(timestep: dm_env.TimeStep) -> State:
       ui_elements=timestep.observation[
           android_world_controller.OBSERVATION_KEY_UI_ELEMENTS
       ],
+      auxiliaries={},
   )
 
 
@@ -296,6 +300,9 @@ class AsyncAndroidEnv(AsyncEnv):
       if action.text:
         self.display_message(action.text, header='Agent answered:')
       return
+    if action.action_type == json_action.STATUS:
+      # Do nothing if it is a termination action.
+      return
     state = self.get_state(wait_to_stabilize=False)
     actuation.execute_adb_action(
         action,
@@ -340,7 +347,10 @@ class AsyncAndroidEnv(AsyncEnv):
     return adb_utils.get_logical_screen_size(self.controller)
 
   def close(self) -> None:
-    return self.controller.close()
+    try:
+      self.controller.close()
+    except:  # pylint: disable=bare-except
+      logging.warning('Failed to close controller. Continuing.')
 
   @property
   def orientation(self) -> int:

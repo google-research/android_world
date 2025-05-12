@@ -29,6 +29,27 @@ INSTANCE_SEPARATOR = '_'
 Episode = dict[str, Any]
 
 
+def sort_key(filename: str) -> tuple[str, int|str]:
+  """Returns the sort key for a filenames.
+
+  Attempts to sort by the filename and then by the instance number. However,
+  if the instance number is not an integer, it will be sorted as a string.
+
+  Args:
+    filename: The filename to sort.
+  """
+  parts = filename.split(INSTANCE_SEPARATOR, maxsplit=1)
+  if len(parts) == 1:
+    # When there is no instance number, sort by filename.
+    return (parts[0], 0)
+  name, num = parts
+  try:
+    num = int(num)
+  except ValueError:
+    num = 0
+  return (name, num)
+
+
 def _gzip_pickle(data: Any) -> bytes:
   """Pickle and gzip compress an object in memory.
 
@@ -105,13 +126,13 @@ class IncrementalCheckpointer(Checkpointer):
     with open(filename, 'wb') as f:
       compressed = _gzip_pickle(task_episodes)
       f.write(compressed)
-    print(f'Wrote task episodes for {task_name} to {filename}')
+    logging.info('Wrote task episodes for %s to %s', task_name, filename)
 
   def load(self, fields: list[str] | None = None) -> list[Episode]:
     """Loads all task groups from disk."""
     # Keep same order as runtime.
     directories = os.listdir(self.directory)
-    directories.sort(key=lambda x: x.split(INSTANCE_SEPARATOR)[0])
+    directories.sort(key=sort_key)
 
     data = []
     for filename in directories:
@@ -126,7 +147,7 @@ class IncrementalCheckpointer(Checkpointer):
             ]
           data.extend(task_group)
         except Exception as e:  # pylint: disable=broad-exception-caught
-          print(f'Unable to load {filename} with exception: {e}')
+          logging.info('Unable to load %s with exception: %s', filename, e)
     return data
 
   def _load_task_group(self, task_group_id: str) -> list[Episode]:
@@ -189,7 +210,7 @@ class DeprecatedCheckpointer:
     with open(self.filename, 'wb') as f:
       compressed = _gzip_pickle((data, completed_tasks))
       f.write(compressed)
-    print(f'Wrote to {self.filename}')
+    logging.info('Wrote to %s', self.filename)
 
   def load(
       self, fields: list[str] | None = None

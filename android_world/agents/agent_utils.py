@@ -15,12 +15,15 @@
 """Utilities for agents."""
 
 import ast
+import json
 import re
-from typing import Any, Optional
+from typing import Any
 
 
-def extract_json(s: str) -> Optional[dict[str, Any]]:
+def extract_json(s: str) -> dict[str, Any] | None:
   """Extracts JSON from string.
+
+  Tries conversion with ast and json modules.
 
   Args:
     s: A string with a JSON in it. E.g., "{'hello': 'world'}" or from CoT:
@@ -35,7 +38,15 @@ def extract_json(s: str) -> Optional[dict[str, Any]]:
     try:
       return ast.literal_eval(match.group())
     except (SyntaxError, ValueError) as error:
-      print('Cannot extract JSON, skipping due to error %s', error)
-      return None
+      try:
+        # Try conversion with json module.
+        return json.loads(match.group())
+      except (SyntaxError, ValueError) as error2:
+        print(
+            'Cannot extract JSON, skipping due to errors %s and %s',
+            error,
+            error2,
+        )
+        return None
   else:
     return None

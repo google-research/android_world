@@ -14,10 +14,9 @@
 
 """Launches the environment used in the benchmark."""
 
-import resource
+import platform
 
 from absl import logging
-from android_world.env import adb_utils
 from android_world.env import android_world_controller
 from android_world.env import interface
 from android_world.env.setup_device import setup
@@ -39,16 +38,6 @@ def _get_env(
   return interface.AsyncAndroidEnv(controller)
 
 
-def verify_api_level(env: interface.AsyncEnv) -> None:
-  """Verifies that the emulator's API level is expected."""
-  level = adb_utils.get_api_level(env.controller)
-  if level != _ANDROID_WORLD_API_LEVEL:
-    raise ValueError(
-        f'Emulator API level must be {_ANDROID_WORLD_API_LEVEL}, but found'
-        f' {level}.'
-    )
-
-
 def _increase_file_descriptor_limit(limit: int = 32768):
   """Increases the file descriptor limit to the given limit.
 
@@ -60,7 +49,13 @@ def _increase_file_descriptor_limit(limit: int = 32768):
     limit: The new file descriptor limit. The default value was determined
       experimentally to not raise too many open files error.
   """
+  system_name = platform.system()
+  if system_name == 'Windows':
+    return
+
   try:
+    import resource  # pylint: disable=g-import-not-at-top
+
     _, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
     if limit > hard:
       logging.warning(

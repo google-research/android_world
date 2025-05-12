@@ -341,8 +341,8 @@ class T3A(base_agent.EnvironmentInteractingAgent):
 
     if is_safe == False:  # pylint: disable=singleton-comparison
       #  is_safe could be None
-      action_output = """Reason: Triggered LLM safety classifier.
-Action: {"action_type": "status", "goal_status": "infeasible"}"""
+      action_output = f"""Reason: {m3a_utils.TRIGGER_SAFETY_CLASSIFIER}
+Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
 
     if not raw_response:
       raise RuntimeError('Error calling LLM in action selection phase.')

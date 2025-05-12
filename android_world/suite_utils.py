@@ -17,11 +17,12 @@
 import collections
 import datetime
 import hashlib
+import logging
 import os
 import random
 import time
 import traceback
-from typing import Any, Callable, Type
+from typing import Any, Callable, Type, TypeVar
 
 from android_env import env_interface
 from android_world import checkpointer as checkpointer_lib
@@ -40,6 +41,7 @@ import pandas as pd
 _FIXED_SEED = 123
 _TASK_TEMPLATE_COLUMN = 'task_template'
 _TASK_PROMPT_COLUMN = 'task_prompt'
+TaskEvalType = TypeVar('TaskEvalType', bound=task_eval.TaskEval)
 
 
 class Suite(dict[str, list[task_eval.TaskEval]]):
@@ -65,6 +67,12 @@ class Suite(dict[str, list[task_eval.TaskEval]]):
   def suite_family(self, value: str):
     """Setter for suite_family."""
     self._suite_family = value
+
+
+def _log_and_print(msg: str, *args: object) -> None:
+  formatted = msg % args if args else msg
+  logging.info(formatted)
+  print(formatted)
 
 
 def _instantiate_task(
@@ -101,7 +109,7 @@ def create_suite(
     seed: int | None = None,
     tasks: list[str] | None = None,
     use_identical_params: bool = False,
-    env: interface.AsyncEnv | None = None,
+    env: interface.AsyncEnv | None = None
 ) -> Suite:
   """Creates task suite.
 
@@ -213,8 +221,8 @@ def _filter_tasks(
 
 
 def _run_task(
-    task: task_eval.TaskEval,
-    run_episode: Callable[[task_eval.TaskEval], episode_runner.EpisodeResult],
+    task: TaskEvalType,
+    run_episode: Callable[[TaskEvalType], episode_runner.EpisodeResult],
     env: interface.AsyncEnv,
     demo_mode: bool,
 ) -> dict[str, Any]:
@@ -235,20 +243,26 @@ def _run_task(
   start = time.time()
   try:
     task.initialize_task(env)
-    print(f'Running task {task.name} with goal "{task.goal}"')
+    _log_and_print('Running task %s with goal "%s"', task.name, task.goal)
     interaction_results = run_episode(task)
     task_successful = task.is_successful(env)
-  except Exception:  # pylint: disable=broad-exception-caught
-    print('~' * 80 + '\n' + f'SKIPPING {task.name}.')
+  except Exception as e:  # pylint: disable=broad-exception-caught
+    _log_and_print('%s\nSKIPPING %s.', '~' * 80, task.name)
+    logging.exception(
+        'Logging exception and skipping task. Will keep running. Task: %s: %s',
+        task.name,
+        e,
+    )
     traceback.print_exc()
     return _create_failed_result(
         task.name, task.goal, traceback.format_exc(), time.time() - start
     )
   else:
     agent_successful = task_successful if interaction_results.done else 0.0
-    print(
-        f'{"Task Successful ✅" if agent_successful > 0.5 else "Task Failed ❌"};'
-        f' {task.goal}'
+    _log_and_print(
+        '%s; %s',
+        'Task Successful ✅' if agent_successful > 0.5 else 'Task Failed ❌',
+        f' {task.goal}',
     )
 
     if demo_mode:
@@ -264,6 +278,7 @@ def _run_task(
         constants.EpisodeConstants.EPISODE_LENGTH: len(
             interaction_results.step_data[constants.STEP_NUMBER]
         ),
+        constants.EpisodeConstants.AUX_DATA: interaction_results.aux_data,
         constants.EpisodeConstants.SCREEN_CONFIG: _get_screen_config(task),
         constants.EpisodeConstants.EXCEPTION_INFO: None,
         constants.EpisodeConstants.SEED: task.params[
@@ -309,6 +324,8 @@ def _run_task_suite(
     demo_mode: bool = False,
     agent_name: str = '',
     return_full_episode_data: bool = False,
+    process_episodes_fn=None,
+    check_episode_fn: Callable[[dict[str, Any]], bool] | None = None,
 ) -> list[dict[str, Any]]:
   """Runs e2e system on suite.
 
@@ -321,6 +338,9 @@ def _run_task_suite(
     agent_name: The name of the agent.
     return_full_episode_data: Whether to return full episode data instead of
       just metadata.
+    process_episodes_fn: The function to process episode data. Usually to
+      compute metrics. Deafaults to process_episodes from this file.
+    check_episode_fn: The function to check episode data.
 
   Returns:
     Metadata for each episode, including the scripted reward.
@@ -333,10 +353,14 @@ def _run_task_suite(
       constants.EpisodeConstants.EPISODE_LENGTH,
       constants.EpisodeConstants.RUN_TIME,
       constants.EpisodeConstants.EXCEPTION_INFO,
+      constants.EpisodeConstants.AUX_DATA,
   ]
   completed_tasks, failed_tasks = _get_task_info(
       checkpointer.load(fields=metadata_fields)
   )
+  if process_episodes_fn is None:
+    process_episodes_fn = process_episodes
+
   if (completed_tasks or failed_tasks) and return_full_episode_data:
     raise ValueError(
         'Cannot return full episode data when resuming from a checkpoint.'
@@ -346,7 +370,7 @@ def _run_task_suite(
   correct, total = 0, 0
   for name, instances in suite.items():
     msg = 'Running task: ' + name
-    print(msg + '\n' + '=' * len(msg))
+    _log_and_print(msg + '\n' + '=' * len(msg))
 
     for i, instance in enumerate(instances):
       instance_name = (
@@ -364,10 +388,16 @@ def _run_task_suite(
           instance_name in completed_tasks and instance_name not in failed_tasks
       )
       if already_processed:
-        print(f'Skipping already processed task {instance_name}')
+        _log_and_print('Skipping already processed task %s', instance_name)
         continue
 
       episode = _run_task(instance, run_episode, env, demo_mode=demo_mode)
+      if (
+          episode.get(constants.EpisodeConstants.EXCEPTION_INFO) is None
+          and check_episode_fn is not None
+      ):
+        if not check_episode_fn(episode):
+          continue
       episode[constants.EpisodeConstants.AGENT_NAME] = agent_name
       episode[constants.EpisodeConstants.INSTANCE_ID] = i
       checkpointer.save_episodes([episode], instance_name)
@@ -376,7 +406,7 @@ def _run_task_suite(
         full_episode_data.append(episode)
 
       episodes_metadata.append({k: episode[k] for k in metadata_fields})
-      process_episodes(episodes_metadata, print_summary=True)
+      process_episodes_fn(episodes_metadata, print_summary=True)
 
       if episode[constants.EpisodeConstants.EXCEPTION_INFO] is not None:
         # Don't include episode in tally if execution/eval logic errored out.
@@ -396,6 +426,8 @@ def run(
     checkpointer: checkpointer_lib.Checkpointer = checkpointer_lib.NullCheckpointer(),
     demo_mode: bool = False,
     return_full_episode_data: bool = False,
+    process_episodes_fn=None,
+    check_episode_fn: Callable[[dict[str, Any]], bool] | None = None,
 ) -> list[dict[str, Any]]:
   """Create suite and runs eval suite.
 
@@ -410,6 +442,9 @@ def run(
       task instruction as a notification.
     return_full_episode_data: Whether to return full episode data instead of
       just metadata.
+    process_episodes_fn: The function to process episode data. Usually to
+      compute metrics. Deafaults to process_episodes from this file.
+    check_episode_fn: The function to check episode data.
 
   Returns:
     Step-by-step data from each episode.
@@ -446,12 +481,14 @@ def run(
       demo_mode=demo_mode,
       agent_name=agent.name,
       return_full_episode_data=return_full_episode_data,
+      process_episodes_fn=process_episodes_fn,
+      check_episode_fn=check_episode_fn,
   )
 
   return results
 
 
-def _allocate_step_budget(task_complexity: int) -> int:
+def _allocate_step_budget(task_complexity: float) -> int:
   """Allocates number of steps dynamically based on the complexity score.
 
   Args:
@@ -517,6 +554,7 @@ def _create_failed_result(
       constants.EpisodeConstants.RUN_TIME: run_time,
       constants.EpisodeConstants.EPISODE_LENGTH: np.nan,
       constants.EpisodeConstants.EXCEPTION_INFO: exception,
+      constants.EpisodeConstants.AUX_DATA: None,
   }
 
 
@@ -562,7 +600,7 @@ def _extract_task_metadata() -> pd.DataFrame:
 
 def _print_results_by_tag(result_df: pd.DataFrame) -> None:
   exploded_df = result_df.explode('tags').reset_index()
-  exploded_df.tags.replace(regex=r'', value='untagged', inplace=True)
+  exploded_df.replace(regex={'tags': r''}, value='untagged', inplace=True)  # pytype: disable=wrong-arg-types
   return (
       exploded_df.groupby(['tags', 'difficulty'], as_index=False)
       .agg(
@@ -679,11 +717,11 @@ def process_episodes(
     pd.set_option('display.max_columns', 100)
     pd.set_option('display.max_rows', 1000)
     pd.set_option('display.width', 1000)
-    print(f'\n\n{result}')
+    _log_and_print('\n\n%s', result)  # Use lazy % formatting
 
     # Add a chart that shows mean success rate by tag and difficulty.
     tags_df = _print_results_by_tag(tagged_result_df)
     pd.set_option('display.precision', 2)
-    print(f'\n\n{tags_df}')
+    _log_and_print('\n\n%s', tags_df)
 
   return tagged_result_df

@@ -30,7 +30,7 @@ import dm_env
 
 def create_file_with_contents(contents: str) -> str:
   temp_dir = tempfile.mkdtemp()
-  file_path = os.path.join(temp_dir, 'file.txt')
+  file_path = file_utils.convert_to_posix_path(temp_dir, 'file.txt')
   with open(file_path, 'w') as f:
     f.write(contents)
   return file_path
@@ -169,7 +169,9 @@ class AndroidWorldControllerTest(absltest.TestCase):
 
     with env.pull_file(remote_file_path) as local_dir:
       local_path = os.path.split(remote_file_path)[1]
-      local_file = open(os.path.join(local_dir, local_path), 'r')
+      local_file = open(
+          file_utils.convert_to_posix_path(local_dir, local_path), 'r'
+      )
       self.assertEqual(open(remote_file_path, 'r').read(), local_file.read())
 
     self.mock_copy_db.assert_called_once_with(

@@ -53,14 +53,6 @@ See demo videos on our [website](https://google-research.github.io/android_world
     conda activate android_world
     ```
 
-1. Install the latest [AndroidEnv](https://github.com/google-deepmind/android_env):
-
-    ```python
-    git clone https://github.com/google-deepmind/android_env.git
-    cd android_env
-    python setup.py install
-    ```
-
 1. Install AndroidWorld. *Note: Python 3.11 or above is required.*
 
     ```python
@@ -95,9 +87,12 @@ Run the `minimal_task_runner.py` script to see the basic mechanics of AndroidWor
 python minimal_task_runner.py --task=ContactsAddContact
 ```
 
-If you don't specify a task, a random task will be selected. *NOTE: If you want to try open-source apps, i.e not included with Android OS, please run `--perform_emulator_setup` in the script below.*
+If you don't specify a task, a random task will be selected. *NOTE: If you want to try open-source apps, i.e. not included with Android OS, please run `--perform_emulator_setup` in the script below.*
 
 ## Run the benchmark
+
+Note: **Task Step Limits Update**
+As of 11/18/2024, the max_steps/step_budget for each task in AndroidWorld have been updated to approximately **2x the human average completion time**. This adjustment ensures agents have sufficient time to complete tasks, while also reducing overhead of running thebenchmark. [Here](https://docs.google.com/spreadsheets/d/1KF-vY0Uy47o0mnursvs-HmS6hreU6U3rPrAjgEfjMK4/edit?usp=sharing) are the per-task updates.
 
 ```bash
 python run.py \
@@ -118,7 +113,7 @@ If a run fails part-way through, you can resume it by re-running the script with
 ## Running MiniWoB++ tasks
 
 To run the MiniWoB++ web-based tasks in AndroidWorld, simply set
-`--suite_family=miniwob` in the command above.
+`--suite_family=miniwob` and `--perform_emulator_setup` in the command above.
 
 A key advantage of running MiniWoB++ tasks is that common input elements are
 rendered as native, commonly used Android UI widgets, rather than as HTML. Thus agents must learn to use universal

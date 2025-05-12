@@ -103,7 +103,9 @@ def get_a11y_tree(
   return forest
 
 
-_TASK_PATH = '/tmp/default.textproto'
+_TASK_PATH = file_utils.convert_to_posix_path(
+    file_utils.get_local_tmp_directory(), 'default.textproto'
+)
 DEFAULT_ADB_PATH = '~/Android/Sdk/platform-tools/adb'
 
 
@@ -132,6 +134,18 @@ class A11yMethod(enum.Enum):
   UIAUTOMATOR = 'uiautomator'
 
 
+def apply_a11y_forwarder_app_wrapper(
+    env: env_interface.AndroidEnvInterface, install_a11y_forwarding_app: bool
+) -> env_interface.AndroidEnvInterface:
+  return a11y_grpc_wrapper.A11yGrpcWrapper(
+      env,
+      install_a11y_forwarding=install_a11y_forwarding_app,
+      start_a11y_service=True,
+      enable_a11y_tree_info=True,
+      latest_a11y_info_only=True,
+  )
+
+
 class AndroidWorldController(base_wrapper.BaseWrapper):
   """Controller for an Android instance that adds accessibility tree data.
 
@@ -148,13 +162,10 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
       a11y_method: A11yMethod = A11yMethod.A11Y_FORWARDER_APP,
       install_a11y_forwarding_app: bool = True,
   ):
+    self._original_env = env
     if a11y_method == A11yMethod.A11Y_FORWARDER_APP:
-      self._env = a11y_grpc_wrapper.A11yGrpcWrapper(
-          env,
-          install_a11y_forwarding=install_a11y_forwarding_app,
-          start_a11y_service=True,
-          enable_a11y_tree_info=True,
-          latest_a11y_info_only=True,
+      self._env = apply_a11y_forwarder_app_wrapper(
+          env, install_a11y_forwarding_app
       )
       self._env.reset()  # Initializes required server services in a11y wrapper.
     else:

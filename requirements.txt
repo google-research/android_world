@@ -1,7 +1,8 @@
 absl-py==2.1.0
+android_env==1.2.3
 dm_env==1.6
 fuzzywuzzy==0.18.0
-google-generativeai==0.5.1
+google-generativeai
 grpcio-tools
 immutabledict==2.0.0
 IPython

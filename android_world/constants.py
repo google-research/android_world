@@ -33,6 +33,8 @@ class EpisodeConstants:
     EPISODE_LENGTH: The length of the episode.
     FINISH_DTIME: The datetime the task finished.
     SEED: The random seed to initialize the current episode's task.
+    AUX_DATA: Additional data which can be passed from the task to
+      process_episodes.
   """
 
   EPISODE_DATA = 'episode_data'
@@ -48,3 +50,4 @@ class EpisodeConstants:
   EXCEPTION_INFO = 'exception_info'
   FINISH_DTIME = 'finish_dtime'
   SEED = 'seed'
+  AUX_DATA = 'aux_data'

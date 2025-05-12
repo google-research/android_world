@@ -16,7 +16,6 @@
 
 import dataclasses
 import datetime
-import os
 import random
 from typing import Any
 
@@ -70,7 +69,7 @@ class Markor(task_eval.TaskEval):
 class MarkorMoveNote(Markor):
   """Task for checking that a file has been moved in Markor."""
 
-  complexity = 2
+  complexity = 1.4
   schema = file_validators.MoveFile.schema
   template = (
       "In Markor, move the note {file_name} from {source_folder} to"
@@ -126,7 +125,7 @@ class MarkorMoveNote(Markor):
 class MarkorCreateFolder(Markor):
   """Task for checking that a new folder in Markor has been created with a specific name."""
 
-  complexity = 2
+  complexity = 1
   schema = {
       "type": "object",
       "properties": {
@@ -170,7 +169,7 @@ class MarkorCreateFolder(Markor):
 class MarkorEditNote(Markor):
   """Task for editing an existing note in Markor."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -228,13 +227,13 @@ class MarkorEditNote(Markor):
         [
             "shell",
             "cat",
-            os.path.join(
+            file_utils.convert_to_posix_path(
                 device_constants.MARKOR_DATA, self.params["file_name"]
             ),
         ],
         env.controller,
     )
-    file_contents = res.generic.output.decode().strip()
+    file_contents = res.generic.output.decode().replace("\r", "").strip()
     logging.info("Retrieved file contents: %s", file_contents)
 
     if self.params["edit_type"] == "header":
@@ -286,7 +285,7 @@ class MarkorEditNote(Markor):
 class MarkorDeleteNote(Markor):
   """Task for checking that a note in Markor has been deleted."""
 
-  complexity = 2
+  complexity = 1
   schema = file_validators.DeleteFile.schema
   template = "Delete the note in Markor named {file_name}."
 
@@ -318,7 +317,7 @@ class MarkorDeleteNote(Markor):
 class MarkorDeleteNewestNote(Markor):
   """Task for deleting the newest note in Markor."""
 
-  complexity = 2
+  complexity = 1
   schema = {}
   template = "Delete the newest note in Markor."
 
@@ -380,7 +379,7 @@ class MarkorDeleteAllNotes(Markor):
   # files one-by-one which envolves many steps (more than 10), but there is also
   # an optimal approach by first long pressing one file, then tapping to select
   # all others and deleting them all together.
-  complexity = 2
+  complexity = 1.4
   schema = {}
   template = "Delete all my notes in Markor."
 
@@ -417,7 +416,7 @@ class MarkorCreateNote(Markor):
   """Task for checking that a new note in Markor has been created with a specific name and text."""
 
   app_names = ("markor",)
-  complexity = 2
+  complexity = 1.6
   schema = file_validators.CreateFile.schema
   template = (
       "Create a new note in Markor named {file_name} with the following text:"
@@ -453,7 +452,8 @@ class MarkorCreateNote(Markor):
 class MarkorCreateNoteFromClipboard(Markor):
   """Task for creating a note using text in clipboard in Markor."""
 
-  complexity = 2
+  app_names = ("markor", "clipper")
+  complexity = 1.4
   schema = {
       "type": "object",
       "properties": {
@@ -510,8 +510,7 @@ class MarkorCreateNoteFromClipboard(Markor):
 class MarkorMergeNotes(Markor):
   """Task for merging three existing notes into a new one."""
 
-  # This task involves more than 20 steps.
-  complexity = 3
+  complexity = 7.8
   schema = {
       "type": "object",
       "properties": {
@@ -615,13 +614,14 @@ class MarkorMergeNotes(Markor):
             [
                 "shell",
                 "cat",
-                os.path.join(
+                file_utils.convert_to_posix_path(
                     device_constants.MARKOR_DATA, self.params["new_file_name"]
                 ),
             ],
             env.controller,
         )
         .generic.output.decode()
+        .replace("\r", "")
         .strip()
     )
 
@@ -653,7 +653,7 @@ class MarkorMergeNotes(Markor):
 class MarkorChangeNoteContent(Markor):
   """Task for changing an existing note's content and renaming it."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -712,7 +712,9 @@ class MarkorChangeNoteContent(Markor):
     ):
       return 0.0
     content_updated = file_utils.check_file_content(
-        os.path.join(device_constants.MARKOR_DATA, self.params["new_name"]),
+        file_utils.convert_to_posix_path(
+            device_constants.MARKOR_DATA, self.params["new_name"]
+        ),
         self.params["updated_content"],
         env.controller,
     )
@@ -732,7 +734,7 @@ class MarkorChangeNoteContent(Markor):
 class MarkorAddNoteHeader(Markor):
   """Task for adding a header to an existing note and renaming it."""
 
-  complexity = 2
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -794,7 +796,9 @@ class MarkorAddNoteHeader(Markor):
     ):
       return 0.0
     correct = file_utils.check_file_content(
-        os.path.join(device_constants.MARKOR_DATA, self.params["new_name"]),
+        file_utils.convert_to_posix_path(
+            device_constants.MARKOR_DATA, self.params["new_name"]
+        ),
         self.params["header"] + "\n\n" + self.params["original_content"] + "\n",
         env.controller,
         exact_match=True,
@@ -821,7 +825,7 @@ class MarkorTranscribeReceipt(task_eval.TaskEval):
   """
 
   app_names = ("simple gallery pro", "markor")
-  complexity = 2
+  complexity = 1.8
   template = (
       "Create a file in Markor, called receipt.md with the transactions from"
       " the receipt.png. Use Simple Gallery to view the receipt. Please enter"
@@ -841,9 +845,12 @@ class MarkorTranscribeReceipt(task_eval.TaskEval):
     """Initializes the task for creating a receipt markdown file."""
     super().initialize_task(env)
     self.create_file_task.initialize_task(env)
-    self.img.save("/tmp/receipt.png")
+    receipt_img_path = file_utils.convert_to_posix_path(
+        file_utils.get_local_tmp_directory(), "receipt.png"
+    )
+    self.img.save(receipt_img_path)
     file_utils.copy_data_to_device(
-        "/tmp/receipt.png",
+        receipt_img_path,
         device_constants.GALLERY_DATA,
         env.controller,
     )
@@ -932,7 +939,6 @@ class MarkorTranscribeVideo(Markor):
             vlc.generate_file_name() for _ in range(random.randint(5, 20))
         ],
     }
-
 
 _NOTE_TITLES = [
     "grocery_list_weekly.md",

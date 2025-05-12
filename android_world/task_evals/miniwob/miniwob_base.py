@@ -59,9 +59,9 @@ def get_episode_reward(env: env_interface.AndroidEnvInterface) -> float:
   return float(int(reward))
 
 
-def is_episode_terminated(env: env_interface.AndroidEnvInterface) -> bool:
+def is_episode_terminated(env: interface.AsyncEnv) -> bool:
   """Checks if the current episode is terminated."""
-  return get_episode_reward(env) != 0.0
+  return get_episode_reward(env.controller.env) != 0.0
 
 
 class MiniWoBTask(task_eval.TaskEval, abc.ABC):

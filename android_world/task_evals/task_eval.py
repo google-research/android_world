@@ -23,7 +23,6 @@ from android_world.env import device_constants
 from android_world.env import interface
 from android_world.utils import app_snapshot
 from android_world.utils import datetime_utils
-import jsonschema
 
 
 class TaskEval(abc.ABC):
@@ -40,12 +39,15 @@ class TaskEval(abc.ABC):
 
   def __init__(self, params: dict[str, Any]):
     self.initialized = False
-    jsonschema.validate(params, self.schema)
+
+    # Disabling this check for now as it is causing issues on occasion with a
+    # with a RefResolutionError due to inability to resolve json-schema.org.
+    # jsonschema.validate(params, self.schema)
     self._params = params
 
   @property
   @abc.abstractmethod
-  def complexity(self) -> int:
+  def complexity(self) -> float:
     """The complexity of the task.
 
     We use heuristics to dynamically allocate number of steps based on the
@@ -112,11 +114,13 @@ class TaskEval(abc.ABC):
   def _initialize_apps(self, env: interface.AsyncEnv) -> None:
 
     for app_name in self.app_names:
-      if app_name:
+      # Don't need to restore snapshot for clipper app since it doesn't have
+      # any state.
+      if app_name and app_name != "clipper":
         try:
           app_snapshot.restore_snapshot(app_name, env.controller)
         except RuntimeError as error:
-          logging.warn("Skipping app snapshot loading : %s", error)
+          logging.warning("Skipping app snapshot loading : %s", error)
 
   @classmethod
   def set_device_time(cls, env: interface.AsyncEnv) -> None:
@@ -172,6 +176,9 @@ class TaskEval(abc.ABC):
   def tear_down(self, env: interface.AsyncEnv) -> None:  # pylint: disable=unused-argument
     """Tears down the task."""
     self._initialize_apps(env)
-    adb_utils.close_recents(env.controller)
+    try:
+      adb_utils.close_recents(env.controller)
+    except:  # pylint: disable=bare-except
+      logging.exception("Failed to close recent apps. Continuing.")
     self.initialized = False
     logging.info("Tearing down %s", self.name)

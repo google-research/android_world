@@ -14,12 +14,17 @@
 
 """Utils for M3A."""
 
+import ast
 import base64
+import json
+import math
 import re
 from typing import Any, Optional
 from android_world.env import representation_utils
 import cv2
 import numpy as np
+
+TRIGGER_SAFETY_CLASSIFIER = 'Triggered LLM safety classifier.'
 
 
 def _logical_to_physical(
@@ -101,6 +106,39 @@ def _ui_element_logical_corner(
   raise ValueError('Unsupported orientation.')
 
 
+def get_ui_element_bbox_pixels(
+    ui_element: representation_utils.UIElement,
+    logical_screen_size: tuple[int, int],
+    physical_frame_boundary: tuple[int, int, int, int],
+    orientation: int,
+) -> representation_utils.BoundingBox | None:
+  """Get bounding box in physical coordinates for a given UI element."""
+  if ui_element.bbox_pixels:
+    upper_left_logical, lower_right_logical = _ui_element_logical_corner(
+        ui_element, orientation
+    )
+    upper_left_physical = _logical_to_physical(
+        upper_left_logical,
+        logical_screen_size,
+        physical_frame_boundary,
+        orientation,
+    )
+    lower_right_physical = _logical_to_physical(
+        lower_right_logical,
+        logical_screen_size,
+        physical_frame_boundary,
+        orientation,
+    )
+    return representation_utils.BoundingBox(
+        x_min=upper_left_physical[0],
+        y_min=upper_left_physical[1],
+        x_max=lower_right_physical[0],
+        y_max=lower_right_physical[1],
+    )
+  else:
+    return None
+
+
 def add_ui_element_mark(
     screenshot: np.ndarray,
     ui_element: representation_utils.UIElement,
@@ -136,30 +174,45 @@ def add_ui_element_mark(
         physical_frame_boundary,
         orientation,
     )
+    x_scale = screenshot.shape[1] / physical_frame_boundary[2]
+    y_scale = screenshot.shape[0] / physical_frame_boundary[3]
+    iso_scale = math.sqrt(x_scale * x_scale + y_scale * y_scale)
+    upper_left_physical = (
+        int(upper_left_physical[0] * x_scale),
+        int(upper_left_physical[1] * y_scale),
+    )
+    lower_right_physical = (
+        int(lower_right_physical[0] * x_scale),
+        int(lower_right_physical[1] * y_scale),
+    )
 
     cv2.rectangle(
         screenshot,
         upper_left_physical,
         lower_right_physical,
         color=(0, 255, 0),
-        thickness=2,
+        thickness=int(2 * iso_scale),
     )
     screenshot[
-        upper_left_physical[1] + 1 : upper_left_physical[1] + 25,
-        upper_left_physical[0] + 1 : upper_left_physical[0] + 35,
+        upper_left_physical[1]
+        + int(1 * y_scale) : upper_left_physical[1]
+        + int(25 * y_scale),
+        upper_left_physical[0]
+        + int(1 * x_scale) : upper_left_physical[0]
+        + int(35 * x_scale),
         :,
     ] = (255, 255, 255)
     cv2.putText(
         screenshot,
         str(index),
         (
-            upper_left_physical[0] + 1,
-            upper_left_physical[1] + 20,
+            upper_left_physical[0] + int(1 * x_scale),
+            upper_left_physical[1] + int(20 * y_scale),
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
+        0.7 * iso_scale,
         (0, 0, 0),
-        thickness=2,
+        thickness=int(2 * iso_scale),
     )
 
 
@@ -217,7 +270,35 @@ def parse_reason_action_output(
       r'Action:(.*)', raw_reason_action_output, flags=re.DOTALL
   )
   action = action_result.group(1).strip() if action_result else None
+  if action:
+    extracted = extract_json(action)
+    if extracted is not None:
+      action = json.dumps(extracted)
+
   return reason, action
+
+
+def extract_json(s: str) -> Optional[dict[str, Any]]:
+  """Extracts JSON from string.
+
+  Args:
+    s: A string with a JSON in it. E.g., "{'hello': 'world'}" or from CoT:
+      "let's think step-by-step, ..., {'hello': 'world'}".
+
+  Returns:
+    JSON object.
+  """
+  pattern = r'\{.*?\}'
+  match = re.search(pattern, s, re.DOTALL)
+  if match:
+    try:
+      return ast.literal_eval(match.group())
+    except (SyntaxError, ValueError) as error:
+      print(f'Cannot extract JSON, skipping due to error {error}')
+      return None
+  else:
+    print(f'No JSON match in {s}')
+    return None
 
 
 def _generate_screenshot_table(task_result: dict[str, Any], i: int) -> str:

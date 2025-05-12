@@ -15,6 +15,7 @@
 """Fake user data; used to populate apps with data."""
 
 import datetime
+import logging
 import os
 import random
 import re
@@ -54,7 +55,7 @@ def get_font_path() -> str:
     raise RuntimeError("No suitable font found.") from exc
 
 
-_TMP = "/tmp"
+_TMP = file_utils.get_local_tmp_directory()
 
 
 def generate_random_string(length: int) -> str:
@@ -164,14 +165,19 @@ def write_to_gallery(
   """
 
   image = _draw_text(data)
-  temp_storage_location = os.path.join(_TMP, file_name)
+  temp_storage_location = file_utils.convert_to_posix_path(_TMP, file_name)
   image.save(temp_storage_location)
   file_utils.copy_data_to_device(
       temp_storage_location,
       device_constants.GALLERY_DATA,
       env.controller,
   )
-  os.remove(temp_storage_location)
+  try:
+    os.remove(temp_storage_location)
+  except FileNotFoundError:
+    logging.warning(
+        "Local file %s not found, so cannot remove it.", temp_storage_location
+    )
   adb_utils.close_app("simple gallery", env.controller)
 
 
@@ -179,7 +185,7 @@ def _copy_data_to_device(
     data: str, file_name: str, location: str, env: interface.AsyncEnv
 ):
   """Copies data to device by first writing locally, then copying.."""
-  temp_storage_location = os.path.join(_TMP, file_name)
+  temp_storage_location = file_utils.convert_to_posix_path(_TMP, file_name)
   with open(temp_storage_location, "w") as temp_file:
     temp_file.write(data)
 
@@ -188,7 +194,12 @@ def _copy_data_to_device(
       location,
       env.controller,
   )
-  os.remove(temp_storage_location)
+  try:
+    os.remove(temp_storage_location)
+  except FileNotFoundError:
+    logging.warning(
+        "Local file %s not found, so cannot remove it.", temp_storage_location
+    )
 
 
 def write_to_markor(
@@ -280,7 +291,7 @@ def write_video_file_to_device(
     messages = ["test" + str(random.randint(0, 1_000_000))]
 
   _create_mpeg_with_messages(
-      os.path.join(_TMP, file_name),
+      file_utils.convert_to_posix_path(_TMP, file_name),
       messages,
       display_time=message_display_time,
       width=width,
@@ -289,7 +300,7 @@ def write_video_file_to_device(
   )
 
   file_utils.copy_data_to_device(
-      os.path.join(_TMP, file_name),
+      file_utils.convert_to_posix_path(_TMP, file_name),
       location,
       env.controller,
   )
@@ -332,7 +343,7 @@ def write_mp3_file_to_device(
     title: The title of the song.
     duration_milliseconds: The duration of the MP3 file in milliseconds.
   """
-  local = os.path.join(_TMP, os.path.basename(remote_path))
+  local = file_utils.convert_to_posix_path(_TMP, os.path.basename(remote_path))
   _create_test_mp3(
       local,
       artist=artist,
@@ -344,7 +355,10 @@ def write_mp3_file_to_device(
       remote_path,
       env.controller,
   )
-  os.remove(local)
+  try:
+    os.remove(local)
+  except FileNotFoundError:
+    logging.warning("Local file %s not found, so cannot remove it.", local)
 
 
 def dict_to_notes(input_dict: dict[str, tuple[str, str]]) -> str:
@@ -411,36 +425,51 @@ def _draw_text(text: str, font_size: int = 24) -> Image.Image:
   Returns:
       The image object with the text.
   """
-
-  # Split the text into lines to calculate image size
+  font = ImageFont.truetype(get_font_path(), font_size)
   lines = text.split("\n")
-  max_line_width = max([len(line) for line in lines])
 
-  # Image dimensions based on text length
-  img_width = max_line_width * font_size // 2
-  img_height = len(lines) * font_size + 20  # Adding some padding
+  # Calculate dimensions using font metrics
+  max_width = 0
+  total_height = 0
+  for line in lines:
+    bbox = font.getbbox(line)
+    max_width = max(max_width, bbox[2])
+    if line.strip():  # For non-empty lines
+      total_height += bbox[3]
+    else:  # For empty lines (paragraph breaks)
+      total_height += font_size // 2
+
+  img_width = max_width + 20
+  img_height = total_height + 20
 
   img = Image.new("RGB", (img_width, img_height), color=(255, 255, 255))
   d = ImageDraw.Draw(img)
 
-  # Load a font
-  font = ImageFont.truetype(get_font_path(), font_size)
-
-  # Initial Y position
   y_text = 10
   for line in lines:
-    d.text((10, y_text), line, fill=(0, 0, 0), font=font)
-    y_text += font_size  # Move text to next line
+    if line.strip():
+      d.text((10, y_text), line, fill=(0, 0, 0), font=font)
+      bbox = font.getbbox(line)
+      y_text += bbox[3]
+    else:
+      y_text += font_size // 2
 
   return img
 
 
 def clear_internal_storage(env: interface.AsyncEnv) -> None:
-  """Clears all internal storage directories on device."""
-  for directory in EMULATOR_DIRECTORIES:
-    file_utils.clear_directory(
-        os.path.join(device_constants.EMULATOR_DATA, directory), env.controller
-    )
+  """Deletes all files from internal storage, leaving directory structure intact."""
+  adb_command = [
+      "shell",
+      "find",
+      device_constants.EMULATOR_DATA,
+      "-mindepth",
+      "1",
+      "-type",
+      "f",  # Regular file.
+      "-delete",
+  ]
+  adb_utils.issue_generic_request(adb_command, env.controller)
 
 
 def _clear_external_downloads(env: interface.AsyncEnv) -> None:

@@ -15,6 +15,7 @@
 """Logic for validating an SMS has been sent."""
 
 import random
+import time
 
 from absl import logging
 from android_env import env_interface
@@ -48,6 +49,7 @@ def parse_message(row: str) -> dict[str, str]:
   """
   parsed_dict = {}
 
+  row = row.strip()
   body_start = row.find("body=")
 
   if body_start != -1:
@@ -75,7 +77,11 @@ def parse_message(row: str) -> dict[str, str]:
 
 def _decode_messages_from_response(response: adb_pb2.AdbResponse) -> list[str]:
   """Decodes the ADB response into a list of messages."""
-  if response.generic.output.decode().startswith("No result found."):
+  if (
+      response.generic.output.decode()
+      .replace("\r", "")
+      .startswith("No result found.")
+  ):
     return []
   messages = response.generic.output.split(b"\nRow:")
   for i, m in enumerate(messages):
@@ -189,7 +195,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
   """
 
   app_names = ("simple sms messenger",)
-  complexity = 1
+  complexity = 1.2
   schema = {
       "type": "object",
       "properties": {
@@ -232,6 +238,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
     android_time = self.get_android_time(env.controller)
 
     messages = self.get_sent_messages(env.controller)
+    time.sleep(5)
     logging.info("During initialize_task, messages: %s", messages)
     if was_sent(
         messages,
@@ -248,6 +255,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     messages = self.get_sent_messages(env.controller)
+    time.sleep(5)
     logging.info("During is_successful, messages: %s", messages)
     sms_was_sent = was_sent(
         messages,

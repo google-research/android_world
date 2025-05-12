@@ -25,7 +25,7 @@ class MarkorCreateNoteAndSms(markor.Markor):
   """Task for checking that a new note in Markor has been created and then an SMS has been sent."""
 
   app_names = ("markor", "simple sms messenger")
-  complexity = 2
+  complexity = 1.8
   schema = {
       "type": "object",
       "properties": {

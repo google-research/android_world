@@ -60,7 +60,7 @@ def _is_stopwatch_paused(
       n_stopwatch += 1
   logging.info("Start present: %s", start_present)
   logging.info("Stopwatch: %d", n_stopwatch)
-  return start_present and n_stopwatch == 2
+  return start_present and n_stopwatch >= 2
 
 
 def _is_timer_set(

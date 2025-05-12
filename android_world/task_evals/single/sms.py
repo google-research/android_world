@@ -84,7 +84,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 
     # Texts don't necessarily come in the same order as sent here, so pause here
     # to make sure the most recent text comes last.
-    time.sleep(1)
+    time.sleep(5)
 
     most_recent_message = self._generate_non_goal_message()
     adb_utils.text_emulator(
@@ -95,7 +95,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 
     # Need to pause to make sure re-enabling notifications happens after the
     # last text came in
-    time.sleep(0.3)
+    time.sleep(5)
 
     adb_utils.enable_headsup_notifications(env.controller)
 
@@ -104,7 +104,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
     )
     if (
         most_recent["address"] != self.params["number"]
-        and most_recent["message"] != most_recent_message
+        and most_recent["body"] != most_recent_message
     ):
       raise ValueError(
           "Unexpected initial state - most recent message is not what is"
@@ -115,6 +115,7 @@ class SimpleSmsReplyMostRecent(sms_validators.SimpleSMSSendSms):
 class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
   """Task for checking a reply was sent."""
 
+  complexity = 1.2
   template = "Reply to {number} with message: {message} in Simple SMS Messenger"
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
@@ -157,6 +158,8 @@ class SimpleSmsReply(sms_validators.SimpleSMSSendSms):
 class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
   """Task for checking that the clipboard contents were sent as an SMS."""
 
+  app_names = ("simple sms messenger", "clipper")
+  complexity = 1.2
   template = (
       "Send a message to {number} with the clipboard content in Simple SMS"
       " Messenger"
@@ -170,7 +173,7 @@ class SimpleSmsSendClipboardContent(sms_validators.SimpleSMSSendSms):
 class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
   """Task for checking that a received address is forward to someone else."""
 
-  complexity = 2
+  complexity = 1.8
   template = (
       "Text the address of the event to {name1} that {name2} just sent me in"
       " Simple SMS Messenger"
@@ -243,6 +246,7 @@ class SimpleSmsSendReceivedAddress(sms_validators.SimpleSMSSendSms):
 class SimpleSmsResend(sms_validators.SimpleSMSSendSms):
   """Task for checking that a message was resent."""
 
+  complexity = 1.2
   template = "Resend the message I just sent to {name} in Simple SMS Messenger"
 
   schema = {

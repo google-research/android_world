@@ -222,6 +222,25 @@ class AdbTypingTest(AdbTestSetup):
       ]
       mock_execute_adb_call.assert_has_calls(expected_calls)
 
+  def test_type_white_space(self):
+    with mock.patch.object(
+        env_interface.AndroidEnvInterface, 'execute_adb_call'
+    ) as mock_execute_adb_call:
+      mock_execute_adb_call.return_value = adb_pb2.AdbResponse(
+          status=adb_pb2.AdbResponse.Status.OK
+      )
+      adb_utils.type_text(' ', self.mock_env)
+      expected_calls = [
+          mock.call(
+              adb_pb2.AdbRequest(
+                  input_text=adb_pb2.AdbRequest.InputText(text='%s'),
+                  timeout_sec=adb_utils._DEFAULT_TIMEOUT_SECS,
+              )
+          ),
+      ]
+      mock_execute_adb_call.assert_has_calls(expected_calls)
+      self.assertLen(expected_calls, mock_execute_adb_call.call_count)
+
 
 class TestExtractBroadcastData(absltest.TestCase):
 
