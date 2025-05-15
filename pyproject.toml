@@ -28,6 +28,8 @@ dependencies = [
     "requests",
     "tenacity",
     "termcolor",
+    "fastapi",
+    "uvicorn",
 ]
 
 [project.optional-dependencies]
