@@ -10,13 +10,13 @@ WORKDIR /
 #=============================
 SHELL ["/bin/bash", "-c"]   
 
-RUN apt update && apt install -y curl sudo wget unzip bzip2 libdrm-dev libxkbcommon-dev libgbm-dev libasound-dev libnss3 libxcursor1 libpulse-dev libxshmfence-dev xauth xvfb x11vnc fluxbox wmctrl libdbus-glib-1-2
+RUN apt update && apt install -y curl sudo wget unzip bzip2 libdrm-dev libxkbcommon-dev libgbm-dev libasound-dev libnss3 libxcursor1 libpulse-dev libxshmfence-dev xauth xvfb x11vnc fluxbox wmctrl libdbus-glib-1-2 ffmpeg
 
 #==============================
 # Android SDK ARGS
 #==============================
 ARG ARCH="x86_64" 
-ARG TARGET="google_apis_playstore"  
+ARG TARGET="google_apis"  
 ARG API_LEVEL="33" 
 ARG BUILD_TOOLS="33.0.0"
 ARG ANDROID_ARCH=${ANDROID_ARCH_DEFAULT}
@@ -74,12 +74,28 @@ RUN curl -sL https://deb.nodesource.com/setup_20.x | bash && \
     rm -Rf /tmp/* && rm -Rf /var/lib/apt/lists/*
 
 #====================================
-# Install Python and dependencies
+# Install Python 3.11 from source
 #====================================
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
+    apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
+    libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev && \
+    wget https://www.python.org/ftp/python/3.11.3/Python-3.11.3.tgz && \
+    tar -xvf Python-3.11.3.tgz && \
+    cd Python-3.11.3 && \
+    ./configure --enable-optimizations && \
+    make -j $(nproc) && \
+    make altinstall && \
+    cd .. && \
+    rm -rf Python-3.11.3* && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Create symlinks for python3.11
+RUN ln -sf /usr/local/bin/python3.11 /usr/local/bin/python3 && \
+    ln -sf /usr/local/bin/python3.11 /usr/local/bin/python
+
+# install pip
+RUN apt-get update && apt-get install python3-pip -y
 
 #====================================
 # Install uv
@@ -117,7 +133,13 @@ RUN chmod a+x docker_setup/start_vnc.sh && \
 #====================================
 # Install dependencies
 #====================================
-RUN uv sync
+RUN uv pip install . --system
+
+#============================================
+# Get Audio Recorder apk
+#============================================
+RUN wget https://github.com/Dimowner/AudioRecorder/releases/download/v0.9.99/app-releaseConfig-release.apk && \
+    mv app-releaseConfig-release.apk /tmp/
 
 #=======================
 # framework entry point
