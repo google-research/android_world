@@ -15,7 +15,8 @@ async def lifespan(app: FastAPI):
     # Startup
     app.state.app_android_env = load_and_setup_env(
         console_port=5554,
-        emulator_setup=False,
+        emulator_setup=True,
+        freeze_datetime=True,
         adb_path="/opt/android/platform-tools/adb",
     )
     task_registry = TaskRegistry()

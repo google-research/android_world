@@ -39,18 +39,15 @@ hw_accel_flag=$(check_hardware_acceleration)
 function launch_emulator () {
   adb devices | grep emulator | cut -f1 | xargs -I {} adb -s "{}" emu kill
   # options="@${emulator_name} -no-window -no-snapshot -noaudio -no-boot-anim -memory 2048 ${hw_accel_flag} -camera-back none  -grpc 8554"
-  # options="@${emulator_name}  -no-window  -no-snapshot -no-boot-anim -memory 2048 ${hw_accel_flag} -camera-back none  -grpc 8554"
   options="@${emulator_name} -no-window -no-snapshot -no-boot-anim -memory 2048 ${hw_accel_flag} -grpc 8554"
-  echo "${OSTYPE}: emulator ${options}"
-  nohup emulator $options &
-  # if [[ "$OSTYPE" == *linux* ]]; then
-  #   echo "${OSTYPE}: emulator ${options} -gpu off"
-  #   nohup emulator $options -gpu off &
-  # fi
-  # if [[ "$OSTYPE" == *darwin* ]] || [[ "$OSTYPE" == *macos* ]]; then
-  #   echo "${OSTYPE}: emulator ${options} -gpu swiftshader_indirect"
-  #   nohup emulator $options -gpu swiftshader_indirect &
-  # fi
+  if [[ "$OSTYPE" == *linux* ]]; then
+    echo "${OSTYPE}: emulator ${options} -gpu off"
+    nohup emulator $options -gpu off &
+  fi
+  if [[ "$OSTYPE" == *darwin* ]] || [[ "$OSTYPE" == *macos* ]]; then
+    echo "${OSTYPE}: emulator ${options} -gpu swiftshader_indirect"
+    nohup emulator $options -gpu swiftshader_indirect &
+  fi
 
   if [ $? -ne 0 ]; then
     echo "Error launching emulator"
