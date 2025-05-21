@@ -84,7 +84,7 @@ class FilesDeleteFile(task_eval.TaskEval):
   """Task for checking that a file has been deleted."""
 
   app_names = ("files",)
-  complexity = 1
+  complexity = 2.2
   schema = file_validators.DeleteFile.schema
   template = (
       "Delete the file {file_name} from the Android filesystem located in the"

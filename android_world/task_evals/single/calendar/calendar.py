@@ -182,7 +182,7 @@ class SimpleCalendarAddOneEventRelativeDay(SimpleCalendarAddOneEvent):
 class SimpleCalendarAddOneEventTomorrow(SimpleCalendarAddOneEvent):
   """Task for creating a calendar event in Simple Calendar Pro for tomorrow."""
 
-  complexity = 2.6
+  complexity = 3.4
   template = (
       "In Simple Calendar Pro, create a calendar event for tomorrow"
       " at {hour}h with the title '{event_title}' and the description"
@@ -202,7 +202,7 @@ class SimpleCalendarAddOneEventTomorrow(SimpleCalendarAddOneEvent):
 class SimpleCalendarAddOneEventInTwoWeeks(SimpleCalendarAddOneEvent):
   """Task for creating a calendar event in Simple Calendar Pro in two weeks from today."""
 
-  complexity = 2
+  complexity = 3.4
   template = (
       "In Simple Calendar Pro, create a calendar event in two weeks from today"
       " at {hour}h with the title '{event_title}' and the description"
@@ -221,7 +221,7 @@ class SimpleCalendarAddOneEventInTwoWeeks(SimpleCalendarAddOneEvent):
 class SimpleCalendarAddRepeatingEvent(SimpleCalendarAddOneEvent):
   """Task for creating a repeating calendar event in Simple Calendar Pro."""
 
-  complexity = 2.8
+  complexity = 3.4
   template = (
       "In Simple Calendar Pro, create a recurring calendar event titled"
       " '{event_title}' starting on {year}-{month}-{day} at"
