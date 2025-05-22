@@ -15,6 +15,7 @@
 """Fake user data; used to populate apps with data."""
 
 import datetime
+import functools
 import logging
 import os
 import random
@@ -41,18 +42,15 @@ _FONT_PATHS = [
 ]
 
 
-def get_font_path() -> str:
-  """Get the font path, falling back to a default system font if necessary."""
+@functools.cache
+def get_font(size: int | float) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+  """Returns a sensible font at the requested size."""
   for font_name in _FONT_PATHS:
     try:
-      font_path = ImageFont.truetype(font_name).path
-      return font_path  # pytype: disable=bad-return-type  # pillow-102-upgrade
+      return ImageFont.truetype(font_name, size=float(size))
     except IOError:
       continue
-  try:
-    return ImageFont.truetype().path  # pytype: disable=bad-return-type  # pillow-102-upgrade
-  except IOError as exc:
-    raise RuntimeError("No suitable font found.") from exc
+  return ImageFont.load_default(float(size))
 
 
 _TMP = file_utils.get_local_tmp_directory()
@@ -425,7 +423,7 @@ def _draw_text(text: str, font_size: int = 24) -> Image.Image:
   Returns:
       The image object with the text.
   """
-  font = ImageFont.truetype(get_font_path(), font_size)
+  font = get_font(font_size)
   lines = text.split("\n")
 
   # Calculate dimensions using font metrics
