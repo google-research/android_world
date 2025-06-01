@@ -25,11 +25,10 @@ MODES:
   full    Run full benchmark with RandomAgent (default)
 
 EXAMPLES:
-  ./run_benchmark.sh                           # Full benchmark with default tasks
+  ./run_benchmark.sh                           # Full benchmark with all 116 tasks
+  ./run_benchmark.sh full                      # Full benchmark with all 116 tasks
   ./run_benchmark.sh fast                      # Fast mode with random task
   ./run_benchmark.sh fast ContactsAddContact   # Fast mode with specific task
-  ./run_benchmark.sh full ClockStopWatchRunning # Full mode with specific task
-  ./run_benchmark.sh ContactsAddContact        # Full mode with specific task (shorthand)
 
 AVAILABLE TASKS:
   ContactsAddContact, ClockStopWatchRunning, and many more...
@@ -102,10 +101,12 @@ parse_and_save_results() {
     local output_file=$1
     local timestamp=$(date +"%Y%m%d_%H%M%S")
     local runs_dir="./runs"
-    local summary_file="$runs_dir/benchmark_summary_$timestamp.txt"
+    local run_subfolder="$runs_dir/run_$timestamp"
+    local summary_file="$run_subfolder/benchmark_summary.txt"
+    local full_log_file="$run_subfolder/benchmark_output.log"
     
-    # Create runs directory if it doesn't exist
-    mkdir -p "$runs_dir"
+    # Create runs directory and run subfolder if they don't exist
+    mkdir -p "$run_subfolder"
     
     echo "📊 Parsing results and saving summary..."
     
@@ -116,57 +117,111 @@ AndroidWorld Benchmark Summary
 Timestamp: $(date)
 Mode: $MODE
 Agent: random_agent
-$([ -n "$SPECIFIC_TASK" ] && echo "Specific Task: $SPECIFIC_TASK" || echo "Tasks: ContactsAddContact, ClockStopWatchRunning")
+$([ -n "$SPECIFIC_TASK" ] && echo "Specific Task: $SPECIFIC_TASK" || echo "Tasks: All available tasks")
 
 TASK RESULTS:
 =============
 EOF
 
     # Parse the output for task results
-    if grep -q "Running task:" "$output_file"; then
-        while IFS= read -r line; do
-            if [[ $line == *"Running task:"* ]]; then
-                current_task=$(echo "$line" | sed 's/.*Running task: //')
-                echo "" >> "$summary_file"
-                echo "$current_task" >> "$summary_file"
-                echo "$(printf '=%.0s' {1..${#current_task}})" >> "$summary_file"
-            elif [[ $line == *"with goal"* ]]; then
-                goal=$(echo "$line" | sed 's/.*with goal "//' | sed 's/".*//')
-                echo "Goal: \"$goal\"" >> "$summary_file"
-            elif [[ $line == *"Task Failed"* ]] || [[ $line == *"Task Passed"* ]]; then
-                if [[ $line == *"Failed"* ]]; then
-                    echo "Result: ❌ Failed" >> "$summary_file"
-                else
-                    echo "Result: ✅ Passed" >> "$summary_file"
-                fi
-            elif [[ $line == *"Agent did not indicate task is done"* ]]; then
-                echo "Reason: Agent reached max steps without completing task" >> "$summary_file"
-            elif [[ $line == *"Completed step"* ]]; then
-                step_num=$(echo "$line" | grep -o 'Completed step [0-9]*' | tail -1 | grep -o '[0-9]*')
-                if [ -n "$step_num" ]; then
-                    last_step=$step_num
-                fi
-            fi
-        done < "$output_file"
-        
-        # Add final statistics from the table
-        if grep -A 10 "mean_success_rate" "$output_file" > /dev/null; then
+    local current_task=""
+    local current_goal=""
+    local step_count=0
+    local max_step=0
+    
+    while IFS= read -r line; do
+        if [[ $line == *"Running random task:"* ]]; then
+            current_task=$(echo "$line" | sed 's/.*Running random task: //')
             echo "" >> "$summary_file"
-            echo "SUMMARY STATISTICS:" >> "$summary_file"
-            echo "==================" >> "$summary_file"
-            grep -A 20 "mean_success_rate" "$output_file" | head -10 >> "$summary_file"
+            echo "$current_task" >> "$summary_file"
+            echo "$(printf '=%.0s' {1..${#current_task}})" >> "$summary_file"
+        elif [[ $line == *"Running task:"* ]]; then
+            current_task=$(echo "$line" | sed 's/.*Running task: //')
+            echo "" >> "$summary_file"
+            echo "$current_task" >> "$summary_file"
+            echo "$(printf '=%.0s' {1..${#current_task}})" >> "$summary_file"
+        elif [[ $line == *"Goal:"* ]]; then
+            current_goal=$(echo "$line" | sed 's/Goal: //')
+            echo "Goal: $current_goal" >> "$summary_file"
+        elif [[ $line == *"Step "* && $line == *"..."* ]]; then
+            step_num=$(echo "$line" | grep -o 'Step [0-9]*' | grep -o '[0-9]*')
+            if [ -n "$step_num" ] && [ "$step_num" -gt "$max_step" ]; then
+                max_step=$step_num
+            fi
+        elif [[ $line == *"Task Failed ❌"* ]]; then
+            echo "Result: ❌ Failed" >> "$summary_file"
+            echo "Steps completed: $max_step" >> "$summary_file"
+            if [[ $line == *";"* ]]; then
+                failure_reason=$(echo "$line" | sed 's/.*; //')
+                echo "Task description: $failure_reason" >> "$summary_file"
+            fi
+            max_step=0
+        elif [[ $line == *"Task Passed ✅"* ]]; then
+            echo "Result: ✅ Passed" >> "$summary_file"
+            echo "Steps completed: $max_step" >> "$summary_file"
+            if [[ $line == *";"* ]]; then
+                success_info=$(echo "$line" | sed 's/.*; //')
+                echo "Task description: $success_info" >> "$summary_file"
+            fi
+            max_step=0
+        elif [[ $line == *"Agent did not indicate task is done"* ]]; then
+            echo "Reason: Agent reached max steps without completing task" >> "$summary_file"
         fi
+    done < "$output_file"
+    
+    # Add final statistics from the table if available
+    if grep -A 10 "mean_success_rate" "$output_file" > /dev/null 2>&1; then
+        echo "" >> "$summary_file"
+        echo "SUMMARY STATISTICS:" >> "$summary_file"
+        echo "==================" >> "$summary_file"
+        grep -A 20 "mean_success_rate" "$output_file" | head -10 >> "$summary_file"
+    fi
+    
+    # Count total tasks and success rate
+    local total_tasks=$(grep -c "Running.*task:" "$output_file" 2>/dev/null | tr -d '\n' || echo "0")
+    local passed_tasks=$(grep -c "Task Passed ✅" "$output_file" 2>/dev/null | tr -d '\n' || echo "0")
+    local failed_tasks=$(grep -c "Task Failed ❌" "$output_file" 2>/dev/null | tr -d '\n' || echo "0")
+    
+    # Ensure variables are clean numbers
+    total_tasks=$(echo "$total_tasks" | tr -d ' \n\r')
+    passed_tasks=$(echo "$passed_tasks" | tr -d ' \n\r')
+    failed_tasks=$(echo "$failed_tasks" | tr -d ' \n\r')
+    
+    # Set defaults if empty or non-numeric
+    total_tasks=${total_tasks:-0}
+    passed_tasks=${passed_tasks:-0}
+    failed_tasks=${failed_tasks:-0}
+    
+    # Validate they are actually numbers
+    if ! [[ "$total_tasks" =~ ^[0-9]+$ ]]; then total_tasks=0; fi
+    if ! [[ "$passed_tasks" =~ ^[0-9]+$ ]]; then passed_tasks=0; fi
+    if ! [[ "$failed_tasks" =~ ^[0-9]+$ ]]; then failed_tasks=0; fi
+    
+    if [ "$total_tasks" -gt 0 ]; then
+        echo "" >> "$summary_file"
+        echo "OVERALL SUMMARY:" >> "$summary_file"
+        echo "===============" >> "$summary_file"
+        echo "Total tasks run: $total_tasks" >> "$summary_file"
+        echo "Tasks passed: $passed_tasks" >> "$summary_file"
+        echo "Tasks failed: $failed_tasks" >> "$summary_file"
+        
+        # Calculate success rate safely
+        local success_rate=0
+        if [ "$total_tasks" -gt 0 ] && [ "$passed_tasks" -ge 0 ]; then
+            success_rate=$(echo "$passed_tasks $total_tasks" | awk '{if ($2 > 0) printf "%.0f", ($1 * 100) / $2; else print "0"}')
+        fi
+        echo "Success rate: ${success_rate}%" >> "$summary_file"
     fi
     
     echo "" >> "$summary_file"
-    echo "Full output saved to: benchmark_output_$timestamp.log" >> "$summary_file"
+    echo "Full output saved to: benchmark_output.log" >> "$summary_file"
     
-    # Copy full output
-    cp "$output_file" "$runs_dir/benchmark_output_$timestamp.log"
+    # Copy full output to the same subfolder
+    cp "$output_file" "$full_log_file"
     
-    echo "✅ Results saved:"
-    echo "   📄 Summary: $summary_file"
-    echo "   📋 Full log: $runs_dir/benchmark_output_$timestamp.log"
+    echo "✅ Results saved in subfolder: $run_subfolder"
+    echo "   📄 Summary: benchmark_summary.txt"
+    echo "   📋 Full log: benchmark_output.log"
 }
 
 # Activate conda environment
@@ -217,21 +272,11 @@ if [ "$MODE" = "fast" ]; then
     fi
 else
     echo "🎯 Running full benchmark with RandomAgent..."
-    if [ -n "$SPECIFIC_TASK" ]; then
-        echo "   Task: $SPECIFIC_TASK"
-        python run.py \
-            --suite_family=android_world \
-            --agent_name=random_agent \
-            --tasks="$SPECIFIC_TASK" \
-            --n_task_combinations=1 2>&1 | tee "$TEMP_OUTPUT"
-    else
-        echo "   Tasks: ContactsAddContact, ClockStopWatchRunning"
-        python run.py \
-            --suite_family=android_world \
-            --agent_name=random_agent \
-            --tasks=ContactsAddContact,ClockStopWatchRunning \
-            --n_task_combinations=1 2>&1 | tee "$TEMP_OUTPUT"
-    fi
+    python run.py \
+        --suite_family=android_world \
+        --agent_name=random_agent \
+        --n_task_combinations=1 2>&1 | tee "$TEMP_OUTPUT"
+        #Zum beispiel : Parameter = 3 => with 116 tasks × 3 combinations = 348 total task instances to run!
 fi
 
 # Parse and save results
