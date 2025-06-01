@@ -23,3 +23,6 @@ poetry.lock
 
 # PyCharm
 .idea
+
+runs/
+*_pb2.py
