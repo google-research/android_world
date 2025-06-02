@@ -29,6 +29,8 @@ from google.generativeai.types import safety_types
 import numpy as np
 from PIL import Image
 import requests
+from dotenv import load_dotenv
+load_dotenv()
 
 
 ERROR_CALLING_LLM = 'Error calling LLM'

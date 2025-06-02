@@ -104,7 +104,7 @@ def _main() -> None:
   params = task_type.generate_random_params()
   task = task_type(params)
   task.initialize_task(env)
-  agent = t3a.T3A(env, infer.Gpt4Wrapper('gpt-4-turbo-2024-04-09'))
+  agent = t3a.T3A(env, infer.GeminiGcpWrapper("gemini-2.0-flash"))
 
   print('Goal: ' + str(task.goal))
   is_done = False
