@@ -23,6 +23,7 @@ jobs:
     # Install AndroidWorld
     - name: Install AndroidWorld
       run: |
+        mv pyproject.toml pyproject.toml.bak || true
         pip install -r requirements.txt
         python setup.py install
 
@@ -52,3 +53,7 @@ jobs:
         PYTHONPATH: ${{ env.PYTHONPATH }}
       run: |
         pytest -vv -n auto --ignore=android_env
+
+    - name: Rename pyproject.toml
+      run: |
+        mv pyproject.toml.bak pyproject.toml || true

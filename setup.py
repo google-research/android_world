@@ -68,12 +68,17 @@ class _BuildPy(build_py.build_py):
     self.run_command('generate_protos')
     super().run()
 
+_GRPCIO_TOOLS_VERSION = '1.71.0'
+_PROTOBUF_VERSION = '5.29.5'
 
 setuptools.setup(
     name='android_world',
-    package_data={'': ['proto/*.proto']},  # Copy protobuf files.
+    package_data={'': ['proto/*.proto']},
     packages=setuptools.find_packages(),
-    setup_requires=['grpcio-tools'],
+    setup_requires=[f'grpcio-tools=={_GRPCIO_TOOLS_VERSION}'],
+    install_requires=[
+        f'protobuf=={_PROTOBUF_VERSION}',
+    ],
     cmdclass={
         'build_py': _BuildPy,
         'generate_protos': _GenerateProtoFiles,

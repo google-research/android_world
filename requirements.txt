@@ -3,7 +3,8 @@ android_env==1.2.3
 dm_env==1.6
 fuzzywuzzy==0.18.0
 google-generativeai
-grpcio-tools
+grpcio-tools==1.71.0
+protobuf==5.29.5
 immutabledict==2.0.0
 IPython
 jsonschema==4.17.3
