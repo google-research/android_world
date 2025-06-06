@@ -82,6 +82,25 @@ def execute_adb_action(
         click_action.action_type = 'click'
         execute_adb_action(click_action, screen_elements, screen_size, env)
         time.sleep(1.0)
+
+      if action.clear_text:
+        # Select all existing text and delete it.
+        adb_utils.issue_generic_request(
+            [
+                'shell',
+                'input',
+                'keycombination',
+                '113',
+                '29',
+                '&&',
+                'input',
+                'keyevent',
+                '67',
+            ],
+            env,
+        )
+        time.sleep(1.0)
+
       adb_utils.type_text(text, env, timeout_sec=10)
       adb_utils.press_enter_button(env)
     else:

@@ -100,6 +100,7 @@ class JSONAction:
       UI elements (like large textareas) that can't be accessed or controlled by
       simply taping, ensuring precise control over navigation and selection in
       the interface.
+    clear_text: Whether to clear the text field before typing.
   """
 
   action_type: Optional[str] = None
@@ -111,6 +112,7 @@ class JSONAction:
   goal_status: Optional[str] = None
   app_name: Optional[str] = None
   keycode: Optional[str] = None
+  clear_text: Optional[bool] = None
 
   def __post_init__(self):
     if self.action_type not in _ACTION_TYPES:

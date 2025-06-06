@@ -163,6 +163,9 @@ class ExecuteAdbActionTest(absltest.TestCase):
         mock.patch.object(
             adb_utils, 'press_enter_button'
         ) as mock_press_enter_button,
+        mock.patch.object(
+            adb_utils, 'issue_generic_request'
+        ) as mock_issue_generic_request,
     ):
       actuation.execute_adb_action(
           action, self.screen_elements, self.screen_size, self.mock_env
@@ -172,6 +175,34 @@ class ExecuteAdbActionTest(absltest.TestCase):
           'test input', self.mock_env, timeout_sec=10
       )
       mock_press_enter_button.assert_called_once_with(self.mock_env)
+      mock_issue_generic_request.assert_not_called()
+
+  def test_input_text_with_clear_text(self):
+    action = json_action.JSONAction(
+        action_type='input_text', text='test input', x=50, y=50, clear_text=True
+    )
+    with (
+        mock.patch.object(
+            adb_utils, 'issue_generic_request'
+        ) as mock_issue_generic_request,
+    ):
+      actuation.execute_adb_action(
+          action, self.screen_elements, self.screen_size, self.mock_env
+      )
+      mock_issue_generic_request.assert_called_once_with(
+          [
+              'shell',
+              'input',
+              'keycombination',
+              '113',
+              '29',
+              '&&',
+              'input',
+              'keyevent',
+              '67',
+          ],
+          self.mock_env,
+      )
 
   def test_scroll(self):
     action = json_action.JSONAction(action_type='scroll', direction='down')
