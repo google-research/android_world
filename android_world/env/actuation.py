@@ -92,25 +92,30 @@ def execute_adb_action(
 
   elif action.action_type == 'fill_form':
     form = action.form
-    print(f'Filling form with {len(form)} fields.')
-    print('Form fields:', form)
     for field in form:
       text = field['text']
       if text:
-        if field['index'] is not None or (
-            field['x'] is not None and field['y'] is not None
-        ):
+        if field['index'] is not None:
           input_text_action = json_action.JSONAction(
               action_type='input_text',
               text=text,
-              index=field.get('index'),
-              x=field.get('x'),
-              y=field.get('y'),
+              index=field['index'],
           )
 
           execute_adb_action(
               input_text_action, screen_elements, screen_size, env
           )
+
+          hide_keyboard_action = json_action.JSONAction(
+              action_type='press_keyboard',
+              keycode='KEYCODE_ESCAPE',  # KEYCODE_BACK
+          )
+          execute_adb_action(
+              hide_keyboard_action, screen_elements, screen_size, env
+          )
+
+          # Wait for the keyboard to hide.
+          time.sleep(2.0)
         else:
           logging.warning(
               'Fill_form action indicated, but no text, index or coordinates provided.'

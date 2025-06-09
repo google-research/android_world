@@ -27,6 +27,7 @@ DOUBLE_TAP = 'double_tap'
 INPUT_TEXT = 'input_text'
 FILL_FORM = 'fill_form'
 KEYBOARD_ENTER = 'keyboard_enter'
+PRESS_KEYBOARD = 'press_keyboard'
 LONG_PRESS = 'long_press'
 NAVIGATE_BACK = 'navigate_back'
 NAVIGATE_HOME = 'navigate_home'
@@ -47,6 +48,7 @@ _ACTION_TYPES = (
     NAVIGATE_HOME,
     NAVIGATE_BACK,
     KEYBOARD_ENTER,
+    PRESS_KEYBOARD,
     OPEN_APP,
     STATUS,
     WAIT,
