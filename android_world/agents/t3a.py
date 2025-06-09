@@ -57,6 +57,13 @@ PROMPT_PREFIX = (
     ' the enter, so no need to click on the target field to start:'
     ' `{{"action_type": "input_text", "text": <text_input>, "index":'
     ' <target_index>}}`\n'
+    '- Fill out a form by typing text into multiple editable text fields'
+    '(each field specified by its index or coordinates and the text to input).'
+    'For each field, the agent will click the field (if index or coordinates are provided),'
+    'type the text, and press enter. You do not need to click the fields separately'
+    'before typing. Example format:\n `{{"action_type": "fill_form",'
+    '"form": [{{"text": <text_input_1>, "index": <target_index_1>}},'
+    '{{"text": <text_input_2>, "index": <target_index_2>}}]}}`\n'
     '- Press the Enter key: `{{"action_type": "keyboard_enter"}}`\n'
     '- Navigate to the home screen: `{{"action_type": "navigate_home"}}`\n'
     '- Navigate back: `{{"action_type": "navigate_back"}}`\n'
@@ -98,7 +105,7 @@ GUIDANCE = (
     ' something (including password) instead of clicking characters on the'
     ' keyboard one by one. Sometimes there is some default text in the text'
     ' field you want to type in, remember to delete them before typing.\n'
-    '- For `click`, `long_press` and `input_text`, the index parameter you'
+    '- For `click`, `long_press`, `input_text` and `fill_form`, the index parameter you'
     ' pick must be VISIBLE in the screenshot and also in the UI element'
     ' list given to you (some elements in the list may NOT be visible on'
     ' the screen so you can not interact with them).\n'
@@ -109,6 +116,13 @@ GUIDANCE = (
     ' bottom, the `scroll` direction should be set to "down". It has been'
     ' observed that you have difficulties in choosing the correct direction, so'
     ' if one does not work, try the opposite as well.\n'
+    '- Use the `fill_form` action whenever you want to fill out multiple text'
+    'fields. For each field, specify the text to input and either'
+    'the index or coordinates of the field. The agent will automatically click'
+    'the field (if index or coordinates are provided), type the text, and press'
+    'enter for each field—there is no need to click the fields separately before'
+    'typing. Make sure each field in the form is specified as a dictionary with'
+    'a "text" key and either an "index" or both "x" and "y" keys.\n'
     'Text Related Operations\n'
     '- Normally to select some text on the screen: <i> Enter text selection'
     ' mode by long pressing the area where the text is, then some of the words'
@@ -374,6 +388,7 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
       converted_action = json_action.JSONAction(
           **agent_utils.extract_json(action),
       )
+      print('Converted action: ' + str(converted_action))
     except Exception as e:  # pylint: disable=broad-exception-caught
       print('Failed to convert the output to a valid action.')
       print(str(e))

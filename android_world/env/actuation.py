@@ -90,6 +90,33 @@ def execute_adb_action(
           'action will be executed.'
       )
 
+  elif action.action_type == 'fill_form':
+    form = action.form
+    print(f'Filling form with {len(form)} fields.')
+    print('Form fields:', form)
+    for field in form:
+      text = field['text']
+      if text:
+        if field['index'] is not None or (
+            field['x'] is not None and field['y'] is not None
+        ):
+          input_text_action = json_action.JSONAction(
+              action_type='input_text',
+              text=text,
+              index=field.get('index'),
+              x=field.get('x'),
+              y=field.get('y'),
+          )
+
+          execute_adb_action(
+              input_text_action, screen_elements, screen_size, env
+          )
+        else:
+          logging.warning(
+              'Fill_form action indicated, but no text, index or coordinates provided.'
+              ' No action will be executed.'
+          )
+
   elif action.action_type == 'keyboard_enter':
     adb_utils.press_enter_button(env)
 

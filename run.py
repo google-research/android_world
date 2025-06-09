@@ -168,7 +168,7 @@ def _get_agent(
     )
   elif _AGENT_NAME.value == 't3a_gemini_gcp':
     agent = t3a.T3A(
-        env, infer.GeminiGcpWrapper(model_name='gemini-2.0-flash')
+        env, infer.GeminiGcpWrapper(model_name='gemini-1.5-flash')
     )
   # GPT.
   elif _AGENT_NAME.value == 't3a_gpt4':

@@ -288,6 +288,19 @@ def extract_json(s: str) -> Optional[dict[str, Any]]:
   Returns:
     JSON object.
   """
+  if '"action_type": "fill_form"' in s:
+    # Try to extract the JSON object using a greedy match for the outermost braces
+    first = s.find('{')
+    last = s.rfind('}')
+    if first != -1 and last != -1:
+      json_str = s[first:last+1]
+      try:
+        return json.loads(json_str)
+      except Exception as error:
+        print(f'Cannot extract fill_form JSON, error: {error}')
+        return None
+  # Default behavior
+
   pattern = r'\{.*?\}'
   match = re.search(pattern, s, re.DOTALL)
   if match:
@@ -295,6 +308,7 @@ def extract_json(s: str) -> Optional[dict[str, Any]]:
       return ast.literal_eval(match.group())
     except (SyntaxError, ValueError) as error:
       print(f'Cannot extract JSON, skipping due to error {error}')
+      print('come from m3a_utils.extract_json')
       return None
   else:
     print(f'No JSON match in {s}')

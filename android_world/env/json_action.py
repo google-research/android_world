@@ -25,6 +25,7 @@ ANSWER = 'answer'
 CLICK = 'click'
 DOUBLE_TAP = 'double_tap'
 INPUT_TEXT = 'input_text'
+FILL_FORM = 'fill_form'
 KEYBOARD_ENTER = 'keyboard_enter'
 LONG_PRESS = 'long_press'
 NAVIGATE_BACK = 'navigate_back'
@@ -42,6 +43,7 @@ _ACTION_TYPES = (
     SCROLL,
     SWIPE,
     INPUT_TEXT,
+    FILL_FORM,
     NAVIGATE_HOME,
     NAVIGATE_BACK,
     KEYBOARD_ENTER,
@@ -100,6 +102,7 @@ class JSONAction:
       UI elements (like large textareas) that can't be accessed or controlled by
       simply taping, ensuring precise control over navigation and selection in
       the interface.
+    form: A list of field actions for fill_form actions.
   """
 
   action_type: Optional[str] = None
@@ -111,6 +114,7 @@ class JSONAction:
   goal_status: Optional[str] = None
   app_name: Optional[str] = None
   keycode: Optional[str] = None
+  form: Optional[list] = None
 
   def __post_init__(self):
     if self.action_type not in _ACTION_TYPES:
@@ -125,6 +129,20 @@ class JSONAction:
       self.text = str(self.text)
     if self.keycode is not None and not self.keycode.startswith('KEYCODE_'):
       raise ValueError(f'Invalid keycode: {self.keycode}')
+    if self.action_type == 'fill_form' and self.form is not None:
+      if not isinstance(self.form, list):
+        raise ValueError('form must be a list of field actions for fill_form.')
+      for field in self.form:
+        # Each field must be a dict with 'text' and either 'index' or both 'x' and 'y'.
+        if not isinstance(field, dict):
+          raise ValueError('Each field in form must be a dict with required keys.')
+        if 'text' not in field:
+          raise ValueError('Each field in form must have a "text" key.')
+        if not (('index' in field) or (('x' in field) and ('y' in field))):
+          raise ValueError('Each field in form must have either an "index" or both "x" and "y" keys.')
+        # Optionally, cast index to int if present
+        if 'index' in field and field['index'] is not None:
+          field['index'] = int(field['index'])
 
   def __repr__(self) -> str:
     properties = []
