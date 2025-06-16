@@ -1,0 +1,825 @@
+[UIElement(text=None, content_description=None, class_name='android.widget.ScrollView', bbox=None, bbox_pixels=BoundingBox(x_min=0, x_max=1080, y_min=0, y_max=2400), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=True, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/workspace', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Home', class_name='android.view.View', bbox=None, bbox_pixels=BoundingBox(x_min=0, x_max=1080, y_min=128, y_max=2337), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Phone', content_description='Phone', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=76, x_max=249, y_min=1873, y_max=2068), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Messages', content_description='Messages', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=328, x_max=501, y_min=1873, y_max=2068), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Chrome', content_description='Chrome', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=580, x_max=753, y_min=1873, y_max=2068), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Gmail', content_description='Predicted app: Gmail', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=832, x_max=1004, y_min=1873, y_max=2068), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Search', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=75, x_max=1004, y_min=2125, y_max=2290), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/search_container_hotseat', tooltip=None, resource_id=None, metadata=None), UIElement(text='Sun, Oct 15', content_description='Sun, Oct 15', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=57, x_max=1023, y_min=292, y_max=354), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/date', tooltip=None, resource_id=None, metadata=None), UIElement(text='Markor', content_description='Markor', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=309, x_max=519, y_min=1165, y_max=1437), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Pro Expense', content_description='Pro Expense', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=57, x_max=267, y_min=1479, y_max=1751), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Gmail', content_description='Gmail', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=309, x_max=519, y_min=1479, y_max=1751), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Photos', content_description='Photos', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=561, x_max=771, y_min=1479, y_max=1751), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='YouTube', content_description='YouTube', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=813, x_max=1023, y_min=1479, y_max=1751), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=True, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Google app', class_name='android.widget.ImageView', bbox=None, bbox_pixels=BoundingBox(x_min=86, x_max=212, y_min=2144, y_max=2270), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/g_icon', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Voice search', class_name='android.widget.ImageView', bbox=None, bbox_pixels=BoundingBox(x_min=741, x_max=867, y_min=2125, y_max=2290), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/mic_icon', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Google Lens', class_name='android.widget.ImageButton', bbox=None, bbox_pixels=BoundingBox(x_min=867, x_max=993, y_min=2125, y_max=2290), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/lens_icon', tooltip=None, resource_id=None, metadata=None), UIElement(text='15:34', content_description='17:34', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=50, x_max=148, y_min=1, y_max=128), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/clock', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Wifi signal full.,No internet', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=885, x_max=931, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/wifi_combo', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Phone two bars.', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=931, x_max=970, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/mobile_combo', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Battery 100 percent.', class_name='android.widget.LinearLayout', bbox=None, bbox_pixels=BoundingBox(x_min=986, x_max=1006, y_min=1, y_max=128), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/battery', tooltip=None, resource_id=None, metadata=None)]
+Filtered out: index0 UIElement(text=None, content_description=None, class_name='android.widget.ScrollView', bbox=None, bbox_pixels=BoundingBox(x_min=0, x_max=1080, y_min=0, y_max=2400), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=True, is_selected=False, is_visible=True, package_name='com.google.android.apps.nexuslauncher', resource_name='com.google.android.apps.nexuslauncher:id/workspace', tooltip=None, resource_id=None, metadata=None)
+Filtered out: index17 UIElement(text=None, content_description='Wifi signal full.,No internet', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=885, x_max=931, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/wifi_combo', tooltip=None, resource_id=None, metadata=None)
+Filtered out: index18 UIElement(text=None, content_description='Phone two bars.', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=931, x_max=970, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/mobile_combo', tooltip=None, resource_id=None, metadata=None)
+Filtered out: index19 UIElement(text=None, content_description='Battery 100 percent.', class_name='android.widget.LinearLayout', bbox=None, bbox_pixels=BoundingBox(x_min=986, x_max=1006, y_min=1, y_max=128), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/battery', tooltip=None, resource_id=None, metadata=None)
+## UI Summary
+        This mobile screen displays a home screen showing the date and time at the top, followed by app shortcuts (e.g., Markor, Pro Expense, Gmail, Photos, YouTube) and a bottom dock with icons for Phone, Messages, Chrome, and Gmail, along with a search bar containing a Google app icon, a voice search icon, and a Google Lens icon.  The layout is primarily vertical, with app shortcuts arranged in a grid-like structure.
+
+        ## UI Elements (JSON)
+        [
+  {
+    "index": 1,
+    "type": "View",
+    "label": "Home",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 0,
+      "x_max": 1080,
+      "y_min": 128,
+      "y_max": 2337
+    }
+  },
+  {
+    "index": 2,
+    "type": "TextView",
+    "label": "Phone",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 76,
+      "x_max": 249,
+      "y_min": 1873,
+      "y_max": 2068
+    },
+    "likely_field": "phone"
+  },
+  {
+    "index": 3,
+    "type": "TextView",
+    "label": "Messages",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 328,
+      "x_max": 501,
+      "y_min": 1873,
+      "y_max": 2068
+    }
+  },
+  {
+    "index": 4,
+    "type": "TextView",
+    "label": "Chrome",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 580,
+      "x_max": 753,
+      "y_min": 1873,
+      "y_max": 2068
+    }
+  },
+  {
+    "index": 5,
+    "type": "TextView",
+    "label": "Gmail",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 832,
+      "x_max": 1004,
+      "y_min": 1873,
+      "y_max": 2068
+    }
+  },
+  {
+    "index": 6,
+    "type": "FrameLayout",
+    "label": "Search",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.google.android.apps.nexuslauncher:id/search_container_hotseat",
+    "position": {
+      "x_min": 75,
+      "x_max": 1004,
+      "y_min": 2125,
+      "y_max": 2290
+    },
+    "likely_field": "search"
+  },
+  {
+    "index": 7,
+    "type": "TextView",
+    "label": "Sun, Oct 15",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.google.android.apps.nexuslauncher:id/date",
+    "position": {
+      "x_min": 57,
+      "x_max": 1023,
+      "y_min": 292,
+      "y_max": 354
+    }
+  },
+  {
+    "index": 8,
+    "type": "TextView",
+    "label": "Markor",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 309,
+      "x_max": 519,
+      "y_min": 1165,
+      "y_max": 1437
+    }
+  },
+  {
+    "index": 9,
+    "type": "TextView",
+    "label": "Pro Expense",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 57,
+      "x_max": 267,
+      "y_min": 1479,
+      "y_max": 1751
+    }
+  },
+  {
+    "index": 10,
+    "type": "TextView",
+    "label": "Gmail",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 309,
+      "x_max": 519,
+      "y_min": 1479,
+      "y_max": 1751
+    }
+  },
+  {
+    "index": 11,
+    "type": "TextView",
+    "label": "Photos",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 561,
+      "x_max": 771,
+      "y_min": 1479,
+      "y_max": 1751
+    }
+  },
+  {
+    "index": 12,
+    "type": "TextView",
+    "label": "YouTube",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 813,
+      "x_max": 1023,
+      "y_min": 1479,
+      "y_max": 1751
+    }
+  },
+  {
+    "index": 13,
+    "type": "ImageView",
+    "label": "Google app",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.google.android.apps.nexuslauncher:id/g_icon",
+    "position": {
+      "x_min": 86,
+      "x_max": 212,
+      "y_min": 2144,
+      "y_max": 2270
+    }
+  },
+  {
+    "index": 14,
+    "type": "ImageView",
+    "label": "Voice search",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.google.android.apps.nexuslauncher:id/mic_icon",
+    "position": {
+      "x_min": 741,
+      "x_max": 867,
+      "y_min": 2125,
+      "y_max": 2290
+    },
+    "likely_field": "search"
+  },
+  {
+    "index": 15,
+    "type": "ImageButton",
+    "label": "Google Lens",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.google.android.apps.nexuslauncher:id/lens_icon",
+    "position": {
+      "x_min": 867,
+      "x_max": 993,
+      "y_min": 2125,
+      "y_max": 2290
+    }
+  },
+  {
+    "index": 16,
+    "type": "TextView",
+    "label": "15:34",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.android.systemui:id/clock",
+    "position": {
+      "x_min": 50,
+      "x_max": 148,
+      "y_min": 1,
+      "y_max": 128
+    }
+  }
+]
+        
+[UIElement(text=None, content_description=None, class_name='android.widget.ImageButton', bbox=None, bbox_pixels=BoundingBox(x_min=891, x_max=1038, y_min=2106, y_max=2253), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/fb_main_add', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description=None, class_name='android.widget.ImageButton', bbox=None, bbox_pixels=BoundingBox(x_min=0, x_max=147, y_min=128, y_max=275), hint_text=None, is_checked=False, is_checkable=False, is_clickable=True, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text='Home', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=189, x_max=334, y_min=166, y_max=237), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name=None, tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description=None, class_name='androidx.recyclerview.widget.RecyclerView', bbox=None, bbox_pixels=BoundingBox(x_min=0, x_max=1080, y_min=275, y_max=2337), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=True, is_long_clickable=False, is_scrollable=True, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/rv_home', tooltip=None, resource_id=None, metadata=None), UIElement(text='Totals', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=63, x_max=193, y_min=338, y_max=401), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_expense_in_out_title', tooltip=None, resource_id=None, metadata=None), UIElement(text='OCT 15 - 22', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=63, x_max=275, y_min=412, y_max=480), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_date_range', tooltip=None, resource_id=None, metadata=None), UIElement(text='INCOME', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=105, x_max=230, y_min=522, y_max=558), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_income', tooltip=None, resource_id=None, metadata=None), UIElement(text='0', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=105, x_max=140, y_min=558, y_max=647), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_income_value', tooltip=None, resource_id=None, metadata=None), UIElement(text='USD', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=140, x_max=210, y_min=576, y_max=627), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_income_symobol', tooltip=None, resource_id=None, metadata=None), UIElement(text='OUTCOME', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=105, x_max=259, y_min=689, y_max=725), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_outcome', tooltip=None, resource_id=None, metadata=None), UIElement(text='0', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=105, x_max=140, y_min=725, y_max=814), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_outcome_value', tooltip=None, resource_id=None, metadata=None), UIElement(text='USD', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=140, x_max=210, y_min=743, y_max=794), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_outcome_symbol', tooltip=None, resource_id=None, metadata=None), UIElement(text='Expenses in this Week', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=63, x_max=532, y_min=961, y_max=1024), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_title', tooltip=None, resource_id=None, metadata=None), UIElement(text='OCT 15 - 22', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=63, x_max=275, y_min=1035, y_max=1103), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_date_range', tooltip=None, resource_id=None, metadata=None), UIElement(text='Recent', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=63, x_max=210, y_min=1628, y_max=1691), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_recent_lists', tooltip=None, resource_id=None, metadata=None), UIElement(text='Rent Payment', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=763, y_min=1754, y_max=1811), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_name', tooltip=None, resource_id=None, metadata=None), UIElement(text='Yesterday 8:00 AM', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=555, y_min=1813, y_max=1856), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_date', tooltip=None, resource_id=None, metadata=None), UIElement(text='145.51', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=784, x_max=913, y_min=1774, y_max=1840), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_amount', tooltip=None, resource_id=None, metadata=None), UIElement(text='USD', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=924, x_max=996, y_min=1769, y_max=1840), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_currency_symbol', tooltip=None, resource_id=None, metadata=None), UIElement(text='Cleaning Services', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=759, y_min=1940, y_max=1997), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_name', tooltip=None, resource_id=None, metadata=None), UIElement(text='2023 Oct 8', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=436, y_min=1999, y_max=2042), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_date', tooltip=None, resource_id=None, metadata=None), UIElement(text='139.72', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=780, x_max=913, y_min=1960, y_max=2026), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_amount', tooltip=None, resource_id=None, metadata=None), UIElement(text='USD', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=924, x_max=996, y_min=1955, y_max=2026), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_currency_symbol', tooltip=None, resource_id=None, metadata=None), UIElement(text='Taxi Fare', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=758, y_min=2126, y_max=2183), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_name', tooltip=None, resource_id=None, metadata=None), UIElement(text='2023 Oct 6', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=436, y_min=2185, y_max=2228), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_date', tooltip=None, resource_id=None, metadata=None), UIElement(text='312.39', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=779, x_max=913, y_min=2146, y_max=2212), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_amount', tooltip=None, resource_id=None, metadata=None), UIElement(text='USD', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=924, x_max=996, y_min=2141, y_max=2212), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_currency_symbol', tooltip=None, resource_id=None, metadata=None), UIElement(text='Shoes', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=270, x_max=757, y_min=2312, y_max=2337), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_name', tooltip=None, resource_id=None, metadata=None), UIElement(text='216.47', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=778, x_max=913, y_min=2332, y_max=2337), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_amount', tooltip=None, resource_id=None, metadata=None), UIElement(text='USD', content_description=None, class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=924, x_max=996, y_min=2327, y_max=2337), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.arduia.expense', resource_name='com.arduia.expense:id/tv_currency_symbol', tooltip=None, resource_id=None, metadata=None), UIElement(text='15:34', content_description='17:34', class_name='android.widget.TextView', bbox=None, bbox_pixels=BoundingBox(x_min=50, x_max=148, y_min=1, y_max=128), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/clock', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Wifi signal full.,No internet', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=885, x_max=931, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/wifi_combo', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Phone one bar.', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=931, x_max=970, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/mobile_combo', tooltip=None, resource_id=None, metadata=None), UIElement(text=None, content_description='Battery 100 percent.', class_name='android.widget.LinearLayout', bbox=None, bbox_pixels=BoundingBox(x_min=986, x_max=1006, y_min=1, y_max=128), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/battery', tooltip=None, resource_id=None, metadata=None)]
+Filtered out: index31 UIElement(text=None, content_description='Wifi signal full.,No internet', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=885, x_max=931, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/wifi_combo', tooltip=None, resource_id=None, metadata=None)
+Filtered out: index32 UIElement(text=None, content_description='Phone one bar.', class_name='android.widget.FrameLayout', bbox=None, bbox_pixels=BoundingBox(x_min=931, x_max=970, y_min=35, y_max=93), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/mobile_combo', tooltip=None, resource_id=None, metadata=None)
+Filtered out: index33 UIElement(text=None, content_description='Battery 100 percent.', class_name='android.widget.LinearLayout', bbox=None, bbox_pixels=BoundingBox(x_min=986, x_max=1006, y_min=1, y_max=128), hint_text=None, is_checked=False, is_checkable=False, is_clickable=False, is_editable=False, is_enabled=True, is_focused=False, is_focusable=False, is_long_clickable=False, is_scrollable=False, is_selected=False, is_visible=True, package_name='com.android.systemui', resource_name='com.android.systemui:id/battery', tooltip=None, resource_id=None, metadata=None)
+## UI Summary
+        This mobile screen displays a summary of weekly expenses for the period of October 15th–22nd, showing income, outcome totals, and a scrollable list of recent expenses with details like item, date, and amount in USD.  The screen is structured with a header showing the time, followed by expense summaries, and a list of recent transactions below.
+
+        ## UI Elements (JSON)
+        [
+  {
+    "index": 0,
+    "type": "ImageButton",
+    "label": "<no label>",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/fb_main_add",
+    "position": {
+      "x_min": 891,
+      "x_max": 1038,
+      "y_min": 2106,
+      "y_max": 2253
+    }
+  },
+  {
+    "index": 1,
+    "type": "ImageButton",
+    "label": "<no label>",
+    "hint": "",
+    "clickable": true,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 0,
+      "x_max": 147,
+      "y_min": 128,
+      "y_max": 275
+    }
+  },
+  {
+    "index": 2,
+    "type": "TextView",
+    "label": "Home",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": null,
+    "position": {
+      "x_min": 189,
+      "x_max": 334,
+      "y_min": 166,
+      "y_max": 237
+    }
+  },
+  {
+    "index": 3,
+    "type": "RecyclerView",
+    "label": "<no label>",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": true,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/rv_home",
+    "position": {
+      "x_min": 0,
+      "x_max": 1080,
+      "y_min": 275,
+      "y_max": 2337
+    }
+  },
+  {
+    "index": 4,
+    "type": "TextView",
+    "label": "Totals",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_expense_in_out_title",
+    "position": {
+      "x_min": 63,
+      "x_max": 193,
+      "y_min": 338,
+      "y_max": 401
+    }
+  },
+  {
+    "index": 5,
+    "type": "TextView",
+    "label": "OCT 15 - 22",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_date_range",
+    "position": {
+      "x_min": 63,
+      "x_max": 275,
+      "y_min": 412,
+      "y_max": 480
+    }
+  },
+  {
+    "index": 6,
+    "type": "TextView",
+    "label": "INCOME",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_income",
+    "position": {
+      "x_min": 105,
+      "x_max": 230,
+      "y_min": 522,
+      "y_max": 558
+    }
+  },
+  {
+    "index": 7,
+    "type": "TextView",
+    "label": "0",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_income_value",
+    "position": {
+      "x_min": 105,
+      "x_max": 140,
+      "y_min": 558,
+      "y_max": 647
+    }
+  },
+  {
+    "index": 8,
+    "type": "TextView",
+    "label": "USD",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_income_symobol",
+    "position": {
+      "x_min": 140,
+      "x_max": 210,
+      "y_min": 576,
+      "y_max": 627
+    }
+  },
+  {
+    "index": 9,
+    "type": "TextView",
+    "label": "OUTCOME",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_outcome",
+    "position": {
+      "x_min": 105,
+      "x_max": 259,
+      "y_min": 689,
+      "y_max": 725
+    }
+  },
+  {
+    "index": 10,
+    "type": "TextView",
+    "label": "0",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_outcome_value",
+    "position": {
+      "x_min": 105,
+      "x_max": 140,
+      "y_min": 725,
+      "y_max": 814
+    }
+  },
+  {
+    "index": 11,
+    "type": "TextView",
+    "label": "USD",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_outcome_symbol",
+    "position": {
+      "x_min": 140,
+      "x_max": 210,
+      "y_min": 743,
+      "y_max": 794
+    }
+  },
+  {
+    "index": 12,
+    "type": "TextView",
+    "label": "Expenses in this Week",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_title",
+    "position": {
+      "x_min": 63,
+      "x_max": 532,
+      "y_min": 961,
+      "y_max": 1024
+    }
+  },
+  {
+    "index": 13,
+    "type": "TextView",
+    "label": "OCT 15 - 22",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_date_range",
+    "position": {
+      "x_min": 63,
+      "x_max": 275,
+      "y_min": 1035,
+      "y_max": 1103
+    }
+  },
+  {
+    "index": 14,
+    "type": "TextView",
+    "label": "Recent",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_recent_lists",
+    "position": {
+      "x_min": 63,
+      "x_max": 210,
+      "y_min": 1628,
+      "y_max": 1691
+    }
+  },
+  {
+    "index": 15,
+    "type": "TextView",
+    "label": "Rent Payment",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_name",
+    "position": {
+      "x_min": 270,
+      "x_max": 763,
+      "y_min": 1754,
+      "y_max": 1811
+    }
+  },
+  {
+    "index": 16,
+    "type": "TextView",
+    "label": "Yesterday 8:00 AM",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_date",
+    "position": {
+      "x_min": 270,
+      "x_max": 555,
+      "y_min": 1813,
+      "y_max": 1856
+    }
+  },
+  {
+    "index": 17,
+    "type": "TextView",
+    "label": "145.51",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_amount",
+    "position": {
+      "x_min": 784,
+      "x_max": 913,
+      "y_min": 1774,
+      "y_max": 1840
+    }
+  },
+  {
+    "index": 18,
+    "type": "TextView",
+    "label": "USD",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_currency_symbol",
+    "position": {
+      "x_min": 924,
+      "x_max": 996,
+      "y_min": 1769,
+      "y_max": 1840
+    }
+  },
+  {
+    "index": 19,
+    "type": "TextView",
+    "label": "Cleaning Services",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_name",
+    "position": {
+      "x_min": 270,
+      "x_max": 759,
+      "y_min": 1940,
+      "y_max": 1997
+    }
+  },
+  {
+    "index": 20,
+    "type": "TextView",
+    "label": "2023 Oct 8",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_date",
+    "position": {
+      "x_min": 270,
+      "x_max": 436,
+      "y_min": 1999,
+      "y_max": 2042
+    }
+  },
+  {
+    "index": 21,
+    "type": "TextView",
+    "label": "139.72",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_amount",
+    "position": {
+      "x_min": 780,
+      "x_max": 913,
+      "y_min": 1960,
+      "y_max": 2026
+    }
+  },
+  {
+    "index": 22,
+    "type": "TextView",
+    "label": "USD",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_currency_symbol",
+    "position": {
+      "x_min": 924,
+      "x_max": 996,
+      "y_min": 1955,
+      "y_max": 2026
+    }
+  },
+  {
+    "index": 23,
+    "type": "TextView",
+    "label": "Taxi Fare",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_name",
+    "position": {
+      "x_min": 270,
+      "x_max": 758,
+      "y_min": 2126,
+      "y_max": 2183
+    }
+  },
+  {
+    "index": 24,
+    "type": "TextView",
+    "label": "2023 Oct 6",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_date",
+    "position": {
+      "x_min": 270,
+      "x_max": 436,
+      "y_min": 2185,
+      "y_max": 2228
+    }
+  },
+  {
+    "index": 25,
+    "type": "TextView",
+    "label": "312.39",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_amount",
+    "position": {
+      "x_min": 779,
+      "x_max": 913,
+      "y_min": 2146,
+      "y_max": 2212
+    }
+  },
+  {
+    "index": 26,
+    "type": "TextView",
+    "label": "USD",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_currency_symbol",
+    "position": {
+      "x_min": 924,
+      "x_max": 996,
+      "y_min": 2141,
+      "y_max": 2212
+    }
+  },
+  {
+    "index": 27,
+    "type": "TextView",
+    "label": "Shoes",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_name",
+    "position": {
+      "x_min": 270,
+      "x_max": 757,
+      "y_min": 2312,
+      "y_max": 2337
+    }
+  },
+  {
+    "index": 28,
+    "type": "TextView",
+    "label": "216.47",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_amount",
+    "position": {
+      "x_min": 778,
+      "x_max": 913,
+      "y_min": 2332,
+      "y_max": 2337
+    }
+  },
+  {
+    "index": 29,
+    "type": "TextView",
+    "label": "USD",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.arduia.expense:id/tv_currency_symbol",
+    "position": {
+      "x_min": 924,
+      "x_max": 996,
+      "y_min": 2327,
+      "y_max": 2337
+    }
+  },
+  {
+    "index": 30,
+    "type": "TextView",
+    "label": "15:34",
+    "hint": "",
+    "clickable": false,
+    "editable": false,
+    "scrollable": false,
+    "visible": true,
+    "resource_name": "com.android.systemui:id/clock",
+    "position": {
+      "x_min": 50,
+      "x_max": 148,
+      "y_min": 1,
+      "y_max": 128
+    }
+  }
+]
+        
