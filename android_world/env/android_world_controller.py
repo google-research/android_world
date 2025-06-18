@@ -133,6 +133,9 @@ class A11yMethod(enum.Enum):
   # From `uiautomator dump``.
   UIAUTOMATOR = 'uiautomator'
 
+  # No A11y tree retrieval
+  NONE = 'none'
+
 
 def apply_a11y_forwarder_app_wrapper(
     env: env_interface.AndroidEnvInterface, install_a11y_forwarding_app: bool
@@ -228,10 +231,12 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
           self.get_a11y_forest(),
           exclude_invisible_elements=True,
       )
-    else:
+    elif self._a11y_method == A11yMethod.UIAUTOMATOR:
       return representation_utils.xml_dump_to_ui_elements(
           adb_utils.uiautomator_dump(self._env)
       )
+    else:
+      return []
 
   def _process_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
     """Adds a11y tree info to the observation."""
