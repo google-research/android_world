@@ -2,7 +2,7 @@
 
 FROM openjdk:18-jdk-slim
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /
 #=============================
@@ -14,7 +14,11 @@ RUN apt update && apt install -y curl sudo wget unzip bzip2 libdrm-dev libxkbcom
 #==============================
 # Android SDK ARGS
 #==============================
-ARG ARCH="x86_64"ARG TARGET="google_apis" ARG API_LEVEL="33"ARG BUILD_TOOLS="33.0.0"
+ARG ARCH="x86_64"
+ARG TARGET="google_apis"
+ARG API_LEVEL="33"
+ARG BUILD_TOOLS="33.0.0"
+ARG ANDROID_ARCH_DEFAULT="x86_64"
 ARG ANDROID_ARCH=${ANDROID_ARCH_DEFAULT}
 ARG ANDROID_API_LEVEL="android-${API_LEVEL}"
 ARG ANDROID_APIS="${TARGET};${ARCH}"
@@ -42,7 +46,8 @@ RUN wget https://dl.google.com/android/repository/${ANDROID_CMD} -P /tmp && \
 #============================================
 # Install required package using SDK manager
 #============================================
-RUN yes Y | sdkmanager --licensesRUN yes Y | sdkmanager --verbose --no_https ${ANDROID_SDK_PACKAGES}
+RUN yes Y | sdkmanager --licenses
+RUN yes Y | sdkmanager --verbose --no_https ${ANDROID_SDK_PACKAGES}
 #============================================
 # Create required emulator
 #============================================
