@@ -25,6 +25,7 @@ function check_hardware_acceleration() {
 
         if [[ $HW_ACCEL_SUPPORT == 0 ]]; then
             hw_accel_flag="-accel off"
+            echo "Warning: no accelerator found. This Docker image is experimental and has only been tested on linux devices with KVM enabled."
         else
             hw_accel_flag="-accel on"
         fi
