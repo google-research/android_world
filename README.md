@@ -1,5 +1,7 @@
 # AndroidWorld
 
+<!-- mdlint off(WHITESPACE_LINE_LENGTH) -->
+
 [![Unittests](https://github.com/google-research/android_world/actions/workflows/pytest.yml/badge.svg)](https://github.com/google-research/android_world/actions/workflows/pytest.yml)
 
 <p align="center">
@@ -125,6 +127,16 @@ ensure a consistent environment.
 3.  **Interact with the environment:**
     You can see the `scripts/run_suite_on_docker.py` script as an example client
     to interact with the Android environment server running in Docker.
+
+### Note for Apple Silicon users
+
+There are known [issues](https://github.com/amrsa1/Android-Emulator-image/issues/10) with installing the required package `emulator` on ARM chips (Apple Silicon). To get around this, if building images locally, you should build images for the AMD64/x86_64 instruction set, by running:
+```bash
+docker buildx build --platform linux/amd64 -t android-emulator:latest .
+```
+
+Note, running in a Docker container like this, on an Apple Silicon device will run quite slowly compared to running the Android
+Device and Emulator natively (because you end up running an Android Emulator inside a Linux Emulator...).
 
 ## Run the benchmark
 
