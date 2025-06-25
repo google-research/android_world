@@ -25,6 +25,7 @@ function check_hardware_acceleration() {
 
         if [[ $HW_ACCEL_SUPPORT == 0 ]]; then
             hw_accel_flag="-accel off"
+            echo "Warning: no accelerator found. This Docker image is experimental and has only been tested on linux devices with KVM enabled."
         else
             hw_accel_flag="-accel on"
         fi
@@ -71,7 +72,7 @@ function check_emulator_status () {
       printf "\e[K${G}==> \u2713 Emulator is ready : '$result'           ${NC}\n"
       adb devices -l
       adb shell input keyevent 82
-      break
+      return 0  # Return a 0 to indicate emulator has booted successfully
     elif [ "$result" == "" ]; then
       printf "${YE}==> Emulator is partially Booted! 😕 ${spinner[$i]} ${NC}\r"
     else
@@ -83,7 +84,7 @@ function check_emulator_status () {
     elapsed_time=$((current_time - start_time))
     if [ $elapsed_time -gt $timeout ]; then
       printf "${RED}==> Timeout after ${timeout} seconds elapsed 🕛.. ${NC}\n"
-      break
+      return 1 # Return a 1 to indicate failure if exceeded timeout
     fi
     sleep 4
   done
@@ -102,9 +103,15 @@ function hidden_policy() {
 
 launch_emulator
 sleep 2
-check_emulator_status
-sleep 1
-disable_animation
-sleep 1
-hidden_policy
-sleep 1
+
+if check_emulator_status; then
+  # Only run the below if the emulator is actually ready
+  sleep 1
+  disable_animation
+  sleep 1
+  hidden_policy
+  sleep 1
+else
+  echo "Emulator failed to start properly, exiting..."
+  exit 1
+fi
