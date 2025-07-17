@@ -1691,7 +1691,7 @@ def set_root_if_needed(
 def uiautomator_dump(env, timeout_sec: Optional[float] = 30) -> str:
   """Issues a uiautomator dump request and returns the UI hierarchy."""
   dump_args = 'shell uiautomator dump /sdcard/window_dump.xml'
-  issue_generic_request(dump_args, env)
+  issue_generic_request(dump_args, env, timeout_sec=timeout_sec)
 
   read_args = 'shell cat /sdcard/window_dump.xml'
   response = issue_generic_request(read_args, env, timeout_sec=timeout_sec)
