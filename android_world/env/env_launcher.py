@@ -45,6 +45,8 @@ def _increase_file_descriptor_limit(limit: int = 32768):
   from too many open files, sockets, or pipes, resulting in "OSError: [Errno 24]
   Too many open files".
 
+  Limit will only be increased if it is higher than the currently set limit.
+
   Args:
     limit: The new file descriptor limit. The default value was determined
       experimentally to not raise too many open files error.
@@ -67,8 +69,11 @@ def _increase_file_descriptor_limit(limit: int = 32768):
           hard,
       )
       limit = hard
-    resource.setrlimit(resource.RLIMIT_NOFILE, (limit, hard))
-    logging.info('File descriptor limit set to %d.', limit)
+
+    current_soft_limit, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+    if current_soft_limit < limit:
+      resource.setrlimit(resource.RLIMIT_NOFILE, (limit, hard))
+      logging.info('File descriptor limit set to %d.', limit)
   except ValueError as e:
     logging.exception('Failed to set file descriptor limit: %s', e)
 
