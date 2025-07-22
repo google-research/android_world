@@ -10,13 +10,13 @@ from android_world.utils import file_utils
 class AdbBroadcastAgent(base_agent.EnvironmentInteractingAgent):
     """Agent that delegates execution to an external Android process via adb."""
 
-    BROADCAST_ACTION = "com.example.AGENT_GOAL"
+    BROADCAST_ACTION = "com.example.intent.TRIGGER_WORLD_STEP_REASONING"
     BROADCAST_RECEIVER = (
-        "com.example.iotcore/com.example.adbinterface.receiver.AdbEventReceiver"
+        "com.example.iotcore/com.example.adbinterface.receiver.WorldStepReasoningReceiver"
     )
     LOG_TAG = "AgentResult"
     RESULT_REMOTE_PATH = (
-        "/sdcard/Android/data/com.example.iotcore/files/action_result.json"
+        "/storage/emulated/0/Documents/NodeInfoResponse/action_result.json"
     )
 
     def __init__(self, env: interface.AsyncEnv, timeout: float = 30.0):
@@ -24,12 +24,21 @@ class AdbBroadcastAgent(base_agent.EnvironmentInteractingAgent):
         self._timeout = timeout
 
     def _broadcast_goal(self, goal: str) -> None:
-        extras = {"goal": goal}
-        adb_utils.send_android_intent(
-            command="broadcast",
-            action=self.BROADCAST_ACTION,
-            env=self.env.controller,
-            extras=extras,
+        """Sends the goal to the device via an explicit broadcast."""
+        adb_utils.issue_generic_request(
+            [
+                "shell",
+                "am",
+                "broadcast",
+                "-a",
+                self.BROADCAST_ACTION,
+                "-n",
+                self.BROADCAST_RECEIVER,
+                "--es",
+                "goal",
+                f'"{goal}"',
+            ],
+            self.env.controller,
         )
 
     def _wait_for_result(self) -> dict | None:
