@@ -24,6 +24,32 @@ from android_world.env.setup_device import setup
 from android_world.utils import app_snapshot
 
 
+class GetAppListToSetupTest(absltest.TestCase):
+
+  def test_get_app_list_to_setup_none(self):
+    self.assertIsNone(setup.get_app_list_to_setup(None))
+
+  def test_get_app_list_to_setup_with_valid_ids(self):
+    task_ids = ["ClockCreateTimer", "ContactsSearchContact"]
+    expected_apps = (apps.ClockApp, apps.ContactsApp)
+    self.assertCountEqual(setup.get_app_list_to_setup(task_ids), expected_apps)
+
+  def test_get_app_list_to_setup_with_mixed_ids(self):
+    task_ids = ["ClockCreateTimer", "InvalidTask", "DialerCallNumber"]
+    expected_apps = (apps.ClockApp, apps.DialerApp)
+    self.assertCountEqual(setup.get_app_list_to_setup(task_ids), expected_apps)
+
+  def test_get_app_list_to_setup_with_space_in_app_name(self):
+    task_ids = ["AudioRecorderRecordAudio"]
+    expected_apps = (apps.AudioRecorder,)
+    self.assertCountEqual(setup.get_app_list_to_setup(task_ids), expected_apps)
+
+  def test_get_app_list_to_setup_with_pascal_case_conversion(self):
+    task_ids = ["SimpleCalendarProCreateEvent"]
+    expected_apps = (apps.SimpleCalendarProApp,)
+    self.assertCountEqual(setup.get_app_list_to_setup(task_ids), expected_apps)
+
+
 class SetupTest(absltest.TestCase):
 
   def setUp(self):
