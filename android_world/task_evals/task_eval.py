@@ -17,10 +17,12 @@
 import abc
 import random
 from typing import Any
+
 from absl import logging
 from android_world.env import adb_utils
 from android_world.env import device_constants
 from android_world.env import interface
+from android_world.env.setup_device import setup
 from android_world.utils import app_snapshot
 from android_world.utils import datetime_utils
 
@@ -121,6 +123,10 @@ class TaskEval(abc.ABC):
           app_snapshot.restore_snapshot(app_name, env.controller)
         except RuntimeError as error:
           logging.warning("Skipping app snapshot loading : %s", error)
+
+  def install_apps_if_not_installed(self, env: interface.AsyncEnv) -> None:
+    for app_name in self.app_names:
+      setup.install_app_if_not_installed(app_name, env)
 
   @classmethod
   def set_device_time(cls, env: interface.AsyncEnv) -> None:

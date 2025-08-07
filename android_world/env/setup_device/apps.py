@@ -76,6 +76,12 @@ class AppSetup(abc.ABC):
   app_name = ""
 
   @classmethod
+  def package_name(cls) -> str:
+    return adb_utils.extract_package_name(
+        adb_utils.get_adb_activity(cls.app_name)
+    )
+
+  @classmethod
   def setup(cls, env: interface.AsyncEnv) -> None:
     """Performs setup tasks specific to the app."""
     adb_utils.clear_app_data(

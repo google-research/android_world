@@ -63,9 +63,24 @@ _APPS = (
 )
 
 
-def get_app_mapping(app_name: str) -> Type[apps.AppSetup]:
+def get_installed_packages(env: interface.AsyncEnv) -> frozenset[str]:
+  """Returns the set of installed packages."""
+  return frozenset(adb_utils.get_all_package_names(env.controller.env))
+
+
+def is_package_installed(package_name: str, env: interface.AsyncEnv) -> bool:
+  """Checks if a package is installed."""
+  installed_packages = get_installed_packages(env)
+  return package_name in installed_packages
+
+
+def get_app_mapping(app_name: str) -> Type[apps.AppSetup] | None:
+  if not app_name:
+    return None
   mapping = {app.app_name: app for app in _APPS}
-  return mapping[app_name]
+  if app_name in mapping:
+    return mapping[app_name]
+  return None
 
 
 def get_app_list_to_setup(
@@ -114,6 +129,12 @@ def setup_app(app: Type[apps.AppSetup], env: interface.AsyncEnv) -> None:
         e,
     )
   app_snapshot.save_snapshot(app.app_name, env.controller)
+
+
+def install_app_if_not_installed(app_name: str, env: interface.AsyncEnv):
+  """Installs the apk of an app only if the apk is not installed."""
+  path = apps.download_app_data(apk)
+  adb_utils.install_apk(path, raw_env)
 
 
 def maybe_install_app(
