@@ -15,6 +15,8 @@
 """A Multimodal Autonomous Agent for Android (M3A)."""
 
 import time
+
+from absl import logging
 from android_world.agents import agent_utils
 from android_world.agents import base_agent
 from android_world.agents import infer
@@ -378,7 +380,7 @@ class M3A(base_agent.EnvironmentInteractingAgent):
         'summary': None,
         'summary_raw_response': None,
     }
-    print('----------step ' + str(len(self.history) + 1))
+    logging.info('----------step %s----------', str(len(self.history) + 1))
 
     state = self.get_post_transition_state()
     logical_screen_size = self.env.logical_screen_size
@@ -437,7 +439,7 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
     # If the output is not in the right format, add it to step summary which
     # will be passed to next step and return.
     if (not reason) or (not action):
-      print('Action prompt output is not in the correct format.')
+      logging.info('Action prompt output is not in the correct format.')
       step_data['summary'] = (
           'Output for action selection is not in the correct format, so no'
           ' action is performed.'
@@ -449,8 +451,8 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
           step_data,
       )
 
-    print('Action: ' + action)
-    print('Reason: ' + reason)
+    logging.info('Action: %s', action)
+    logging.info('Reason: %s', reason)
     step_data['action_reason'] = reason
 
     try:
@@ -459,8 +461,8 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
       )
       step_data['action_output_json'] = converted_action
     except Exception as e:  # pylint: disable=broad-exception-caught
-      print('Failed to convert the output to a valid action.')
-      print(str(e))
+      logging.info('Failed to convert the output to a valid action.')
+      logging.info(str(e))
       step_data['summary'] = (
           'Can not parse the output to a valid action. Please make sure to pick'
           ' the action from the list with required parameters (if any) in the'
@@ -481,9 +483,11 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
         and action_index is not None
     ):
       if action_index >= num_ui_elements:
-        print(
-            f'Index out of range, prediction index is {action_index}, but the'
-            f' UI element list only has {num_ui_elements} elements.'
+        logging.info(
+            'Index out of range, prediction index is %s, but the'
+            ' UI element list only has %d elements.',
+            action_index,
+            num_ui_elements,
         )
         step_data['summary'] = (
             'The parameter index is out of range. Remember the index must be in'
@@ -504,7 +508,7 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
 
     if converted_action.action_type == 'status':
       if converted_action.goal_status == 'infeasible':
-        print('Agent stopped since it thinks mission impossible.')
+        logging.info('Agent stopped since it thinks mission impossible.')
       step_data['summary'] = 'Agent thinks the request has been completed.'
       self.history.append(step_data)
       return base_agent.AgentInteractionResult(
@@ -513,13 +517,13 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
       )
 
     if converted_action.action_type == 'answer':
-      print('Agent answered with: ' + converted_action.text)
+      logging.info('Agent answered with: %s', converted_action.text)
 
     try:
       self.env.execute_action(converted_action)
     except Exception as e:  # pylint: disable=broad-exception-caught
-      print('Failed to execute action.')
-      print(str(e))
+      logging.info('Failed to execute action.')
+      logging.info(str(e))
       step_data['summary'] = (
           'Can not execute the action, make sure to select the action with'
           ' the required parameters (if any) in the correct JSON format!'
@@ -577,9 +581,10 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
       summary = """Summary triggered LLM safety classifier."""
 
     if not raw_response:
-      print(
-          'Error calling LLM in summarization phase. This should not happen: '
-          f'{summary}'
+      logging.info(
+          'Error calling LLM in summarization phase. This should not'
+          ' happen: %s',
+          summary,
       )
       step_data['summary'] = (
           'Some error occurred calling LLM during summarization phase: %s'
@@ -593,7 +598,7 @@ Action: {{"action_type": "status", "goal_status": "infeasible"}}"""
 
     step_data['summary_prompt'] = summary_prompt
     step_data['summary'] = f'Action selected: {action}. {summary}'
-    print('Summary: ' + summary)
+    logging.info('Summary: %s', summary)
     step_data['summary_raw_response'] = raw_response
 
     self.history.append(step_data)
