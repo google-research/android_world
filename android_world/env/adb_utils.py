@@ -1468,6 +1468,32 @@ def put_settings(
   return env.execute_adb_call(adb_request)
 
 
+def get_all_settings(env: env_interface.AndroidEnvInterface) -> dict[str, str]:
+  """Get all settings from the Android system via ADB."""
+  adb_commands = [
+      'settings list secure',
+      'settings list global',
+      'settings list system',
+  ]
+  settings = {}
+  for adb_command in adb_commands:
+    response = issue_generic_request(adb_command, env)
+    lines = response.generic.output.decode().split('\n')
+    for line in lines:
+      if not line:
+        continue
+      key, value = line.split('=', 1)
+      if key in settings and settings[key] != value:
+        logging.warning(
+            'Inconsistent value for key: %s. %s vs %s',
+            key,
+            settings[key],
+            value,
+        )
+      settings[key] = value
+  return settings
+
+
 def delete_contacts(
     env: env_interface.AndroidEnvInterface,
     timeout_sec: float = _DEFAULT_TIMEOUT_SECS,
