@@ -14,6 +14,7 @@
 
 """Utilties to interact with the environment using adb."""
 
+import json
 import os
 import re
 import time
@@ -38,7 +39,13 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'google chat': (
         'com.google.android.apps.dynamite/com.google.android.apps.dynamite.startup.StartUpActivity'
     ),
+    'google chat': (
+        'com.google.android.apps.dynamite/com.google.android.apps.dynamite.startup.StartUpActivity'
+    ),
     'settings|system settings': 'com.android.settings/.Settings',
+    'youtube|yt': (
+        'com.google.android.youtube/com.google.android.apps.youtube.app.WatchWhileActivity'
+    ),
     'youtube|yt': (
         'com.google.android.youtube/com.google.android.apps.youtube.app.WatchWhileActivity'
     ),
@@ -54,10 +61,16 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'google photos|gphotos|photos|google photo|google pics|google images': (
         'com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity'
     ),
+    'google photos|gphotos|photos|google photo|google pics|google images': (
+        'com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity'
+    ),
     'google calendar|gcal': (
         'com.google.android.calendar/com.android.calendar.AllInOneActivity'
     ),
     'camera': 'com.android.camera2/com.android.camera.CameraLauncher',
+    'audio recorder': (
+        'com.dimowner.audiorecorder/com.dimowner.audiorecorder.app.welcome.WelcomeActivity'
+    ),
     'audio recorder': (
         'com.dimowner.audiorecorder/com.dimowner.audiorecorder.app.welcome.WelcomeActivity'
     ),
@@ -69,6 +82,9 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     ),
     'grubhub': (
         'com.grubhub.android/com.grubhub.dinerapp.android.splash.SplashActivity'
+    ),
+    'tripadvisor': (
+        'com.tripadvisor.tripadvisor/com.tripadvisor.android.ui.launcher.LauncherActivity'
     ),
     'tripadvisor': (
         'com.tripadvisor.tripadvisor/com.tripadvisor.android.ui.launcher.LauncherActivity'
@@ -93,6 +109,12 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'contacts': (
         'com.google.android.contacts/com.android.contacts.activities.PeopleActivity'
     ),
+    'google search|google': (
+        'com.google.android.googlequicksearchbox/com.google.android.googlequicksearchbox.SearchActivity'
+    ),
+    'contacts': (
+        'com.google.android.contacts/com.android.contacts.activities.PeopleActivity'
+    ),
     'facebook|fb': 'com.facebook.katana/com.facebook.katana.LoginActivity',
     'whatsapp|wa': 'com.whatsapp/com.whatsapp.Main',
     'instagram|ig': (
@@ -108,8 +130,14 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'netflix': (
         'com.netflix.mediaclient/com.netflix.mediaclient.ui.launch.UIWebViewActivity'
     ),
+    'netflix': (
+        'com.netflix.mediaclient/com.netflix.mediaclient.ui.launch.UIWebViewActivity'
+    ),
     'amazon shopping|amazon|amzn': (
         'com.amazon.mShop.android.shopping/com.amazon.mShop.home.HomeActivity'
+    ),
+    'tiktok|tt': (
+        'com.zhiliaoapp.musically/com.ss.android.ugc.aweme.splash.SplashActivity'
     ),
     'tiktok|tt': (
         'com.zhiliaoapp.musically/com.ss.android.ugc.aweme.splash.SplashActivity'
@@ -118,6 +146,9 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'reddit': 'com.reddit.frontpage/com.reddit.frontpage.MainActivity',
     'pinterest': 'com.pinterest/com.pinterest.activity.PinterestActivity',
     'android world': 'com.example.androidworld/.MainActivity',
+    'files': (
+        'com.google.android.documentsui/com.android.documentsui.files.FilesActivity'
+    ),
     'files': (
         'com.google.android.documentsui/com.android.documentsui.files.FilesActivity'
     ),
@@ -144,11 +175,35 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'simple draw pro': (
         'com.simplemobiletools.draw.pro/com.simplemobiletools.draw.pro.activities.MainActivity'
     ),
+    'messages': (
+        'com.google.android.apps.messaging/com.google.android.apps.messaging.ui.ConversationListActivity'
+    ),
+    'simple sms messenger|simple sms': (
+        'com.simplemobiletools.smsmessenger/com.simplemobiletools.smsmessenger.activities.MainActivity'
+    ),
+    'dialer|phone': (
+        'com.google.android.dialer/com.google.android.dialer.extensions.GoogleDialtactsActivity'
+    ),
+    'simple calendar pro|simple calendar': (
+        'com.simplemobiletools.calendar.pro/com.simplemobiletools.calendar.pro.activities.MainActivity'
+    ),
+    'simple gallery pro|simple gallery': (
+        'com.simplemobiletools.gallery.pro/com.simplemobiletools.gallery.pro.activities.MainActivity'
+    ),
+    'miniwob': (
+        'com.google.androidenv.miniwob/com.google.androidenv.miniwob.app.MainActivity'
+    ),
+    'simple draw pro': (
+        'com.simplemobiletools.draw.pro/com.simplemobiletools.draw.pro.activities.MainActivity'
+    ),
     'pro expense|pro expense app': (
         'com.arduia.expense/com.arduia.expense.ui.MainActivity'
     ),
     'broccoli|broccoli app|broccoli recipe app|recipe app': (
         'com.flauschcode.broccoli/com.flauschcode.broccoli.MainActivity'
+    ),
+    'caa|caa test|context aware access': (
+        'com.google.ccc.hosted.contextawareaccess.thirdpartyapp/.ChooserActivity'
     ),
     'caa|caa test|context aware access': (
         'com.google.ccc.hosted.contextawareaccess.thirdpartyapp/.ChooserActivity'
@@ -1511,6 +1566,41 @@ def put_settings(
   )
   adb_request = adb_pb2.AdbRequest(settings=settings_request)
   return env.execute_adb_call(adb_request)
+
+
+def _post_process_settings(settings: dict[str, str]) -> dict[str, Any]:
+  """Post process settings to remove non-deterministic fields."""
+
+  # Remove theme timestamp
+  _THEME_KEY = 'theme_customization_overlay_packages'
+  if _THEME_KEY in settings:
+    theme = json.loads(settings[_THEME_KEY])
+    theme.pop('_applied_timestamp')
+    settings[_THEME_KEY] = theme
+
+  # Remove zen_duration
+  settings.pop('zen_duration')
+
+  return settings
+
+
+def get_all_settings(env: env_interface.AndroidEnvInterface) -> dict[str, str]:
+  """Get all settings from the Android system via ADB."""
+  adb_commands = [
+      'settings list secure',
+      'settings list global',
+      'settings list system',
+  ]
+  settings = {}
+  for adb_command in adb_commands:
+    response = issue_generic_request(adb_command, env)
+    lines = response.generic.output.decode().split('\n')
+    for line in lines:
+      if not line:
+        continue
+      key, value = line.split('=', 1)
+      settings[key] = value
+  return _post_process_settings(settings)
 
 
 def delete_contacts(
