@@ -14,6 +14,7 @@
 
 """Utilties to interact with the environment using adb."""
 
+import json
 import os
 import re
 import time
@@ -1511,6 +1512,41 @@ def put_settings(
   )
   adb_request = adb_pb2.AdbRequest(settings=settings_request)
   return env.execute_adb_call(adb_request)
+
+
+def _post_process_settings(settings: dict[str, str]) -> dict[str, Any]:
+  """Post process settings to remove non-deterministic fields."""
+
+  # Remove theme timestamp
+  theme_key = 'theme_customization_overlay_packages'
+  if theme_key in settings:
+    theme = json.loads(settings[theme_key])
+    theme.pop('_applied_timestamp')
+    settings[theme_key] = theme
+
+  # Remove zen_duration
+  settings.pop('zen_duration')
+
+  return settings
+
+
+def get_all_settings(env: env_interface.AndroidEnvInterface) -> dict[str, str]:
+  """Get all settings from the Android system via ADB."""
+  adb_commands = [
+      'settings list secure',
+      'settings list global',
+      'settings list system',
+  ]
+  settings = {}
+  for adb_command in adb_commands:
+    response = issue_generic_request(adb_command, env)
+    lines = response.generic.output.decode().split('\n')
+    for line in lines:
+      if not line:
+        continue
+      key, value = line.split('=', 1)
+      settings[key] = value
+  return _post_process_settings(settings)
 
 
 def delete_contacts(
