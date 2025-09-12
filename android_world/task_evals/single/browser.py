@@ -104,8 +104,9 @@ class BrowserTask(task_eval.TaskEval):
       return 0.0
 
     for element in state.ui_elements:
-      if element.text == 'Success!':
-        return 1.0
+      if hasattr(element, 'text'):
+        if element.text and element.text == 'Success!':
+          return 1.0
     return 0.0
 
   @classmethod
