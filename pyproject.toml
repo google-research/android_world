@@ -20,7 +20,7 @@ dependencies = [
     "grpcio-tools",
     "immutabledict==2.0.0",
     "IPython",
-    "jsonschema==4.17.3",
+    "jsonschema>=4.21.1",
     "matplotlib>=3.6.1",
     "numpy>=1.26.3",
     "opencv-python",
