@@ -27,6 +27,7 @@ from typing import Type
 from absl import app
 from absl import flags
 from absl import logging
+from dotenv import load_dotenv
 from android_world import registry
 from android_world.agents import infer
 from android_world.agents import t3a
@@ -34,6 +35,9 @@ from android_world.env import env_launcher
 from android_world.task_evals import task_eval
 
 logging.set_verbosity(logging.WARNING)
+
+# Load environment variables from .env file
+load_dotenv()
 
 os.environ['GRPC_VERBOSITY'] = 'ERROR'  # Only show errors
 os.environ['GRPC_TRACE'] = 'none'  # Disable tracing

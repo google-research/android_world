@@ -25,6 +25,7 @@ dependencies = [
     "numpy>=1.26.3",
     "opencv-python",
     "pandas>=2.1.4",
+    "protobuf>=5.26.0",
     "pydub",
     "python-Levenshtein",
     "pytest",
