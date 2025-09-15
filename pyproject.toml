@@ -13,11 +13,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "absl-py==2.1.0",
-    "android_env==1.2.3",
+    "android_env>=1.2.2",
     "dm_env==1.6",
     "fuzzywuzzy==0.18.0",
     "google-generativeai",
-    "grpcio-tools",
+    "grpcio-tools>=1.65.0,<1.71.0",
     "immutabledict==2.0.0",
     "IPython",
     "jsonschema>=4.21.1",
