@@ -242,16 +242,18 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
 
 
 class VLLMWrapper(LlmWrapper, MultimodalLlmWrapper):
-  """VLLM local model wrapper.
+  """vLLM wrapper using OpenAI-compatible API server.
+
+  This wrapper connects to a vLLM server running with OpenAI-compatible API.
+  The server should be started separately using the vLLM OpenAI server.
 
   Attributes:
-    base_url: The base URL of the VLLM server.
-    model_name: The name/path of the model to use.
-    max_retry: Max number of retries when some error happens.
-    temperature: The temperature parameter in LLM to control result stability.
+    base_url: Base URL of the vLLM server (e.g., "http://localhost:8001/v1")
+    model_name: Model name as registered in vLLM server
+    max_retry: Max number of retries when some error happens
+    temperature: The temperature parameter in LLM to control result stability
+    max_tokens: Maximum tokens to generate
   """
-
-  RETRY_WAITING_SECONDS = 10
 
   def __init__(
       self,
@@ -259,35 +261,56 @@ class VLLMWrapper(LlmWrapper, MultimodalLlmWrapper):
       base_url: str = 'http://localhost:8001',
       max_retry: int = 3,
       temperature: float = 0.0,
+      max_tokens: int = 1000,
   ):
-    self.base_url = base_url
+    try:
+      import openai
+    except ImportError as err:
+      raise RuntimeError(
+          'OpenAI library not installed. Run: pip install openai'
+      ) from err
+
+    # If no model name provided, fetch the first available model
+    if not model_name:
+      self.model_name = self._fetch_first_available_model(base_url)
+    else:
+      self.model_name = model_name
+
+    # Ensure base_url has /v1 suffix for OpenAI compatibility
+    if not base_url.endswith('/v1'):
+      base_url = base_url.rstrip('/') + '/v1'
+
+    # Create OpenAI client pointing to vLLM server
+    self.client = openai.OpenAI(
+        base_url=base_url,
+        api_key='',  # vLLM doesn't require real API key
+    )
+
     if max_retry <= 0:
       max_retry = 3
       print('Max_retry must be positive. Reset it to 3')
     self.max_retry = min(max_retry, 5)
     self.temperature = temperature
-    
-    # If no model name provided, fetch the first available model
-    if not model_name:
-      self.model_name = self._fetch_first_available_model()
-    else:
-      self.model_name = model_name
+    self.max_tokens = max_tokens
+    self.base_url = base_url
 
-  def _fetch_first_available_model(self) -> str:
+  def _fetch_first_available_model(self, base_url: str) -> str:
     """Fetch the first available model from VLLM server."""
     try:
-      response = requests.get(f"{self.base_url}/v1/models")
+      # Ensure proper URL format for models endpoint
+      models_url = base_url.rstrip('/') + '/v1/models'
+      response = requests.get(models_url)
       if response.ok:
         models = response.json()
         if models.get('data') and len(models['data']) > 0:
           model_name = models['data'][0]['id']
-          print(f"Using first available VLLM model: {model_name}")
+          print(f'Using first available VLLM model: {model_name}')
           return model_name
-      print(f"Failed to fetch models from VLLM server: {response.status_code}")
+      print(f'Failed to fetch models from VLLM server: {response.status_code}')
     except Exception as e:
-      print(f"Error connecting to VLLM server: {e}")
+      print(f'Error connecting to VLLM server: {e}')
     
-    raise ValueError("No model specified and unable to fetch from VLLM server")
+    raise ValueError('No model specified and unable to fetch from VLLM server')
 
   @classmethod
   def encode_image(cls, image: np.ndarray) -> str:
@@ -297,55 +320,58 @@ class VLLMWrapper(LlmWrapper, MultimodalLlmWrapper):
       self,
       text_prompt: str,
   ) -> tuple[str, Optional[bool], Any]:
-    headers = {
-        'Content-Type': 'application/json',
-    }
-
-    payload = {
-        'model': self.model_name,
-        'prompt': text_prompt,
-        'temperature': self.temperature,
-        'max_tokens': 1000,
-    }
-
-    counter = self.max_retry
-    wait_seconds = self.RETRY_WAITING_SECONDS
-    while counter > 0:
-      try:
-        response = requests.post(
-            f'{self.base_url}/v1/completions',
-            headers=headers,
-            json=payload,
-        )
-        if response.ok:
-          response_json = response.json()
-          if 'choices' in response_json and len(response_json['choices']) > 0:
-            return (
-                response_json['choices'][0]['text'],
-                None,
-                response,
-            )
-        print(f'Error calling VLLM API: {response.status_code}')
-        if response.text:
-          print(f'Response: {response.text}')
-        time.sleep(wait_seconds)
-        wait_seconds *= 2
-      except Exception as e:  # pylint: disable=broad-exception-caught
-        time.sleep(wait_seconds)
-        wait_seconds *= 2
-        counter -= 1
-        print('Error calling VLLM, will retry soon...')
-        print(e)
-    return ERROR_CALLING_LLM, None, None
+    return self.predict_mm(text_prompt, [])
 
   def predict_mm(
       self, text_prompt: str, images: list[np.ndarray]
   ) -> tuple[str, Optional[bool], Any]:
-    # For multimodal support, we'd need to check if the model supports it
-    # For now, we'll just use text-only prediction
-    if images:
-      print('Warning: VLLM wrapper does not currently support multimodal input. Ignoring images.')
-    return self.predict(text_prompt)
+    # Build message content
+    content = [{'type': 'text', 'text': text_prompt}]
+
+    # Add images if provided (for multimodal models)
+    for image in images:
+      content.append({
+          'type': 'image_url',
+          'image_url': {
+              'url': f'data:image/jpeg;base64,{self.encode_image(image)}'
+          },
+      })
+
+    messages = [{'role': 'user', 'content': content}]
+
+    counter = self.max_retry
+    retry_delay = 1.0
+
+    while counter > 0:
+      try:
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+        )
+
+        content = response.choices[0].message.content
+
+        return (
+            content,
+            None,  # vLLM doesn't have explicit safety flags
+            response,
+        )
+
+      except Exception as e:  # pylint: disable=broad-exception-caught
+        counter -= 1
+        print(
+            f'Error calling vLLM API at {self.base_url}, '
+            f'will retry in {retry_delay} seconds'
+        )
+        print(f'Error: {e}')
+
+        if counter > 0:
+          time.sleep(retry_delay)
+          retry_delay *= 2
+
+    return ERROR_CALLING_LLM, None, None
 
 
 class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):

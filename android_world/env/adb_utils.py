@@ -166,6 +166,24 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'retro music|retro|retro player': (
         'code.name.monkey.retromusic/.activities.MainActivity'
     ),
+    'uber' : (
+        'com.ubercab/.presidio.app.core.root.RootActivity'
+      ),
+    'lyft' : (
+        'me.lyft.android/.ui.MainActivity'
+    ),
+    'amazon|amazon shopping|amazon app': (
+        'com.amazon.mShop.android.shopping/com.amazon.mShop.home.HomeActivit'
+    ),
+    "coupang eats|쿠팡이츠|쿠팡 이츠" : (
+      'com.coupang.mobile.eats/.intro.view.SplashActivity'
+    ),
+    "baemin eats|배민|배달의 민족" : (
+      'com.sampleapp/com.baemin.presentation.ui.RouterActivity'
+    ),
+    "coupang|쿠팡" : (
+      'com.coupang.mobile/.activity.SplashActivity'
+    )
 })
 # pylint: enable=line-too-long
 
