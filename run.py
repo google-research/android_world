@@ -130,6 +130,18 @@ _OUTPUT_PATH = flags.DEFINE_string(
 # Agent specific.
 _AGENT_NAME = flags.DEFINE_string('agent_name', 'm3a_gpt4v', help='Agent name.')
 
+_VLLM_BASE_URL = flags.DEFINE_string(
+    'vllm_base_url',
+    'http://localhost:8001',
+    'Base URL for VLLM server when using t3a_vllm or m3a_vllm agents.'
+)
+
+_VLLM_MODEL_NAME = flags.DEFINE_string(
+    'vllm_model_name',
+    '',
+    'Model name/path for VLLM. If empty, will fetch and use the first available model.'
+)
+
 _FIXED_TASK_SEED = flags.DEFINE_boolean(
     'fixed_task_seed',
     False,
@@ -172,9 +184,18 @@ def _get_agent(
     )
   # GPT.
   elif _AGENT_NAME.value == 't3a_gpt4':
-    agent = t3a.T3A(env, infer.Gpt4Wrapper('gpt-4-turbo-2024-04-09'))
+    agent = t3a.T3A(env, infer.Gpt4Wrapper('gpt-4.1'))
   elif _AGENT_NAME.value == 'm3a_gpt4v':
     agent = m3a.M3A(env, infer.Gpt4Wrapper('gpt-4-turbo-2024-04-09'))
+  # VLLM.
+  elif _AGENT_NAME.value == 't3a_vllm':
+    agent = t3a.T3A(
+        env, 
+        infer.VLLMWrapper(
+            model_name=_VLLM_MODEL_NAME.value,
+            base_url=_VLLM_BASE_URL.value
+        )
+    )
   # SeeAct.
   elif _AGENT_NAME.value == 'seeact':
     agent = seeact.SeeAct(env)

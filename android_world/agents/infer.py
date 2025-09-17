@@ -241,6 +241,113 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
     return converted
 
 
+class VLLMWrapper(LlmWrapper, MultimodalLlmWrapper):
+  """VLLM local model wrapper.
+
+  Attributes:
+    base_url: The base URL of the VLLM server.
+    model_name: The name/path of the model to use.
+    max_retry: Max number of retries when some error happens.
+    temperature: The temperature parameter in LLM to control result stability.
+  """
+
+  RETRY_WAITING_SECONDS = 10
+
+  def __init__(
+      self,
+      model_name: str = '',
+      base_url: str = 'http://localhost:8001',
+      max_retry: int = 3,
+      temperature: float = 0.0,
+  ):
+    self.base_url = base_url
+    if max_retry <= 0:
+      max_retry = 3
+      print('Max_retry must be positive. Reset it to 3')
+    self.max_retry = min(max_retry, 5)
+    self.temperature = temperature
+    
+    # If no model name provided, fetch the first available model
+    if not model_name:
+      self.model_name = self._fetch_first_available_model()
+    else:
+      self.model_name = model_name
+
+  def _fetch_first_available_model(self) -> str:
+    """Fetch the first available model from VLLM server."""
+    try:
+      response = requests.get(f"{self.base_url}/v1/models")
+      if response.ok:
+        models = response.json()
+        if models.get('data') and len(models['data']) > 0:
+          model_name = models['data'][0]['id']
+          print(f"Using first available VLLM model: {model_name}")
+          return model_name
+      print(f"Failed to fetch models from VLLM server: {response.status_code}")
+    except Exception as e:
+      print(f"Error connecting to VLLM server: {e}")
+    
+    raise ValueError("No model specified and unable to fetch from VLLM server")
+
+  @classmethod
+  def encode_image(cls, image: np.ndarray) -> str:
+    return base64.b64encode(array_to_jpeg_bytes(image)).decode('utf-8')
+
+  def predict(
+      self,
+      text_prompt: str,
+  ) -> tuple[str, Optional[bool], Any]:
+    headers = {
+        'Content-Type': 'application/json',
+    }
+
+    payload = {
+        'model': self.model_name,
+        'prompt': text_prompt,
+        'temperature': self.temperature,
+        'max_tokens': 1000,
+    }
+
+    counter = self.max_retry
+    wait_seconds = self.RETRY_WAITING_SECONDS
+    while counter > 0:
+      try:
+        response = requests.post(
+            f'{self.base_url}/v1/completions',
+            headers=headers,
+            json=payload,
+        )
+        if response.ok:
+          response_json = response.json()
+          if 'choices' in response_json and len(response_json['choices']) > 0:
+            return (
+                response_json['choices'][0]['text'],
+                None,
+                response,
+            )
+        print(f'Error calling VLLM API: {response.status_code}')
+        if response.text:
+          print(f'Response: {response.text}')
+        time.sleep(wait_seconds)
+        wait_seconds *= 2
+      except Exception as e:  # pylint: disable=broad-exception-caught
+        time.sleep(wait_seconds)
+        wait_seconds *= 2
+        counter -= 1
+        print('Error calling VLLM, will retry soon...')
+        print(e)
+    return ERROR_CALLING_LLM, None, None
+
+  def predict_mm(
+      self, text_prompt: str, images: list[np.ndarray]
+  ) -> tuple[str, Optional[bool], Any]:
+    # For multimodal support, we'd need to check if the model supports it
+    # For now, we'll just use text-only prediction
+    if images:
+      print('Warning: VLLM wrapper does not currently support multimodal input. Ignoring images.')
+    return self.predict(text_prompt)
+
+
 class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
   """OpenAI GPT4 wrapper.
 
