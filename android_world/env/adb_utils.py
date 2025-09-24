@@ -521,9 +521,138 @@ def _split_words_and_newlines(text: str) -> Iterable[str]:
       if word:
         yield word
       if j < len(words) - 1:
-        yield '%s'
+        yield ' '
     if i < len(lines) - 1:
       yield '\n'
+
+
+# Global flag to track if ADBKeyboard is ready
+_adb_keyboard_ready = False
+
+
+def _get_device_serial() -> Optional[str]:
+  """Extract device serial from adb devices."""
+  try:
+    import subprocess
+    result = subprocess.run(
+        ["adb", "devices"], capture_output=True, text=True
+    )
+    lines = result.stdout.strip().split('\n')
+    for line in lines[1:]:  # Skip header
+      if '\t' in line and 'device' in line:
+        serial = line.split('\t')[0]
+        return serial
+  except Exception:
+    pass
+  return None
+
+
+def _ensure_adb_keyboard_ready() -> bool:
+  """Ensure ADBKeyboard is installed and set as the active IME."""
+  global _adb_keyboard_ready
+  
+  if _adb_keyboard_ready:
+    return True
+  
+  try:
+    import subprocess
+    serial = _get_device_serial()
+    if not serial:
+      return False
+        
+    # Check if ADBKeyboard package exists
+    cmd = ["adb", "-s", serial, "shell", "pm", "list", "packages", "com.android.adbkeyboard"]
+    check = subprocess.run(cmd, capture_output=True, text=True)
+    
+    if "com.android.adbkeyboard" not in (check.stdout or ""):
+      return False
+    
+    # Enable and set IME (silently, don't print errors)
+    subprocess.run(["adb", "-s", serial, "shell", "ime", "enable", "com.android.adbkeyboard/.AdbIME"], 
+                   capture_output=True)
+    subprocess.run(["adb", "-s", serial, "shell", "ime", "set", "com.android.adbkeyboard/.AdbIME"],
+                   capture_output=True)
+    
+    _adb_keyboard_ready = True
+    return True
+    
+  except Exception:
+    return False
+
+
+def _try_adbkeyboard_input(text: str, env: env_interface.AndroidEnvInterface) -> bool:
+  """Try to send text using ADBKeyboard via Android env. Returns True if successful."""
+  if not _ensure_adb_keyboard_ready():
+    return False
+  
+  try:
+    import time
+    
+    serial = _get_device_serial()
+    if not serial:
+      return False
+    
+    time.sleep(0.1)  # Small delay to ensure IME is ready
+    
+    # Clear existing text first using env.execute_adb_call
+    clear_args = [
+        "shell", "am", "broadcast",
+        # "-n", "com.android.adbkeyboard/.AdbIME",
+        "-a", "ADB_CLEAR_TEXT"
+    ]
+    clear_response = env.execute_adb_call(
+        adb_pb2.AdbRequest(
+            generic=adb_pb2.AdbRequest.GenericRequest(args=clear_args),
+            timeout_sec=5.0,
+        )
+    )
+    
+    if clear_response.status != adb_pb2.AdbResponse.Status.OK:
+      return False
+    
+    # Handle newline at the end
+    formatted = text[:-1] if text.endswith("\n") else text
+    enter_after = text.endswith("\n")
+    
+    # Send text via broadcast using env.execute_adb_call
+    input_args = [
+        "shell", "am", "broadcast",
+        # "-n", "com.android.adbkeyboard/.AdbIME",
+        "-a", "ADB_INPUT_TEXT",
+        "--es", "msg", formatted
+    ]
+    input_response = env.execute_adb_call(
+        adb_pb2.AdbRequest(
+            generic=adb_pb2.AdbRequest.GenericRequest(args=input_args),
+            timeout_sec=5.0,
+        )
+    )
+    
+    if input_response.status != adb_pb2.AdbResponse.Status.OK:
+      return False
+    
+    # Press enter if needed
+    if enter_after:
+      enter_args = [
+          "shell", "am", "broadcast",
+          # "-n", "com.android.adbkeyboard/.AdbIME",
+          "-a", "ADB_INPUT_CODE",
+          "--ei", "code", "66"  # KEYCODE_ENTER
+      ]
+      enter_response = env.execute_adb_call(
+          adb_pb2.AdbRequest(
+              generic=adb_pb2.AdbRequest.GenericRequest(args=enter_args),
+              timeout_sec=5.0,
+          )
+      )
+      
+      if enter_response.status != adb_pb2.AdbResponse.Status.OK:
+        return False
+    
+    return True
+    
+  except Exception:
+    return False
 
 
 def type_text(
@@ -531,12 +660,10 @@ def type_text(
     env: env_interface.AndroidEnvInterface,
     timeout_sec: Optional[float] = _DEFAULT_TIMEOUT_SECS,
 ) -> None:
-  """Issues an AdbRequest to type the specified text string word-by-word.
+  """Issues an AdbRequest to type the specified text string.
 
-  It types word-by-word to fix issue where sometimes long text strings can be
-  typed out of order at the character level. Additionally, long strings can time
-  out and word-by-word fixes this, while allowing us to keep a lot timeout per
-  word.
+  Enhanced version that tries ADBKeyboard first for better Unicode/Korean support,
+  then falls back to the original word-by-word method if ADBKeyboard is not available.
 
   Args:
     text: The text string to be typed.
@@ -544,6 +671,11 @@ def type_text(
     timeout_sec: A timeout to use for this operation. Note: For longer texts,
       this should be longer as it takes longer to type.
   """
+  # Try ADBKeyboard first for better Unicode/Korean support
+  if _try_adbkeyboard_input(text, env):
+    return
+  
+  # Fallback to original implementation
   words = _split_words_and_newlines(text)
   for word in words:
     if word == '\n':
