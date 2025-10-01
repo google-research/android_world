@@ -16,7 +16,7 @@
 
 import dataclasses
 import json
-from typing import Optional
+from typing import Any, Optional
 
 
 _JSON_SEPARATORS = (',', ':')
@@ -130,11 +130,10 @@ class JSONAction:
 
   def __repr__(self) -> str:
     properties = []
-    for key, value in self.__dict__.items():
-      if value is not None:
-        if isinstance(value, float):
-          value = f'{value:.3f}'
-        properties.append(f'{key}={value!r}')
+    for key, value in self.as_dict(skip_none=True).items():
+      if isinstance(value, float):
+        value = f'{value:.3f}'
+      properties.append(f'{key}={value!r}')
     return f"JSONAction({', '.join(properties)})"
 
   def __eq__(self, other):
@@ -145,11 +144,24 @@ class JSONAction:
   def __ne__(self, other):
     return not self.__eq__(other)
 
-  def json_str(self) -> str:
+  def as_dict(self, skip_none: bool = True) -> dict[str, Any]:
+    """Returns a dict representation of the action.
+
+    Args:
+      skip_none: Whether to skip none values.
+    Returns:
+      A dict representation of the action.
+    """
     non_null = {}
     for key, value in self.__dict__.items():
       if value is not None:
+        if skip_none and value is None:
+          continue
         non_null[key] = value
+    return non_null
+
+  def json_str(self) -> str:
+    non_null = self.as_dict(skip_none=True)
     return json.dumps(non_null, separators=_JSON_SEPARATORS)
 
 
