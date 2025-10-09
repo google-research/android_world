@@ -43,6 +43,9 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.proto", "*.textproto", "*.xml", "res/xml/*.xml"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py","*_test.py"]
