@@ -1533,9 +1533,9 @@ def _post_process_settings(settings: dict[str, str]) -> dict[str, Any]:
 def get_all_settings(env: env_interface.AndroidEnvInterface) -> dict[str, str]:
   """Get all settings from the Android system via ADB."""
   adb_commands = [
-      'settings list secure',
-      'settings list global',
-      'settings list system',
+      'shell settings list secure',
+      'shell settings list global',
+      'shell settings list system',
   ]
   settings = {}
   for adb_command in adb_commands:
