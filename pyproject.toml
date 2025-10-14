@@ -2,7 +2,7 @@
 # only. The non-docker implementation uses a requirements.txt file.
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "grpcio-tools==1.71.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
