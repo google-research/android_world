@@ -102,6 +102,8 @@ If you don't specify a task, a random task will be selected. *NOTE: If you want
 to try open-source apps, i.e. not included with Android OS, please run
 `--perform_emulator_setup` in the script below.*
 
+**Note on Model Cost:** The `minimal_task_runner.py` script uses a legacy model `gpt-4-turbo-2024-04-09` by default. This model can be expensive. For serious usage, you can switch to a more cost-effective model, by modifying the `model_name` in the script.
+
 ## Docker Support (Experimental)
 
 AndroidWorld now offers Docker support. This allows you to run the Android
