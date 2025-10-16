@@ -73,7 +73,15 @@ _PROTOBUF_VERSION = '5.29.5'
 
 setuptools.setup(
     name='android_world',
-    package_data={'': ['proto/*.proto']},
+    package_data={
+        '': [
+            '*.json',
+            '*.proto',
+            '*.textproto',
+            '*.xml',
+            'res/xml/*.xml',
+        ]
+    },
     packages=setuptools.find_packages(),
     setup_requires=[f'grpcio-tools=={_GRPCIO_TOOLS_VERSION}'],
     install_requires=[

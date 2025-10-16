@@ -2,7 +2,7 @@
 # only. The non-docker implementation uses a requirements.txt file.
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "grpcio-tools==1.71.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,14 +17,14 @@ dependencies = [
     "dm_env==1.6",
     "fuzzywuzzy==0.18.0",
     "google-generativeai",
-    "grpcio-tools",
+    "grpcio-tools==1.71.0",
+    "protobuf==5.29.5",
     "immutabledict==2.0.0",
     "IPython",
     "jsonschema==4.17.3",
-    "matplotlib>=3.6.1",
-    "numpy>=1.26.3",
+    "numpy==1.26.3",
     "opencv-python",
-    "pandas>=2.1.4",
+    "pandas==2.1.4",
     "pydub",
     "python-Levenshtein",
     "pytest",
@@ -40,11 +40,11 @@ dev = [
     "pytest",
 ]
 
-[tool.setuptools]
-packages = ["android_world"]
+[tool.setuptools.packages.find]
+where = ["."]
 
-[tool.setuptools.package-dir]
-android_world = "android_world"
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.proto", "*.textproto", "*.xml", "res/xml/*.xml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
