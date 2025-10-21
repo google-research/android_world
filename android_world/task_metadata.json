@@ -14,11 +14,25 @@
     "optimal_steps": "10"
   },
   {
+    "task_name": "BrowserAdBlock",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then close the advertisement overlay to reveal the content, read the secret code, and enter it in the form.",
+    "difficulty": "medium",
+    "tags": ["distraction_handling", "multi_step", "screen_reading", "parameterized"],
+    "optimal_steps": "9"
+  },
+  {
     "task_name": "BrowserDraw",
     "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then create a drawing using the three colors shown at the top and hit submit.",
     "difficulty": "easy",
     "tags": ["game_playing", "parameterized"],
     "optimal_steps": "5"
+  },
+  {
+    "task_name": "BrowserFileUpload",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then select a file from the file list and click Upload to complete the task.",
+    "difficulty": "medium",
+    "tags": ["file_selection", "list_navigation", "multi_step", "parameterized"],
+    "optimal_steps": "8"
   },
   {
     "task_name": "BrowserMaze",
@@ -39,6 +53,34 @@
     "difficulty": "hard",
     "tags": ["math_counting", "memorization", "screen_reading"],
     "optimal_steps": "11"
+  },
+  {
+    "task_name": "BrowserMultiStepForm",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then complete the 3-step registration form by filling in all required fields and clicking Next/Submit on each step.",
+    "difficulty": "hard",
+    "tags": ["form_filling", "multi_step", "navigation", "data_entry", "parameterized"],
+    "optimal_steps": "15"
+  },
+  {
+    "task_name": "BrowserPopupDismiss",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then fill in the form with any values and submit. You may need to close popup dialogs that appear.",
+    "difficulty": "hard",
+    "tags": ["distraction_handling", "form_filling", "multi_step", "parameterized"],
+    "optimal_steps": "12"
+  },
+  {
+    "task_name": "BrowserProgressBar",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then wait for the progress bar to reach 100% and click the Continue button that appears.",
+    "difficulty": "medium",
+    "tags": ["async_content", "waiting", "button_click", "parameterized"],
+    "optimal_steps": "7"
+  },
+  {
+    "task_name": "BrowserRetry",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then fill in the survey form and submit. The first submission may fail - if so, click Retry to resubmit.",
+    "difficulty": "hard",
+    "tags": ["form_filling", "error_handling", "retry_logic", "multi_step", "parameterized"],
+    "optimal_steps": "13"
   },
   {
     "task_name": "BrowserSlider",

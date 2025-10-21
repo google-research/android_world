@@ -17,6 +17,17 @@
 
 ## 🚀 What's New in AndroidWorld+
 
+### 🌐 New Browser-Based Tasks
+
+- **BrowserSudoku** - Solve a 4×4 Sudoku puzzle with logic reasoning
+- **BrowserSlider** - Precisely position a slider to match the exact target value
+- **BrowserProgressBar** - Wait for asynchronous content to load (3-6 seconds) before proceeding
+- **BrowserRetry** - Handle submission failures and retry logic (first attempt always fails)
+- **BrowserAdBlock** - Close advertisement overlays to reveal hidden content
+- **BrowserPopupDismiss** - Complete forms while dismissing 2 random popup dialogs
+- **BrowserMultiStepForm** - Navigate through a 3-step registration form with validation
+- **BrowserFileUpload** - Select and upload a specific file from a list of 8-10 files
+
 ### 🎯 Enhanced Task Directions
 
 | Direction | Why Challenging | Example |
