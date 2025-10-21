@@ -41,6 +41,20 @@
     "optimal_steps": "11"
   },
   {
+    "task_name": "BrowserSlider",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then drag the slider to match the target number shown at the top.",
+    "difficulty": "hard",
+    "tags": ["game_playing", "precise_control", "parameterized"],
+    "optimal_steps": "8"
+  },
+  {
+    "task_name": "BrowserSudoku",
+    "task_template": "Open the file task.html in Downloads in the file manager; when prompted open it with Chrome. Then solve the 4x4 Sudoku puzzle by filling in the empty cells. Each row, column, and 2x2 box must contain the numbers 1-4.",
+    "difficulty": "hard",
+    "tags": ["game_playing", "logic_puzzle", "multi_step", "parameterized"],
+    "optimal_steps": "12"
+  },
+  {
     "task_name": "CameraTakePhoto",
     "task_template": "Take one photo.",
     "difficulty": "easy",

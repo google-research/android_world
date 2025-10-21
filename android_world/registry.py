@@ -114,6 +114,8 @@ class TaskRegistry:
       browser.BrowserDraw,
       browser.BrowserMaze,
       browser.BrowserMultiply,
+      browser.BrowserSlider,
+      browser.BrowserSudoku,
       calendar.SimpleCalendarAddOneEvent,
       calendar.SimpleCalendarAddOneEventInTwoWeeks,
       calendar.SimpleCalendarAddOneEventRelativeDay,
