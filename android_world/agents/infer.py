@@ -57,7 +57,7 @@ class LlmWrapper(abc.ABC):
       self,
       text_prompt: str,
   ) -> tuple[str, Optional[bool], Any]:
-    """Calling multimodal LLM with a prompt and a list of images.
+    """Calling text-only LLM with a prompt.
 
     Args:
       text_prompt: Text prompt.
