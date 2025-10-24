@@ -291,7 +291,7 @@ def tap_screen(
   Returns:
     The adb response received after issuing the request.
   """
-  logging.info('Attemting to tap the screen at (%d, %d)', x, y)
+  logging.info('Attempting to tap the screen at (%d, %d)', x, y)
   response = env.execute_adb_call(
       adb_pb2.AdbRequest(
           tap=adb_pb2.AdbRequest.Tap(x=x, y=y), timeout_sec=timeout_sec
