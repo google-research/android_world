@@ -532,7 +532,7 @@ def type_text(
       logging.info('Found \\n, pressing enter button.')
       press_enter_button(env)
       continue
-    formatted = _adb_text_format(word)
+    formatted = word
     logging.info('Attempting to type word: %r', formatted)
     response = env.execute_adb_call(
         adb_pb2.AdbRequest(
