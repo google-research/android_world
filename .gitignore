@@ -21,5 +21,11 @@ poetry.lock
 # Other
 *.DS_Store
 
+#Zed
+.zed/
+pyrightconfig.json
+
 # PyCharm
 .idea
+android_world/task_evals/information_retrieval/proto/
+.env
