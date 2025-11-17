@@ -8,6 +8,9 @@ from typing import Optional
 
 from android_world.env.json_action import JSONAction
 
+# Global scale factor for coordinate scaling
+SCALE = 0.4
+
 
 def click(x: int, y: int) -> JSONAction:
     """Create a click action at the specified coordinates.
@@ -20,7 +23,7 @@ def click(x: int, y: int) -> JSONAction:
         >>> click(100, 200)
         # Performs a click at position (100, 200)
     """
-    return JSONAction(action_type="click", x=x, y=y)
+    return JSONAction(action_type="click", x=int(int(x) / SCALE), y=int(int(y) / SCALE))
 
 
 def double_tap(x: int, y: int) -> JSONAction:
@@ -34,7 +37,9 @@ def double_tap(x: int, y: int) -> JSONAction:
         >>> double_tap(150, 300)
         # Performs a double-tap at position (150, 300)
     """
-    return JSONAction(action_type="double_tap", x=x, y=y)
+    return JSONAction(
+        action_type="double_tap", x=int(int(x) / SCALE), y=int(int(y) / SCALE)
+    )
 
 
 def long_press(x: int, y: int) -> JSONAction:
@@ -48,7 +53,9 @@ def long_press(x: int, y: int) -> JSONAction:
         >>> long_press(200, 400)
         # Performs a long-press at position (200, 400)
     """
-    return JSONAction(action_type="long_press", x=x, y=y)
+    return JSONAction(
+        action_type="long_press", x=int(int(x) / SCALE), y=int(int(y) / SCALE)
+    )
 
 
 def scroll(
@@ -77,7 +84,9 @@ def scroll(
             f"Direction must be one of {valid_directions}, got: {direction}"
         )
 
-    return JSONAction(action_type="scroll", direction=direction, x=x, y=y)
+    scaled_x = int(int(x) / SCALE) if x is not None else None
+    scaled_y = int(int(y) / SCALE) if y is not None else None
+    return JSONAction(action_type="scroll", direction=direction, x=scaled_x, y=scaled_y)
 
 
 def swipe(
@@ -106,7 +115,9 @@ def swipe(
             f"Direction must be one of {valid_directions}, got: {direction}"
         )
 
-    return JSONAction(action_type="swipe", direction=direction, x=x, y=y)
+    scaled_x = int(int(x) / SCALE) if x is not None else None
+    scaled_y = int(int(y) / SCALE) if y is not None else None
+    return JSONAction(action_type="swipe", direction=direction, x=scaled_x, y=scaled_y)
 
 
 def input_text(
@@ -131,11 +142,13 @@ def input_text(
         >>> input_text("user@example.com", x=200, y=300, clear_text=True)
         # Clicks at (200, 300), clears the field, then types the email
     """
+    scaled_x = int(int(x) / SCALE) if x is not None else None
+    scaled_y = int(int(y) / SCALE) if y is not None else None
     return JSONAction(
         action_type="input_text",
         text=text,
-        x=x,
-        y=y,
+        x=scaled_x,
+        y=scaled_y,
         clear_text=clear_text if clear_text else None,
     )
 
@@ -230,7 +243,9 @@ def keycode_action(
     # Since there's no specific action_type for keycode in the original class,
     # we'll need to determine the most appropriate action_type or extend the class
     # For now, using a generic action with keycode parameter
-    return JSONAction(action_type="click", keycode=keycode, x=x, y=y)
+    scaled_x = int(int(x) / SCALE) if x is not None else None
+    scaled_y = int(int(y) / SCALE) if y is not None else None
+    return JSONAction(action_type="click", keycode=keycode, x=scaled_x, y=scaled_y)
 
 
 # Convenience functions for common patterns
@@ -324,6 +339,14 @@ def scroll_down(x: Optional[int] = None, y: Optional[int] = None) -> JSONAction:
         y: Optional y-coordinate for scroll origin.
     """
     return scroll("down", x, y)
+
+
+def extracted_data(data: str):
+    """
+    This function is a callback to return extracted data.
+    If you have been tasked with extracting data from a screen, you may use this function to return that data.
+    Please send the data in a structured format that can be effectively used.
+    """
 
 
 def done(success: bool):

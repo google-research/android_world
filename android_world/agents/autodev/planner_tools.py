@@ -29,14 +29,37 @@ def swipe(intent: str):
     vector using the screenshot.
 
     Examples of `intent`:
-      - "scroll down"
-      - "scroll up to reveal hidden content"
+      - "swipe down"
+      - "swipe up to reveal hidden content"
       - "swipe left to switch tab"
       - "swipe right to view next item"
 
     Parameters:
         intent (str): A natural-language description of the direction or
                       purpose of the swipe.
+    """
+    pass
+
+
+def scroll(intent: str):
+    """
+    This is an inverse action of swipe.
+
+    To scroll up, you would swipe down.
+    You may ask the executor to scroll exactly one view port up or down if you're doing data extraction.
+
+    The executor will translate the high-level intent into a concrete scroll
+    vector using the screenshot.
+
+    Examples of `intent`:
+      - "scroll down"
+      - "scroll up to reveal hidden content"
+      - "scroll left to switch tab"
+      - "scroll right to view next item"
+
+    Parameters:
+        intent (str): A natural-language description of the direction or
+                      purpose of the scroll.
     """
     pass
 
@@ -126,6 +149,17 @@ def answer(text: str):
         text (str): The answer the agent wants to output.
     """
     pass
+
+
+def extract_data(data: str):
+    """
+    Extract data from the current screen. It will not perform any action, just return JSON formatted data from the current
+    screen. This is not an input action.
+
+    If you have to extract data from a list that doesn't fit on the screen, extract & scroll one by one.
+
+    You may ask the executor to scroll exactly 1 viewport
+    """
 
 
 def finish_task(success: bool):

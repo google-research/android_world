@@ -3,8 +3,8 @@ from typing import Any, Callable, Dict, List
 
 from litellm.utils import function_to_dict
 
-from android_world.agents.autodev_agent import executor_tools, planner_tools
-from android_world.agents.autodev_agent.llm import ToolCall
+from android_world.agents.autodev import executor_tools, planner_tools
+from android_world.agents.autodev.llm import ToolCall
 
 
 def get_all_planner_tools_dict() -> List[Dict[str, Any]]:

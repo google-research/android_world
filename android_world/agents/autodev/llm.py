@@ -6,7 +6,12 @@ from typing import Any, Dict, List, Optional, TypedDict, Union
 
 import litellm
 import numpy as np
+from dotenv import load_dotenv
 from PIL import Image
+
+from .todo_list import TodoList
+
+load_dotenv()
 
 
 class ToolCall(TypedDict):
@@ -27,37 +32,68 @@ class ChatResponse(TypedDict):
 class AutoDevLLM:
     """Simple LLM wrapper with conversation history and tool calls."""
 
-    def __init__(self, model: str = "gpt-4", system_prompt: str = "") -> None:
+    def __init__(
+        self,
+        model: str = "gpt-4",
+        system_prompt: str = "",
+        todo_list_enabled: bool = False,
+    ) -> None:
         self.model = model
         self.messages: List[Dict[str, Any]] = []
         if system_prompt:
             self.messages.append({"role": "system", "content": system_prompt})
+        self.todo_list_enabled = todo_list_enabled
+        self.todo_list = TodoList()
 
     def chat(
         self,
         user_message: Optional[str],
-        screenshot: Optional[np.ndarray] = None,
+        screenshot: np.ndarray,
         tools: Optional[List[Dict[str, Any]]] = None,
     ) -> ChatResponse:
         """Send a message and get response, optionally with tool calls."""
         # Prepare user message content
-        content: Union[str, List[Dict[str, Any]], None] = user_message
+        tools_for_call = list(tools) if tools is not None else []
 
-        if screenshot is not None:
-            # Convert screenshot to base64 for vision models
-            image_data = self._encode_image(screenshot)
-            content = [
-                {"type": "text", "text": user_message},
-                {"type": "image", "image": image_data},
-            ]
+        parts: List[Dict[str, Any]] = []
 
-        if content is not None:
-            self.messages.append({"role": "user", "content": content})
+        if user_message:  # only add if not None/empty
+            parts.append({"type": "text", "text": user_message})
+        image_data = self._encode_image(screenshot)
+        parts.append(
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}",
+                    # you probably don't need 'format' here, the data URL covers it
+                },
+            }
+        )
+        if self.todo_list_enabled:
+            parts.append({"type": "text", "text": self.todo_list.get_system_reminder()})
+        self.messages.append({"role": "user", "content": parts})
 
         kwargs: Dict[str, Any] = {"model": self.model, "messages": self.messages}
 
-        if tools:
-            kwargs["tools"] = tools
+        if self.todo_list_enabled:
+            tools_for_call.append(TodoList.get_tool())
+        if tools_for_call:
+            wrapped_tools = []
+            for t in tools_for_call:
+                wrapped_tools.append(
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": t["name"],
+                            "description": t.get("description", ""),
+                            "parameters": t.get(
+                                "parameters", {"type": "object", "properties": {}}
+                            ),
+                        },
+                    }
+                )
+            tools_for_call = wrapped_tools  # replace original
+            kwargs["tools"] = tools_for_call
             kwargs["tool_choice"] = "auto"
 
         response = litellm.completion(**kwargs)
@@ -65,6 +101,8 @@ class AutoDevLLM:
 
         # Extract content and tool_calls
         content = assistant_message.content
+
+        # Handle both legacy function_call and new tool_calls format
         tool_calls = getattr(assistant_message, "tool_calls", None)
 
         # Add to message history
@@ -82,7 +120,12 @@ class AutoDevLLM:
     def add_tool_result(self, tool_call_id: str, result: str) -> None:
         """Add tool execution result to conversation."""
         self.messages.append(
-            {"role": "tool", "tool_call_id": tool_call_id, "content": result}
+            {
+                "role": "tool",
+                "type": "function_call_output",
+                "tool_call_id": tool_call_id,
+                "content": result,
+            }
         )
 
     def clear_history(self) -> None:
