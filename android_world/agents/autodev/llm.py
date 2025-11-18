@@ -114,6 +114,9 @@ class AutoDevLLM:
             }
         )
 
+        # Remove image blocks from message history after API call
+        self._remove_image_blocks_from_history()
+
         # Return just the content and tool_calls
         return ChatResponse(content=content, tool_calls=tool_calls)
 
@@ -127,6 +130,16 @@ class AutoDevLLM:
                 "content": result,
             }
         )
+
+    def _remove_image_blocks_from_history(self) -> None:
+        """Remove image blocks from message history to save memory."""
+        for message in self.messages:
+            if message.get("role") == "user" and isinstance(message.get("content"), list):
+                # Filter out image_url blocks, keep only text blocks
+                message["content"] = [
+                    part for part in message["content"] 
+                    if part.get("type") != "image_url"
+                ]
 
     def clear_history(self) -> None:
         """Clear conversation history but keep system prompt."""
