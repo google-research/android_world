@@ -36,11 +36,14 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         self.scale = scale
         # Set the global scale in executor_tools
         executor_tools.SCALE = scale
-        self.planner_llm = AutoDevLLM("openai/gpt-5.1", PLANNER_SYSTEM_PROMPT, True)
+        self.planner_llm = AutoDevLLM(
+            "gemini/gemini-3-pro-preview", PLANNER_SYSTEM_PROMPT, True
+        )
 
         self.planner_tools_dict = get_all_planner_tools_dict()
         self.executor_tools_dict = get_all_executor_tools_dict()
-
+        self.target_width = 0
+        self.target_height = 0
         self.executor_registry = get_executor_registry()
         self._is_done = False
 
@@ -48,16 +51,14 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         """Resize screenshot to scaled logical screen size."""
         logical_width, logical_height = self.env.logical_screen_size
         # Scale down by self.scale for model input
-        target_width = int(logical_width * self.scale)
-        target_height = int(logical_height * self.scale)
-        print(f"logical width: {logical_width}, logical_height: {logical_height}")
-        print(f"target_width: {target_width}, target_height: {target_height}")
+        self.target_width = int(logical_width * self.scale)
+        self.target_height = int(logical_height * self.scale)
         current_height, current_width = screenshot.shape[:2]
-        print(f"current_width: {current_width}, current_height: {current_height}")
-        if current_width != target_width or current_height != target_height:
+
+        if current_width != self.target_width or current_height != self.target_height:
             resized = cv2.resize(
                 screenshot,
-                (target_width, target_height),
+                (self.target_width, self.target_height),
                 interpolation=cv2.INTER_LINEAR,
             )
             return resized
@@ -128,8 +129,20 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
     def execute_step(self, planner_tool_call: ToolCall) -> None:
         """Run the executor loop for a single planner tool call and
         send the final result back to the planner via add_tool_result."""
+
+        DIMENSIONS = f"""\n\n === DIMENSIONS ===
+        The screenshot being sent is {self.target_width}x{self.target_height}
+        it is {self.target_width} pixels in width.
+        it is {self.target_height} pixels in width.
+        The top left corner is 0,0.
+
+        Please point to things given its current width and height.
+
+        NEVER EXCEED width and height dimensions.
+
+        """
         executor_llm = AutoDevLLM(
-            "anthropic/claude-sonnet-4-5-20250929", EXECUTOR_SYSTEM_PROMPT
+            "anthropic/claude-sonnet-4-5-20250929", EXECUTOR_SYSTEM_PROMPT + DIMENSIONS
         )
 
         # This is the "intent" or high-level description from the planner.
@@ -144,6 +157,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                 screenshot,
                 tools=self.executor_tools_dict,
             )
+            print(execution_step)
 
             if execution_step["tool_calls"]:
                 for exec_call in execution_step["tool_calls"]:
@@ -153,7 +167,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                         args = json.loads(args)
 
                     # 1) Executor is done: return success back to planner
-                    if fname == "done":
+                    if fname == "report":
                         # expected schema: {"success": bool}
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
@@ -197,6 +211,8 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         # Hide the coordinates/pointer visualization on screen
         self.env.hide_automation_ui()
         self._step_count = 0
-        self.planner_llm = AutoDevLLM("openai/gpt-5.1", PLANNER_SYSTEM_PROMPT, True)
+        self.planner_llm = AutoDevLLM(
+            "gemini/gemini-3-pro-preview", PLANNER_SYSTEM_PROMPT, True
+        )
         self._is_done = False
         self._session_id = None  # Clear session ID on reset

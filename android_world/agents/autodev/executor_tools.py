@@ -28,6 +28,7 @@ def click(x: int, y: int) -> JSONAction:
 
 def double_tap(x: int, y: int) -> JSONAction:
     """Create a double-tap action at the specified coordinates.
+    You may use this to perform a zoom in gesture on a map or an image.
 
     Args:
         x: The x-coordinate of the double-tap position on the screen.
@@ -62,11 +63,15 @@ def scroll(
     direction: str, x: Optional[int] = None, y: Optional[int] = None
 ) -> JSONAction:
     """Create a scroll action in the specified direction.
-
+    In order to scroll a tiny bit, use swipe in the inverse direction instead.
     Args:
         direction: The scroll direction. Must be one of: 'up', 'down', 'left', 'right'.
         x: Optional x-coordinate for the scroll origin. If not provided, scrolls from center.
         y: Optional y-coordinate for the scroll origin. If not provided, scrolls from center.
+
+
+
+
 
     Raises:
         ValueError: If direction is not one of the valid scroll directions.
@@ -93,7 +98,8 @@ def swipe(
     direction: str, x: Optional[int] = None, y: Optional[int] = None
 ) -> JSONAction:
     """Create a swipe action in the specified direction.
-
+    You may scroll tiny amounts by using swipe instead.
+    For example, to scroll down, swipe the screen up from the upper half of the screen.
     Args:
         direction: The swipe direction. Must be one of: 'up', 'down', 'left', 'right'.
         x: Optional x-coordinate for the swipe origin. If not provided, swipes from center.
@@ -211,46 +217,6 @@ def wait() -> JSONAction:
     return JSONAction(action_type="wait")
 
 
-def keycode_action(
-    keycode: str, x: Optional[int] = None, y: Optional[int] = None
-) -> JSONAction:
-    """Create a keycode action for complex UI interactions.
-
-    Keycode actions are necessary for interacting with complex UI elements
-    (like large textareas) that can't be accessed or controlled by simply
-    tapping, ensuring precise control over navigation and selection.
-
-    Args:
-        keycode: The Android keycode to send. Must start with 'KEYCODE_'.
-                Common examples: 'KEYCODE_DPAD_UP', 'KEYCODE_DPAD_DOWN',
-                'KEYCODE_TAB', 'KEYCODE_ESCAPE', 'KEYCODE_DEL'.
-        x: Optional x-coordinate for the action.
-        y: Optional y-coordinate for the action.
-
-    Raises:
-        ValueError: If keycode doesn't start with 'KEYCODE_'.
-
-    Example:
-        >>> keycode_action('KEYCODE_TAB')
-        # Sends a TAB key press
-
-        >>> keycode_action('KEYCODE_DPAD_DOWN', x=100, y=200)
-        # Sends a DPAD down key press at position (100, 200)
-    """
-    if not keycode.startswith("KEYCODE_"):
-        raise ValueError(f"Keycode must start with 'KEYCODE_', got: {keycode}")
-
-    # Since there's no specific action_type for keycode in the original class,
-    # we'll need to determine the most appropriate action_type or extend the class
-    # For now, using a generic action with keycode parameter
-    scaled_x = int(int(x) / SCALE) if x is not None else None
-    scaled_y = int(int(y) / SCALE) if y is not None else None
-    return JSONAction(action_type="click", keycode=keycode, x=scaled_x, y=scaled_y)
-
-
-# Convenience functions for common patterns
-
-
 def tap(x: int, y: int) -> JSONAction:
     """Alias for click() - create a tap action at the specified coordinates.
 
@@ -301,46 +267,6 @@ def swipe_down(x: Optional[int] = None, y: Optional[int] = None) -> JSONAction:
     return swipe("down", x, y)
 
 
-def swipe_left(x: Optional[int] = None, y: Optional[int] = None) -> JSONAction:
-    """Convenience function for swiping left.
-
-    Args:
-        x: Optional x-coordinate for swipe origin.
-        y: Optional y-coordinate for swipe origin.
-    """
-    return swipe("left", x, y)
-
-
-def swipe_right(x: Optional[int] = None, y: Optional[int] = None) -> JSONAction:
-    """Convenience function for swiping right.
-
-    Args:
-        x: Optional x-coordinate for swipe origin.
-        y: Optional y-coordinate for swipe origin.
-    """
-    return swipe("right", x, y)
-
-
-def scroll_up(x: Optional[int] = None, y: Optional[int] = None) -> JSONAction:
-    """Convenience function for scrolling up.
-
-    Args:
-        x: Optional x-coordinate for scroll origin.
-        y: Optional y-coordinate for scroll origin.
-    """
-    return scroll("up", x, y)
-
-
-def scroll_down(x: Optional[int] = None, y: Optional[int] = None) -> JSONAction:
-    """Convenience function for scrolling down.
-
-    Args:
-        x: Optional x-coordinate for scroll origin.
-        y: Optional y-coordinate for scroll origin.
-    """
-    return scroll("down", x, y)
-
-
 def extracted_data(data: str):
     """
     This function is a callback to return extracted data.
@@ -349,15 +275,18 @@ def extracted_data(data: str):
     """
 
 
-def done(success: bool):
-    """Report the completion status of an action.
+def report(notes: str):
+    """Reports what it has achieved of current conversation objectives.
 
     This function serves as a callback or notification mechanism to indicate
-    whether the originally initiated action completed successfully or failed.
-    Use this when you are done, or have no way to proceed.
+    the overall status and summary of the performed actions on the originally stated goal.
+
+    It will help the planner in setting future objectives, and tracking the status
+    of the goals.
+
+    Use this when you have achieved what you set out to achieve or don't have a way to proceed.
 
     Args:
-        success: A boolean indicating the outcome of the action.
-                 True if the action succeeded, False if it failed.
+        notes: Succint notes on everything that was done and observed in this flow.
 
     """

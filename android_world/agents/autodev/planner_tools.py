@@ -1,6 +1,8 @@
 def tap(intent: str):
     """
     Declare an intent to tap a specific UI element on the current screen.
+    You must give the executor enough context on what we're accomplishing.
+    The executor will be able to make a series of taps to achieve our goal.
 
     This is a semantic instruction only — no coordinates should be provided.
     The executor will analyze the screenshot and determine the correct pixel
@@ -20,17 +22,26 @@ def tap(intent: str):
     pass
 
 
-def swipe(intent: str):
+def scan_for_element(intent: str):
     """
-    Declare an intent to perform a swipe gesture based on semantic direction
-    or purpose.
+    When you're aware of the element, item, text, ID or button that we're looking for, trust the executor to
+    scroll to find it itself. The executor performs well when it has goal oriented instructions.
+
+    """
+
+
+def gesture(intent: str):
+    """
+    Declare an intent to perform a gesture based on semantic direction
+    or purpose. You must give the executor context on the goal, so they may perform actions
+    towards the goal.
 
     The executor will translate the high-level intent into a concrete swipe
     vector using the screenshot.
 
     Examples of `intent`:
-      - "swipe down"
-      - "swipe up to reveal hidden content"
+      - "swipe left on the "Do taxes" reminder and and delete it.
+      - "swipe up to reveal the drawer from the bottom of the screen"
       - "swipe left to switch tab"
       - "swipe right to view next item"
 
@@ -43,19 +54,18 @@ def swipe(intent: str):
 
 def scroll(intent: str):
     """
-    This is an inverse action of swipe.
+    It is preferable that you call scan_for_element() tool call and let the executor make sense of what to do.
+
+    If you do have to call scroll, you must give the executor context about what they're to look for.
 
     To scroll up, you would swipe down.
     You may ask the executor to scroll exactly one view port up or down if you're doing data extraction.
 
-    The executor will translate the high-level intent into a concrete scroll
-    vector using the screenshot.
+    The executor will translate the high-level intent into a concrete gesture to execute.
 
     Examples of `intent`:
-      - "scroll down"
-      - "scroll up to reveal hidden content"
-      - "scroll left to switch tab"
-      - "scroll right to view next item"
+      - "scroll down and find where all the expenses are"
+      - "scroll right to see more properties."
 
     Parameters:
         intent (str): A natural-language description of the direction or

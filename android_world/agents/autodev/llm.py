@@ -1,6 +1,7 @@
 """Simple LiteLLM wrapper for AutoDev agent."""
 
 import base64
+import os
 from io import BytesIO
 from typing import Any, Dict, List, Optional, TypedDict, Union
 
@@ -74,7 +75,6 @@ class AutoDevLLM:
         self.messages.append({"role": "user", "content": parts})
 
         kwargs: Dict[str, Any] = {"model": self.model, "messages": self.messages}
-
         if self.todo_list_enabled:
             tools_for_call.append(TodoList.get_tool())
         if tools_for_call:
@@ -134,10 +134,13 @@ class AutoDevLLM:
     def _remove_image_blocks_from_history(self) -> None:
         """Remove image blocks from message history to save memory."""
         for message in self.messages:
-            if message.get("role") == "user" and isinstance(message.get("content"), list):
+            if message.get("role") == "user" and isinstance(
+                message.get("content"), list
+            ):
                 # Filter out image_url blocks, keep only text blocks
                 message["content"] = [
-                    part for part in message["content"] 
+                    part
+                    for part in message["content"]
                     if part.get("type") != "image_url"
                 ]
 
