@@ -57,12 +57,6 @@ def convert_to_posix_path(*args):
   return str(pathlib.Path(*args).as_posix())
 
 
-# Local temporary location for files copied to or from the device.
-TMP_LOCAL_LOCATION = convert_to_posix_path(
-    get_local_tmp_directory(), "android_world"
-)
-
-
 @dataclasses.dataclass(frozen=True)
 class FileWithMetadata:
   """File with its metadata like change time.
@@ -391,9 +385,10 @@ def tmp_file_from_device(
     FileNotFoundError: If device_file does not exist.
     RuntimeError: If there is an adb communication error.
   """
+  tmp_directory = tempfile.mkdtemp()
   head, tail = os.path.split(device_file)
   dir_and_file_name = convert_to_posix_path(os.path.basename(head), tail)
-  local_file = convert_to_posix_path(TMP_LOCAL_LOCATION, dir_and_file_name)
+  local_file = convert_to_posix_path(tmp_directory, dir_and_file_name)
   try:
     # Need root access to access many directories.
     adb_utils.set_root_if_needed(env, timeout_sec)
@@ -415,7 +410,14 @@ def tmp_file_from_device(
 
     yield local_file
   finally:
-    os.remove(local_file)
+    try:
+      shutil.rmtree(tmp_directory)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+      logging.error(
+          "Failed to delete temporary directory: %s with error %s",
+          tmp_directory,
+          e,
+      )
 
 
 def copy_file_to_device(
@@ -439,9 +441,7 @@ def copy_file_to_device(
   # escaped.
   escaped_path = remote_file_path.replace(" ", r"\ ").replace("'", r"\'")
 
-  adb_utils.issue_generic_request(
-      ["shell", "chmod", "777", escaped_path], env
-  )
+  adb_utils.issue_generic_request(["shell", "chmod", "777", escaped_path], env)
   return push_response
 
 
