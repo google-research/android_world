@@ -18,3 +18,5 @@ pytest
 requests
 tenacity
 termcolor
+pysqlite3
+litellm

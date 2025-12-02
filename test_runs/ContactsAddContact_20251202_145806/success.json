@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "reason": "Task completed successfully",
+  "duration_seconds": 242.74,
+  "total_steps": 15,
+  "task_name": "ContactsAddContact",
+  "timestamp_start": "2025-12-02T14:58:06.466464",
+  "timestamp_end": "2025-12-02T15:02:09.204087",
+  "agent_name": "autodev",
+  "final_status": "completed"
+}

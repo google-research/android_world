@@ -284,7 +284,7 @@ class Gpt4Wrapper(LlmWrapper, MultimodalLlmWrapper):
 
         payload = {
             "model": self.model,
-            # "temperature": self.temperature,
+            "temperature": self.temperature,  # Enable temperature for better format compliance
             "messages": [
                 {
                     "role": "user",
