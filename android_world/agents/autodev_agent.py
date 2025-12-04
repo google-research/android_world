@@ -1,8 +1,10 @@
 import json
+import os
 from typing import Optional
 
 import cv2
 import numpy as np
+from dotenv import load_dotenv
 
 from android_world.agents import base_agent
 from android_world.agents.autodev import executor_tools
@@ -23,7 +25,64 @@ from android_world.agents.autodev.util import (
 from android_world.env import interface
 from android_world.env.json_action import JSONAction
 
+# Load environment variables from .env file
+load_dotenv()
+
 MAX_EXECUTOR_STEPS = 10
+
+
+def _get_task_difficulty(task_name: Optional[str]) -> Optional[str]:
+    """Get task difficulty from task_metadata.json."""
+    if not task_name:
+        return None
+    
+    try:
+        # Load task_metadata.json
+        # Path: android_world/agents/autodev_agent.py -> android_world/task_metadata.json
+        # __file__ = android_world/agents/autodev_agent.py
+        # dirname(dirname(__file__)) = android_world/
+        android_world_dir = os.path.dirname(os.path.dirname(__file__))
+        metadata_path = os.path.join(android_world_dir, "task_metadata.json")
+        
+        if not os.path.exists(metadata_path):
+            print(f"⚠️  Warning: task_metadata.json not found at {metadata_path}")
+            return None
+        
+        with open(metadata_path, 'r') as f:
+            tasks = json.load(f)
+        
+        # Find task by name
+        for task in tasks:
+            if task.get("task_name") == task_name:
+                return task.get("difficulty")
+        
+        # Debug: print if task not found
+        print(f"⚠️  Warning: Task '{task_name}' not found in task_metadata.json")
+    except Exception as e:
+        # Print the exception for debugging
+        print(f"⚠️  Warning: Error loading task_metadata.json: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+    
+    return None
+
+
+def _get_planner_model(task_difficulty: Optional[str]) -> str:
+    """Select planner model based on task difficulty.
+    
+    Args:
+        task_difficulty: "easy", "medium", or "hard" from task_metadata.json
+        
+    Returns:
+        Model name string for the planner LLM
+    """
+    if task_difficulty in ("easy", "medium"):
+        # Use Sonnet for easy/medium tasks (can switch to "openai/gpt-5.1" if preferred)
+        return "anthropic/claude-sonnet-4-5-20250929"
+    else:
+        # Use Gemini for hard tasks (or if difficulty is unknown)
+        return "gemini/gemini-3-pro-preview"
 
 
 class AutoDev(base_agent.EnvironmentInteractingAgent):
@@ -39,12 +98,31 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         task_name: Optional[str] = None,
     ):
         super().__init__(env, name)
+        
+        # Initialize logging first (needed for _log_print)
+        self.enable_logging = enable_logging
+        self.task_name = task_name
+        # Pass env controller for ADB screenshot capture
+        env_controller = env.controller if hasattr(env, 'controller') else None
+        self.logger: TestRunLogger = TestRunLogger(log_dir, env_controller=env_controller) if enable_logging else None
+        self.current_goal = None
+        self.current_executor_session_id = None
+        
+        # Select planner model based on task difficulty
+        task_difficulty = _get_task_difficulty(task_name)
+        planner_model = _get_planner_model(task_difficulty)
+        
+        if task_difficulty:
+            self._log_print(f"📋 Task difficulty: {task_difficulty} → Using planner: {planner_model}")
+        else:
+            self._log_print(f"📋 Task difficulty: unknown → Using planner: {planner_model} (default: Gemini)")
+        
         self._step_count = 0
         self.scale = scale
         # Set the global scale in executor_tools
         executor_tools.SCALE = scale
         self.planner_llm = AutoDevLLM(
-            "gemini/gemini-3-pro-preview", PLANNER_SYSTEM_PROMPT, True
+            planner_model, PLANNER_SYSTEM_PROMPT, True
         )
 
         self.planner_tools_dict = get_all_planner_tools_dict()
@@ -53,15 +131,15 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         self.target_height = 0
         self.executor_registry = get_executor_registry()
         self._is_done = False
-
-        # Initialize logging
-        self.enable_logging = enable_logging
-        self.task_name = task_name
-        # Pass env controller for ADB screenshot capture
-        env_controller = env.controller if hasattr(env, 'controller') else None
-        self.logger: TestRunLogger = TestRunLogger(log_dir, env_controller=env_controller) if enable_logging else None
-        self.current_goal = None
-        self.current_executor_session_id = None
+    
+    def _log_print(self, message: str) -> None:
+        """Print message and also log to file if logging is enabled."""
+        print(message)
+        # Safely check if logging is enabled and logger exists
+        if (hasattr(self, 'enable_logging') and self.enable_logging and 
+            hasattr(self, 'logger') and self.logger and 
+            hasattr(self.logger, 'logs_file') and self.logger.logs_file):
+            self.logger.log_to_file(message)
 
     def _resize_screenshot_to_logical_size(self, screenshot: np.ndarray) -> np.ndarray:
         """Resize screenshot to scaled logical screen size."""
@@ -95,14 +173,15 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                 task_name=self.task_name,
                 scale=self.scale,
                 logical_screen_size=self.env.logical_screen_size,
-                planner_model="gemini/gemini-3-pro-preview",
+                planner_model=self.planner_llm.model,
                 executor_model="anthropic/claude-sonnet-4-5-20250929",
                 agent_name="autodev",
             )
-            print(f"📝 Logging enabled. Run ID: {run_id}")
+            self._log_print(f"📝 Logging enabled. Run ID: {run_id}")
 
         state = self.get_post_transition_state()
         screenshot = self._resize_screenshot_to_logical_size(state.pixels.copy())
+        
         planned_step = self.planner_llm.chat(
             goal if self._step_count == 1 else None,
             screenshot,
@@ -114,19 +193,19 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
             tool_names = []
             for tc in planned_step["tool_calls"]:
                 if isinstance(tc, dict):
-                    name = tc.get("function", {}).get("name", "unknown")
+                    name = tc.get("function", {}).get("name")
                 else:
                     tc_dict = serialize_tool_call(tc)
-                    name = tc_dict.get("function", {}).get("name", "unknown")
-                # Skip todo updates in terminal output
-                if name != "update_todos":
+                    name = tc_dict.get("function", {}).get("name")
+                # Skip todo updates in terminal output, only add valid names
+                if name and name != "update_todos":
                     tool_names.append(name)
             if tool_names:
-                print(f"Step {self._step_count}: {', '.join(tool_names)}")
+                self._log_print(f"Step {self._step_count}: Planning → {', '.join(tool_names)}")
             else:
-                print(f"Step {self._step_count}: Planning")
+                self._log_print(f"Step {self._step_count}: Planning → (updating todos)")
         else:
-            print(f"Step {self._step_count}: No tool calls")
+            self._log_print(f"Step {self._step_count}: Planning → (no actions)")
 
         # Log planner step
         if self.enable_logging:
@@ -149,41 +228,62 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
 
         if planned_step["tool_calls"]:
             for tool_call in planned_step["tool_calls"]:
-                if tool_call["function"]["name"] == "go_back":
-                    self.env.execute_action(JSONAction(action_type="navigate_back"))
-                    self.planner_llm.add_tool_result(
-                        tool_call["id"], json.dumps({"success": True})
-                    )
-                elif tool_call["function"]["name"] == "answer":
-                    args = tool_call["function"]["arguments"]
-                    if isinstance(args, str):
-                        args = json.loads(args)
-
-                    self.env.execute_action(
-                        JSONAction(
-                            action_type="answer",
-                            text=args["text"],
+                try:
+                    if tool_call["function"]["name"] == "go_back":
+                        self.env.execute_action(JSONAction(action_type="navigate_back"))
+                        self.planner_llm.add_tool_result(
+                            tool_call["id"], json.dumps({"success": True})
                         )
-                    )
-                    self.planner_llm.add_tool_result(
-                        tool_call["id"], json.dumps({"success": True})
-                    )
-                elif tool_call["function"]["name"] == "finish_task":
-                    # self.env.execute_action(JSONAction(action_type="finish_task"))
-                    self._is_done = True
-                    if self.enable_logging:
-                        # Note: success will be determined by task.is_successful() in the runner
-                        self.logger.end_run(status="completed", success=None)
-                elif tool_call["function"]["name"] == "update_todos":
-                    args = tool_call["function"]["arguments"]
-                    if isinstance(args, str):
-                        args = json.loads(args)
+                    elif tool_call["function"]["name"] == "answer":
+                        args = tool_call["function"]["arguments"]
+                        if isinstance(args, str):
+                            args = json.loads(args)
 
-                    res = self.planner_llm.todo_list.update(args["todos"])
-                    print(self.planner_llm.todo_list.pretty_print())
-                    self.planner_llm.add_tool_result(tool_call["id"], json.dumps(res))
-                else:
-                    self.execute_step(tool_call)
+                        self.env.execute_action(
+                            JSONAction(
+                                action_type="answer",
+                                text=args["text"],
+                            )
+                        )
+                        self.planner_llm.add_tool_result(
+                            tool_call["id"], json.dumps({"success": True})
+                        )
+                    elif tool_call["function"]["name"] == "finish_task":
+                        # self.env.execute_action(JSONAction(action_type="finish_task"))
+                        self._is_done = True
+                        # CRITICAL: Must add tool result for Anthropic API
+                        self.planner_llm.add_tool_result(
+                            tool_call["id"], json.dumps({"success": True, "task_completed": True})
+                        )
+                        if self.enable_logging:
+                            # Note: success will be determined by task.is_successful() in the runner
+                            self.logger.end_run(status="completed", success=None)
+                    elif tool_call["function"]["name"] == "update_todos":
+                        args = tool_call["function"]["arguments"]
+                        if isinstance(args, str):
+                            args = json.loads(args)
+
+                        res = self.planner_llm.todo_list.update(args["todos"])
+                        self._log_print(self.planner_llm.todo_list.pretty_print())
+                        self.planner_llm.add_tool_result(tool_call["id"], json.dumps(res))
+                    else:
+                        self.execute_step(tool_call)
+                except Exception as e:
+                    # Log planner step failure
+                    error_msg = f"Error executing planner tool {tool_call['function']['name']}: {str(e)}"
+                    self._log_print(f"❌ PLANNER ERROR: {error_msg}")
+                    if self.enable_logging:
+                        # Update the last planner step with error status
+                        if self.logger.planner_steps:
+                            last_step = self.logger.planner_steps[-1]
+                            if last_step.step_number == self._step_count:
+                                last_step.status = "failed"
+                                last_step.error_message = error_msg
+                                self.logger._save_planner_steps()
+                    # Always add tool result, even on error
+                    self.planner_llm.add_tool_result(
+                        tool_call["id"], json.dumps({"success": False, "error": error_msg})
+                    )
 
         return base_agent.AgentInteractionResult(
             done=self._is_done,
@@ -238,9 +338,19 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
             )
             # Show simplified executor step info (not full JSON)
             if execution_step.get("tool_calls"):
-                tool_names = [tc.get("function", {}).get("name", "unknown") if isinstance(tc, dict)
-                             else "unknown" for tc in execution_step["tool_calls"]]
-                print(f"  Executor: {', '.join(tool_names)}")
+                tool_names = []
+                for tc in execution_step["tool_calls"]:
+                    if isinstance(tc, dict):
+                        name = tc.get("function", {}).get("name")
+                    else:
+                        # Try to extract from object
+                        name = getattr(tc, "function", None)
+                        if name:
+                            name = getattr(name, "name", None)
+                    if name:
+                        tool_names.append(name)
+                if tool_names:
+                    self._log_print(f"  Executor: {', '.join(tool_names)}")
 
             # Track tool results for logging
             tool_results = []
@@ -273,6 +383,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                     "width": self.target_width,
                                     "height": self.target_height,
                                 },
+                                status="success",
                             )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
@@ -301,36 +412,54 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                     "width": self.target_width,
                                     "height": self.target_height,
                                 },
+                                status="success",
                             )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
                             json.dumps(args),
                         )
                         return
-
-                    # 3) Normal executor actions (tap, swipe, etc.)
-                    # Don't log intermediate micro-steps, only log when executor completes
                     try:
                         json_action = self.executor_registry[fname](**args)
                         self.env.execute_action(json_action)
                         executor_llm.add_tool_result(exec_call["id"], "Done")
                         tool_results.append(
-                            {"tool_call_id": exec_call["id"], "result": "Done"}
+                            {"tool_call_id": exec_call["id"], "result": "Done", "status": "success"}
                         )
-                    except (ValueError, TypeError) as e:
-                        error_msg = (
-                            f"Error with coordinates: {e}. "
-                            "Please provide x and y as separate integer values."
-                        )
+                    except Exception as e:
+                        error_msg = f"Error executing {fname}: {str(e)}"
                         executor_llm.add_tool_result(exec_call["id"], error_msg)
                         tool_results.append(
-                            {"tool_call_id": exec_call["id"], "result": error_msg}
+                            {"tool_call_id": exec_call["id"], "result": error_msg, "status": "failed"}
                         )
+                        if self.enable_logging:
+                            error_state = self.get_post_transition_state()
+                            error_screenshot = self._resize_screenshot_to_logical_size(error_state.pixels.copy())
+                            self.logger.log_executor_step(
+                                session_id=self.current_executor_session_id,
+                                step_number=executor_step_count,
+                                query=query,
+                                thinking=execution_step.get("content", ""),
+                                tool_calls=execution_step["tool_calls"],
+                                tool_results=tool_results,
+                                screenshot=error_screenshot,
+                                dimensions={
+                                    "width": self.target_width,
+                                    "height": self.target_height,
+                                },
+                                status="failed",
+                                error_message=error_msg,
+                            )
+                        self.planner_llm.add_tool_result(
+                            planner_tool_call["id"],
+                            json.dumps({"status": "failed", "error": error_msg}),
+                        )
+                        return
 
             else:
-                print(f"  Executor: ERROR - No tool call returned")
+                self._log_print(f"  Executor: ERROR - No tool call returned")
 
-                # Log error state only (this is a meaningful completion point)
+                # Log error state (this is a meaningful completion point)
                 if self.enable_logging:
                     error_state = self.get_post_transition_state()
                     error_screenshot = self._resize_screenshot_to_logical_size(error_state.pixels.copy())
@@ -340,12 +469,14 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                         query=query,  # Always use the original query from planner
                         thinking=execution_step.get("content", ""),
                         tool_calls=[],
-                        tool_results=[{"error": "No tool call returned"}],
+                        tool_results=[{"error": "No tool call returned", "status": "failed"}],
                         screenshot=error_screenshot,
                         dimensions={
                             "width": self.target_width,
                             "height": self.target_height,
                         },
+                        status="failed",
+                        error_message="No tool call returned by executor LLM",
                     )
 
                 self.planner_llm.add_tool_result(
@@ -353,6 +484,31 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                     json.dumps({"status": execution_step["content"]}),
                 )
                 return
+        
+        # If we reach here, max executor steps were reached without completion
+        self._log_print(f"❌ EXECUTOR ERROR: Max executor steps ({MAX_EXECUTOR_STEPS}) reached for query: {query}")
+        if self.enable_logging:
+            error_state = self.get_post_transition_state()
+            error_screenshot = self._resize_screenshot_to_logical_size(error_state.pixels.copy())
+            self.logger.log_executor_step(
+                session_id=self.current_executor_session_id,
+                step_number=executor_step_count,
+                query=query,
+                thinking="Max executor steps reached.",
+                tool_calls=[],
+                tool_results=[{"error": "Max executor steps reached", "status": "failed"}],
+                screenshot=error_screenshot,
+                dimensions={
+                    "width": self.target_width,
+                    "height": self.target_height,
+                },
+                status="failed",
+                error_message=f"Max executor steps ({MAX_EXECUTOR_STEPS}) reached",
+            )
+        self.planner_llm.add_tool_result(
+            planner_tool_call["id"],
+            json.dumps({"status": "failed", "error": "Max executor steps reached"}),
+        )
 
     def reset(self, go_home: bool = False) -> None:
         """Reset the agent."""

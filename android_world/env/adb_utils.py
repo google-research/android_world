@@ -130,7 +130,7 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict(
             "com.google.android.apps.messaging/com.google.android.apps.messaging.ui.ConversationListActivity"
         ),
         "simple sms messenger|simple sms": (
-            "com.simplemobiletools.smsmessenger/com.simplemobiletools.smsmessenger.activities.MainActivity"
+            "com.google.android.apps.messaging/com.google.android.apps.messaging.ui.ConversationListActivity"
         ),
         "dialer|phone": (
             "com.google.android.dialer/com.google.android.dialer.extensions.GoogleDialtactsActivity"

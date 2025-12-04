@@ -76,6 +76,8 @@ class PlannerStep:
     tool_calls: List[Any]  # Will be serialized when saving
     todo_list_state: Optional[Dict[str, Any]] = None
     screenshot_path: Optional[str] = None
+    status: str = "success"  # "success", "error", "failed"
+    error_message: Optional[str] = None
 
 
 @dataclass
@@ -90,6 +92,8 @@ class ExecutorStep:
     tool_results: List[Dict[str, Any]]
     screenshot_path: Optional[str] = None
     dimensions: Dict[str, int] = None  # width, height info
+    status: str = "success"  # "success", "error", "failed"
+    error_message: Optional[str] = None
 
 
 @dataclass
@@ -182,6 +186,10 @@ class TestRunLogger:
 
         # Create screenshots directory (unified for all screenshots)
         (self.current_run_dir / "screenshots").mkdir(exist_ok=True)
+        
+        # Create logs.txt file for terminal output
+        self.logs_file = self.current_run_dir / "logs.txt"
+        self.logs_file.touch()
 
         # Initialize metadata
         model_config = {}
@@ -217,6 +225,12 @@ class TestRunLogger:
         self._save_metadata()
 
         return run_id
+    
+    def log_to_file(self, message: str) -> None:
+        """Write a message to logs.txt file."""
+        if self.logs_file and self.logs_file.exists():
+            with open(self.logs_file, 'a', encoding='utf-8') as f:
+                f.write(f"{message}\n")
 
     def log_planner_step(
         self,
@@ -226,6 +240,8 @@ class TestRunLogger:
         tool_calls: List[Any],  # These are ChatCompletionMessageToolCall objects
         screenshot: np.ndarray,
         todo_list_state: Optional[Dict[str, Any]] = None,
+        status: str = "success",
+        error_message: Optional[str] = None,
     ) -> None:
         """
         Log a planner step with its screenshot.
@@ -250,6 +266,8 @@ class TestRunLogger:
             tool_calls=tool_calls,
             todo_list_state=todo_list_state,
             screenshot_path=f"screenshots/{screenshot_filename}",
+            status=status,
+            error_message=error_message,
         )
 
         self.planner_steps.append(planner_step)
@@ -285,6 +303,8 @@ class TestRunLogger:
         tool_results: List[Dict[str, Any]],
         screenshot: Optional[np.ndarray],  # Can be None to skip screenshot saving
         dimensions: Dict[str, int],
+        status: str = "success",
+        error_message: Optional[str] = None,
     ) -> None:
         """
         Log an executor step within a session.
@@ -305,7 +325,7 @@ class TestRunLogger:
             # Save screenshot to unified screenshots directory
             screenshot_filename = f"step_{global_step:03d}_executor.png"
             screenshot_path = self.current_run_dir / "screenshots" / screenshot_filename
-            cv2.imwrite(str(screenshot_path), screenshot)
+        cv2.imwrite(str(screenshot_path), screenshot)
             screenshot_path_str = f"screenshots/{screenshot_filename}"
 
         # Serialize tool_calls if they're ChatCompletionMessageToolCall objects
@@ -326,6 +346,8 @@ class TestRunLogger:
             tool_results=tool_results,
             screenshot_path=screenshot_path_str,  # None if no screenshot saved
             dimensions=dimensions,
+            status=status,
+            error_message=error_message,
         )
 
         self.executor_sessions[session_id].append(executor_step)
@@ -433,7 +455,7 @@ class TestRunLogger:
         self.run_metadata.end_time = datetime.now().isoformat()
         self.run_metadata.final_status = status
         if error_details:
-            self.run_metadata.error_details = error_details
+        self.run_metadata.error_details = error_details
 
         # Capture final screenshot if env_controller is available
         if self.env_controller:

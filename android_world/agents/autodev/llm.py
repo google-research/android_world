@@ -2,6 +2,7 @@
 
 import base64
 import os
+import time
 from io import BytesIO
 from typing import Any, Dict, List, Optional, TypedDict, Union
 
@@ -38,6 +39,8 @@ class AutoDevLLM:
         model: str = "gpt-4",
         system_prompt: str = "",
         todo_list_enabled: bool = False,
+        max_retries: int = 5,
+        retry_delay: float = 2.0,
     ) -> None:
         self.model = model
         self.messages: List[Dict[str, Any]] = []
@@ -45,6 +48,65 @@ class AutoDevLLM:
             self.messages.append({"role": "system", "content": system_prompt})
         self.todo_list_enabled = todo_list_enabled
         self.todo_list = TodoList()
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
+
+    def _is_retryable_error(self, error: Exception) -> bool:
+        """Check if an error is retryable (transient failures).
+        
+        IMPORTANT: 400 Bad Request errors are NOT retryable - they indicate
+        malformed requests (e.g., missing tool_result blocks).
+        """
+        error_str = str(error).lower()
+        error_type = type(error).__name__.lower()
+        
+        # 400 Bad Request is NOT retryable - it's a malformed request
+        if "400" in error_str or "bad request" in error_str:
+            return False
+        
+        # Check for retryable error patterns
+        retryable_patterns = [
+            "503",  # Service unavailable
+            "429",  # Rate limit
+            "500",  # Internal server error
+            "502",  # Bad gateway
+            "504",  # Gateway timeout
+            "overloaded",
+            "unavailable",
+            "timeout",
+            "rate limit",
+            "too many requests",
+            "connection",
+            "network",
+            "internal server error",
+            "bad gateway",
+            "service unavailable",
+        ]
+        
+        # Check error string
+        if any(pattern in error_str for pattern in retryable_patterns):
+            return True
+        
+        # Check for specific LiteLLM exception types
+        if hasattr(litellm, "exceptions"):
+            if isinstance(error, litellm.exceptions.BadRequestError):
+                # BadRequestError (400) is NOT retryable
+                return False
+            if isinstance(error, litellm.exceptions.InternalServerError):
+                return True
+            if isinstance(error, litellm.exceptions.RateLimitError):
+                return True
+            if isinstance(error, litellm.exceptions.APIConnectionError):
+                return True
+            if isinstance(error, litellm.exceptions.APIError):
+                # Check status code if available
+                if hasattr(error, "status_code"):
+                    if error.status_code == 400:
+                        return False  # 400 is NOT retryable
+                    if error.status_code in [429, 500, 502, 503, 504]:
+                        return True
+        
+        return False
 
     def chat(
         self,
@@ -74,7 +136,11 @@ class AutoDevLLM:
             parts.append({"type": "text", "text": self.todo_list.get_system_reminder()})
         self.messages.append({"role": "user", "content": parts})
 
-        kwargs: Dict[str, Any] = {"model": self.model, "messages": self.messages}
+        kwargs: Dict[str, Any] = {
+            "model": self.model,
+            "messages": self.messages,
+            "num_retries": self.max_retries,  # Use LiteLLM's built-in retry mechanism
+        }
         if self.todo_list_enabled:
             tools_for_call.append(TodoList.get_tool())
         if tools_for_call:
@@ -96,29 +162,53 @@ class AutoDevLLM:
             kwargs["tools"] = tools_for_call
             kwargs["tool_choice"] = "auto"
 
-        response = litellm.completion(**kwargs)
-        assistant_message = response.choices[0].message
+        retry_count = 0
+        current_delay = self.retry_delay
+        last_exception = None
+        
+        while retry_count <= self.max_retries:
+            try:
+                response = litellm.completion(**kwargs)
+                assistant_message = response.choices[0].message
 
-        # Extract content and tool_calls
-        content = assistant_message.content
+                content = assistant_message.content
 
-        # Handle both legacy function_call and new tool_calls format
-        tool_calls = getattr(assistant_message, "tool_calls", None)
+                tool_calls = getattr(assistant_message, "tool_calls", None)
 
-        # Add to message history
-        self.messages.append(
-            {
-                "role": "assistant",
-                "content": content,
-                "tool_calls": tool_calls,
-            }
-        )
+                self.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": content,
+                        "tool_calls": tool_calls,
+                    }
+                )
 
-        # Remove image blocks from message history after API call
-        self._remove_image_blocks_from_history()
+                self._remove_image_blocks_from_history()
 
-        # Return just the content and tool_calls
-        return ChatResponse(content=content, tool_calls=tool_calls)
+                return ChatResponse(content=content, tool_calls=tool_calls)
+                
+            except Exception as e:
+                last_exception = e
+                
+                if not self._is_retryable_error(e):
+                    raise
+                
+                if retry_count >= self.max_retries:
+                    print(f"❌ LLM API error (max retries {self.max_retries} reached): {e}")
+                    raise RuntimeError(
+                        f"LLM API call failed after {self.max_retries} retries. Last error: {last_exception}"
+                    ) from last_exception
+                
+                retry_count += 1
+                print(f"⚠️  LLM API error (attempt {retry_count}/{self.max_retries}): {type(e).__name__}: {str(e)[:100]}")
+                print(f"   Retrying in {current_delay:.1f} seconds...")
+                time.sleep(current_delay)
+                
+                current_delay = min(current_delay * 2, 60.0)
+        
+        raise RuntimeError(
+            f"LLM API call failed after {self.max_retries} retries. Last error: {last_exception}"
+        ) from last_exception
 
     def add_tool_result(self, tool_call_id: str, result: str) -> None:
         """Add tool execution result to conversation."""

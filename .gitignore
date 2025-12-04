@@ -4,7 +4,7 @@
 # Byte-compiled
 _pycache__/
 .cache/
-
+Check
 # Poetry, setuptools, PyPI distribution artifacts.
 /*.egg-info
 .eggs/
@@ -29,3 +29,5 @@ pyrightconfig.json
 .idea
 android_world/task_evals/information_retrieval/proto/
 .env
+test_runs/
+*.md

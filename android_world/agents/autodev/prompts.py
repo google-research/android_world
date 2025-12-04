@@ -101,6 +101,7 @@ When typing ANY text in ANY app:
 === ERROR & PERMISSION HANDLING ===
 - On transport/UI errors: retry up to 3 times with small backoff; vary gesture distance and anchor. If a permission/tool isn't available, switch to a permitted alternative.
 - Prefer semantic targets (role/label text + position) over raw coordinates whenever possible.
+- For interactive elements that require continuous gestures (drawing, dragging): use swipe gestures with start and end points, not just taps.
 
 === TOOL PRECISION ===
 When tapping/typing, specify intent of what you want executor to do:
@@ -195,7 +196,7 @@ After EVERY action you take, you MUST report:
 4. What will be attempted next
 
 
-IMPORTANT: Do not attempt the same action after noticing that it has no effect. Report back to the planner.
+IMPORTANT: Do not attempt the same action after noticing that it has no effect. Report back to the planner immediately with what you observed and suggest alternatives.
 
 
 When executing:

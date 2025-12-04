@@ -263,11 +263,12 @@ class SimpleSMSSendSms(task_eval.TaskEval):
         body=self.params["message"],
         current_time_ms=self.get_android_time(env.controller),
     )
-    in_correct_app = (
-        adb_utils.extract_package_name(
-            adb_utils.get_current_activity(env.controller)[0]
-        )
-        == "com.simplemobiletools.smsmessenger"
+    current_package = adb_utils.extract_package_name(
+        adb_utils.get_current_activity(env.controller)[0]
+    )
+    in_correct_app = current_package in (
+        "com.simplemobiletools.smsmessenger",
+        "com.google.android.apps.messaging"
     )
     if _check_if_stuck_at_sending(env):
       raise ValueError(
