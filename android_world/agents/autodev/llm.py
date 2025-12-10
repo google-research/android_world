@@ -42,10 +42,25 @@ class AutoDevLLM:
         max_retries: int = 5,
         retry_delay: float = 2.0,
     ) -> None:
+        self.is_anthropic: bool = model.startswith("anthropic")
         self.model = model
         self.messages: List[Dict[str, Any]] = []
         if system_prompt:
-            self.messages.append({"role": "system", "content": system_prompt})
+            if self.is_anthropic:
+                self.messages.append(
+                    {
+                        "role": "system",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": system_prompt,
+                                "cache_control": {"type": "ephemeral"},
+                            }
+                        ],
+                    }
+                )
+            else:
+                self.messages.append({"role": "system", "content": system_prompt})
         self.todo_list_enabled = todo_list_enabled
         self.todo_list = TodoList()
         self.max_retries = max_retries
@@ -53,17 +68,17 @@ class AutoDevLLM:
 
     def _is_retryable_error(self, error: Exception) -> bool:
         """Check if an error is retryable (transient failures).
-        
+
         IMPORTANT: 400 Bad Request errors are NOT retryable - they indicate
         malformed requests (e.g., missing tool_result blocks).
         """
         error_str = str(error).lower()
         error_type = type(error).__name__.lower()
-        
+
         # 400 Bad Request is NOT retryable - it's a malformed request
         if "400" in error_str or "bad request" in error_str:
             return False
-        
+
         # Check for retryable error patterns
         retryable_patterns = [
             "503",  # Service unavailable
@@ -82,11 +97,11 @@ class AutoDevLLM:
             "bad gateway",
             "service unavailable",
         ]
-        
+
         # Check error string
         if any(pattern in error_str for pattern in retryable_patterns):
             return True
-        
+
         # Check for specific LiteLLM exception types
         if hasattr(litellm, "exceptions"):
             if isinstance(error, litellm.exceptions.BadRequestError):
@@ -105,7 +120,7 @@ class AutoDevLLM:
                         return False  # 400 is NOT retryable
                     if error.status_code in [429, 500, 502, 503, 504]:
                         return True
-        
+
         return False
 
     def chat(
@@ -165,7 +180,7 @@ class AutoDevLLM:
         retry_count = 0
         current_delay = self.retry_delay
         last_exception = None
-        
+
         while retry_count <= self.max_retries:
             try:
                 response = litellm.completion(**kwargs)
@@ -186,26 +201,30 @@ class AutoDevLLM:
                 self._remove_image_blocks_from_history()
 
                 return ChatResponse(content=content, tool_calls=tool_calls)
-                
+
             except Exception as e:
                 last_exception = e
-                
+
                 if not self._is_retryable_error(e):
                     raise
-                
+
                 if retry_count >= self.max_retries:
-                    print(f"❌ LLM API error (max retries {self.max_retries} reached): {e}")
+                    print(
+                        f"❌ LLM API error (max retries {self.max_retries} reached): {e}"
+                    )
                     raise RuntimeError(
                         f"LLM API call failed after {self.max_retries} retries. Last error: {last_exception}"
                     ) from last_exception
-                
+
                 retry_count += 1
-                print(f"⚠️  LLM API error (attempt {retry_count}/{self.max_retries}): {type(e).__name__}: {str(e)[:100]}")
+                print(
+                    f"⚠️  LLM API error (attempt {retry_count}/{self.max_retries}): {type(e).__name__}: {str(e)[:100]}"
+                )
                 print(f"   Retrying in {current_delay:.1f} seconds...")
                 time.sleep(current_delay)
-                
+
                 current_delay = min(current_delay * 2, 60.0)
-        
+
         raise RuntimeError(
             f"LLM API call failed after {self.max_retries} retries. Last error: {last_exception}"
         ) from last_exception
