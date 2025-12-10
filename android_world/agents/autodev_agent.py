@@ -317,7 +317,8 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         # Start new executor session for logging
         if self.enable_logging:
             self.current_executor_session_id = self.logger.start_executor_session(
-                f"planner_step_{self._step_count}"
+                f"planner_step_{self._step_count}",
+                planner_tool_call_id=planner_tool_call["id"]
             )
 
         # This is the "intent" or high-level description from the planner.
@@ -339,18 +340,47 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
             # Show simplified executor step info (not full JSON)
             if execution_step.get("tool_calls"):
                 tool_names = []
+                tool_details = []  # ADD THIS: Store tool name + coordinates
                 for tc in execution_step["tool_calls"]:
                     if isinstance(tc, dict):
                         name = tc.get("function", {}).get("name")
+                        args = tc.get("function", {}).get("arguments", {})
                     else:
-                        # Try to extract from object
                         name = getattr(tc, "function", None)
                         if name:
                             name = getattr(name, "name", None)
+                            args = getattr(tc, "function", {}).get("arguments", {})
+                    
                     if name:
-                        tool_names.append(name)
-                if tool_names:
-                    self._log_print(f"  Executor: {', '.join(tool_names)}")
+                        # Parse args to extract coordinates
+                        if isinstance(args, str):
+                            try:
+                                args = json.loads(args)
+                            except:
+                                args = {}
+                        
+                        # Format tool call with coordinates
+                        if name in ["click", "double_tap", "long_press"]:
+                            x = args.get("x", "?")
+                            y = args.get("y", "?")
+                            tool_details.append(f"{name}({x}, {y})")
+                        elif name == "swipe":
+                            x0 = args.get("x0", "?")
+                            y0 = args.get("y0", "?")
+                            x1 = args.get("x1", "?")
+                            y1 = args.get("y1", "?")
+                            tool_details.append(f"{name}({x0},{y0}→{x1},{y1})")
+                        elif name == "scroll":
+                            direction = args.get("direction", "?")
+                            x = args.get("x", "")
+                            y = args.get("y", "")
+                            coord_str = f" at ({x},{y})" if x and y else ""
+                            tool_details.append(f"{name}({direction}{coord_str})")
+                        else:
+                            tool_details.append(name)
+                
+                if tool_details:
+                    self._log_print(f"  Executor: {', '.join(tool_details)}")
 
             # Track tool results for logging
             tool_results = []
@@ -384,6 +414,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                     "height": self.target_height,
                                 },
                                 status="success",
+                                planner_tool_call_id=planner_tool_call["id"],
                             )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
@@ -413,6 +444,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                     "height": self.target_height,
                                 },
                                 status="success",
+                                planner_tool_call_id=planner_tool_call["id"],
                             )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
@@ -421,11 +453,32 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                         return
                     try:
                         json_action = self.executor_registry[fname](**args)
+                        self._log_print(f"  {json_action}")
                         self.env.execute_action(json_action)
                         executor_llm.add_tool_result(exec_call["id"], "Done")
                         tool_results.append(
                             {"tool_call_id": exec_call["id"], "result": "Done", "status": "success"}
                         )
+                        
+                        # ADD THIS: Log EVERY step, not just completion/errors
+                        if self.enable_logging:
+                            current_state = self.get_post_transition_state()
+                            current_screenshot = self._resize_screenshot_to_logical_size(current_state.pixels.copy())
+                            self.logger.log_executor_step(
+                                session_id=self.current_executor_session_id,
+                                step_number=executor_step_count,
+                                query=query,
+                                thinking=execution_step.get("content", ""),
+                                tool_calls=execution_step["tool_calls"],
+                                tool_results=tool_results,
+                                screenshot=current_screenshot,
+                                dimensions={
+                                    "width": self.target_width,
+                                    "height": self.target_height,
+                                },
+                                status="success",
+                                planner_tool_call_id=planner_tool_call["id"],
+                            )
                     except Exception as e:
                         error_msg = f"Error executing {fname}: {str(e)}"
                         executor_llm.add_tool_result(exec_call["id"], error_msg)
@@ -449,6 +502,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                 },
                                 status="failed",
                                 error_message=error_msg,
+                                planner_tool_call_id=planner_tool_call["id"],
                             )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
@@ -477,6 +531,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                         },
                         status="failed",
                         error_message="No tool call returned by executor LLM",
+                        planner_tool_call_id=planner_tool_call["id"],
                     )
 
                 self.planner_llm.add_tool_result(
@@ -504,6 +559,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                 },
                 status="failed",
                 error_message=f"Max executor steps ({MAX_EXECUTOR_STEPS}) reached",
+                planner_tool_call_id=planner_tool_call["id"],
             )
         self.planner_llm.add_tool_result(
             planner_tool_call["id"],

@@ -60,6 +60,11 @@ def tool_call_to_query(tool_call: ToolCall) -> str:
         intent = arguments.get("intent", "")
         return f"Perform a swipe gesture to {intent}. Analyze the current screen and determine the appropriate start and end coordinates for this swipe action."
 
+    elif function_name == "scroll":
+        intent = arguments.get("intent", "")
+        base_query = f"Perform a scroll gesture to {intent}. Analyze the current screen and determine the appropriate coordinates for this scroll action."
+        return base_query
+
     elif function_name == "wait":
         seconds = arguments.get("seconds", 1)
         return f"Wait for {seconds} second{'s' if seconds != 1 else ''} before proceeding to the next action. No interaction required."

@@ -94,6 +94,7 @@ class ExecutorStep:
     dimensions: Dict[str, int] = None  # width, height info
     status: str = "success"  # "success", "error", "failed"
     error_message: Optional[str] = None
+    planner_tool_call_id: Optional[str] = None  # ADD THIS: Link to planner step
 
 
 @dataclass
@@ -277,18 +278,21 @@ class TestRunLogger:
         self._save_planner_steps()
         self._save_metadata()
 
-    def start_executor_session(self, planner_step_id: str) -> str:
+    def start_executor_session(self, planner_step_id: str, planner_tool_call_id: Optional[str] = None) -> str:
         """
         Start tracking a new executor session for a planner tool call.
 
         Args:
             planner_step_id: Unique identifier for the planner step
+            planner_tool_call_id: The actual planner tool call ID for linking
 
         Returns:
             session_id: Unique identifier for this executor session
         """
         session_id = f"exec_session_{len(self.executor_sessions):03d}"
         self.executor_sessions[session_id] = []
+        # Store planner tool call ID in session metadata (we'll need to add this)
+        # For now, we'll pass it to each log_executor_step call
         return session_id
 
     def log_executor_step(
@@ -297,14 +301,13 @@ class TestRunLogger:
         step_number: int,
         query: str,
         thinking: str,
-        tool_calls: List[
-            Any
-        ],  # These might also be ChatCompletionMessageToolCall objects
+        tool_calls: List[Any],
         tool_results: List[Dict[str, Any]],
-        screenshot: Optional[np.ndarray],  # Can be None to skip screenshot saving
+        screenshot: Optional[np.ndarray],
         dimensions: Dict[str, int],
         status: str = "success",
         error_message: Optional[str] = None,
+        planner_tool_call_id: Optional[str] = None,  # ADD THIS
     ) -> None:
         """
         Log an executor step within a session.
@@ -325,7 +328,7 @@ class TestRunLogger:
             # Save screenshot to unified screenshots directory
             screenshot_filename = f"step_{global_step:03d}_executor.png"
             screenshot_path = self.current_run_dir / "screenshots" / screenshot_filename
-        cv2.imwrite(str(screenshot_path), screenshot)
+            cv2.imwrite(str(screenshot_path), screenshot)  # FIX: This was incorrectly indented
             screenshot_path_str = f"screenshots/{screenshot_filename}"
 
         # Serialize tool_calls if they're ChatCompletionMessageToolCall objects
@@ -348,6 +351,7 @@ class TestRunLogger:
             dimensions=dimensions,
             status=status,
             error_message=error_message,
+            planner_tool_call_id=planner_tool_call_id,  # ADD THIS
         )
 
         self.executor_sessions[session_id].append(executor_step)
@@ -455,7 +459,7 @@ class TestRunLogger:
         self.run_metadata.end_time = datetime.now().isoformat()
         self.run_metadata.final_status = status
         if error_details:
-        self.run_metadata.error_details = error_details
+            self.run_metadata.error_details = error_details
 
         # Capture final screenshot if env_controller is available
         if self.env_controller:
@@ -493,7 +497,7 @@ class TestRunLogger:
 
             # Serialize tool_calls properly
             serialized_tool_calls = []
-            for tc in step.tool_calls:
+            for tc in (step.tool_calls or []):
                 if isinstance(tc, dict):
                     serialized_tool_calls.append(tc)
                 else:
@@ -923,15 +927,23 @@ class TestRunLogger:
                     # Task End
                     f.write("## Task End\n\n")
                     success_reason = "Action completed successfully"
-                    if executor_result and executor_result.tool_results:
-                        result = executor_result.tool_results[-1].get("result", {})
-                        if isinstance(result, dict):
-                            success_reason = result.get("notes", result.get("status", success_reason))
-                        elif isinstance(result, str) and result:
-                            success_reason = result
+                    step_status = "success"
+                    if executor_result:
+                        step_status = executor_result.status
+                        if executor_result.tool_results:
+                            result = executor_result.tool_results[-1].get("result", {})
+                            if isinstance(result, dict):
+                                success_reason = result.get("notes", result.get("status", success_reason))
+                            elif isinstance(result, str) and result:
+                                success_reason = result
+                        if executor_result.error_message:
+                            success_reason = executor_result.error_message
+                            step_status = "failed"
                     
                     f.write(f"**Success Reason:**\n\n{success_reason}\n\n")
-                    f.write("**✅ Success**\n\n")
+                    status_emoji = "✅" if step_status == "success" else "❌"
+                    status_text = "Success" if step_status == "success" else "Failed"
+                    f.write(f"**{status_emoji} {status_text}**\n\n")
                     
                     # Screenshot
                     if step.screenshot_path:
@@ -941,15 +953,20 @@ class TestRunLogger:
                     
                     f.write("---\n\n")
                 
-                # Final completion step
-                if self.run_metadata.success:
-                    f.write("## Plan Thinking\n\n")
-                    f.write("**Thoughts:**\n\n")
-                    f.write(f"{self.run_metadata.success_reason or 'Task completed successfully'}\n\n")
-                    f.write("**Code:**\n\n")
-                    f.write("```\n")
-                    f.write(f"complete_goal(message=\"{self.run_metadata.success_reason or 'Task completed'}\")\n")
-                    f.write("```\n\n")
+                # Final task validation result
+                f.write("## Final Task Validation\n\n")
+                if self.run_metadata.success is not None:
+                    if self.run_metadata.success:
+                        f.write("**✅ Task Validation: PASSED**\n\n")
+                        f.write(f"**Reason:** {self.run_metadata.success_reason or 'Task completed successfully'}\n\n")
+                    else:
+                        f.write("**❌ Task Validation: FAILED**\n\n")
+                        f.write(f"**Reason:** {self.run_metadata.success_reason or 'Task validation failed'}\n\n")
+                    if self.run_metadata.error_details:
+                        f.write(f"**Error Details:** {self.run_metadata.error_details}\n\n")
+                else:
+                    f.write("**⚠️ Task Validation: Not Completed**\n\n")
+                f.write("---\n\n")
 
     def _format_action(self, action: Dict[str, Any]) -> str:
         """Format action dictionary into human-readable string"""

@@ -151,23 +151,31 @@ def delete_all_rows_from_table(
     adb_utils.launch_app(app_name, env.controller)
     time.sleep(7.0)
 
-  with env.controller.pull_file(
-      remote_db_file_path, timeout_sec
-  ) as local_db_directory:
-    local_db_path = file_utils.convert_to_posix_path(
-        local_db_directory, os.path.split(remote_db_file_path)[1]
-    )
+  try:
+    with env.controller.pull_file(
+        remote_db_file_path, timeout_sec
+    ) as local_db_directory:
+      local_db_path = file_utils.convert_to_posix_path(
+          local_db_directory, os.path.split(remote_db_file_path)[1]
+      )
 
-    conn = sqlite3.connect(local_db_path)
-    cursor = conn.cursor()
-    delete_command = f"DELETE FROM {table_name}"
-    cursor.execute(delete_command)
-    conn.commit()
-    conn.close()
-    env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
-    adb_utils.close_app(
-        app_name, env.controller
-    )  # Close app to register the changes.
+      conn = sqlite3.connect(local_db_path)
+      cursor = conn.cursor()
+      delete_command = f"DELETE FROM {table_name}"
+      cursor.execute(delete_command)
+      conn.commit()
+      conn.close()
+      env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
+      adb_utils.close_app(
+          app_name, env.controller
+      )  # Close app to register the changes.
+  except sqlite3.OperationalError as e:
+    if "fts4" in str(e).lower() or "no such module" in str(e).lower():
+      delete_command = f"DELETE FROM {table_name}"
+      adb_utils.execute_sql_command(remote_db_file_path, delete_command, env.controller.env)
+      adb_utils.close_app(app_name, env.controller)
+    else:
+      raise
 
 
 def insert_rows_to_remote_db(
@@ -191,22 +199,38 @@ def insert_rows_to_remote_db(
     env: The environment.
     timeout_sec: Optional timeout in seconds for the database copy operation.
   """
-  with env.controller.pull_file(
-      remote_db_file_path, timeout_sec
-  ) as local_db_directory:
-    local_db_path = file_utils.convert_to_posix_path(
-        local_db_directory, os.path.split(remote_db_file_path)[1]
-    )
-
-    conn = sqlite3.connect(local_db_path)
-    cursor = conn.cursor()
-    for row in rows:
-      insert_command, values = sqlite_schema_utils.insert_into_db(
-          row, table_name, exclude_key
+  try:
+    with env.controller.pull_file(
+        remote_db_file_path, timeout_sec
+    ) as local_db_directory:
+      local_db_path = file_utils.convert_to_posix_path(
+          local_db_directory, os.path.split(remote_db_file_path)[1]
       )
-      cursor.execute(insert_command, values)
-    conn.commit()
-    conn.close()
 
-    env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
-    adb_utils.close_app(app_name, env.controller)
+      conn = sqlite3.connect(local_db_path)
+      cursor = conn.cursor()
+      for row in rows:
+        insert_command, values = sqlite_schema_utils.insert_into_db(
+            row, table_name, exclude_key
+        )
+        cursor.execute(insert_command, values)
+      conn.commit()
+      conn.close()
+
+      env.controller.push_file(local_db_path, remote_db_file_path, timeout_sec)
+      adb_utils.close_app(app_name, env.controller)
+  except sqlite3.OperationalError as e:
+    if "fts4" in str(e).lower() or "no such module" in str(e).lower():
+      for row in rows:
+        insert_command, values = sqlite_schema_utils.insert_into_db(
+            row, table_name, exclude_key
+        )
+        escaped_values = tuple(
+            str(v).replace("'", "''") if isinstance(v, str) else str(v)
+            for v in values
+        )
+        final_insert = insert_command.replace('?', "'{}'").format(*escaped_values)
+        adb_utils.execute_sql_command(remote_db_file_path, final_insert, env.controller.env)
+      adb_utils.close_app(app_name, env.controller)
+    else:
+      raise

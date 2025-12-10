@@ -122,6 +122,39 @@ def load_and_setup_env(
   Returns:
     An interactable Android environment.
   """
+  # Wait for device to be ready before proceeding
+  if emulator_setup:
+    logging.info('Waiting for emulator to be ready...')
+    _wait_for_device_ready(adb_path, console_port)
+  
   env = _get_env(console_port, adb_path, grpc_port)
   setup_env(env, emulator_setup, freeze_datetime)
   return env
+
+
+def _wait_for_device_ready(adb_path: str, console_port: int, timeout: int = 300) -> None:
+  """Wait for emulator to be fully booted and ADB to be ready."""
+  import subprocess
+  import time
+  
+  start_time = time.time()
+  device_id = f"emulator-{console_port}"
+  
+  while time.time() - start_time < timeout:
+    try:
+      # Check if device is online
+      result = subprocess.run(
+          [adb_path, "-s", device_id, "shell", "getprop", "sys.boot_completed"],
+          capture_output=True,
+          timeout=5,
+      )
+      if result.returncode == 0 and result.stdout.strip() == b"1":
+        logging.info("Emulator is ready!")
+        return
+    except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+      pass
+    
+    time.sleep(2)
+    logging.info("Waiting for emulator to boot...")
+  
+  raise RuntimeError(f"Emulator did not become ready within {timeout} seconds")

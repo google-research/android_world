@@ -167,9 +167,9 @@ def _get_agent(
         agent = t3a.T3A(env, infer.GeminiGcpWrapper(model_name="gemini-1.5-pro-latest"))
     # GPT.
     elif _AGENT_NAME.value == "t3a_gpt4":
-        agent = t3a.T3A(env, infer.Gpt4Wrapper("gpt-4-turbo-2024-04-09"))
+        agent = t3a.T3A(env, infer.Gpt4Wrapper("gpt-5.1"))
     elif _AGENT_NAME.value == "m3a_gpt4v":
-        agent = m3a.M3A(env, infer.Gpt4Wrapper("gpt-4-turbo-2024-04-09"))
+        agent = m3a.M3A(env, infer.Gpt4Wrapper("gpt-5.1"))
     # SeeAct.
     elif _AGENT_NAME.value == "seeact":
         agent = seeact.SeeAct(env)
