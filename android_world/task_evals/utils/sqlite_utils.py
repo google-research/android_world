@@ -170,10 +170,29 @@ def delete_all_rows_from_table(
           app_name, env.controller
       )  # Close app to register the changes.
   except sqlite3.OperationalError as e:
-    if "fts4" in str(e).lower() or "no such module" in str(e).lower():
-      delete_command = f"DELETE FROM {table_name}"
-      adb_utils.execute_sql_command(remote_db_file_path, delete_command, env.controller.env)
-      adb_utils.close_app(app_name, env.controller)
+    error_str = str(e).lower()
+    if "fts4" in error_str or "fts3" in error_str or "no such module" in error_str:
+      try:
+        delete_command = f"DELETE FROM {table_name}"
+        adb_utils.execute_sql_command(remote_db_file_path, delete_command, env.controller.env)
+        adb_utils.close_app(app_name, env.controller)
+      except Exception as adb_error:
+        adb_error_str = str(adb_error).lower()
+        if "malformed database schema" in adb_error_str or "trigger" in adb_error_str or "constraint" in adb_error_str or "syntax error" in adb_error_str:
+          try:
+            try:
+              adb_utils.issue_generic_request(["shell", f"rm -f {remote_db_file_path}"], env.controller.env)
+              adb_utils.issue_generic_request(["shell", f"rm -f {remote_db_file_path}-wal"], env.controller.env)
+              adb_utils.issue_generic_request(["shell", f"rm -f {remote_db_file_path}-shm"], env.controller.env)
+            except Exception:
+              pass
+            adb_utils.launch_app(app_name, env.controller)
+            time.sleep(3.0)
+            adb_utils.close_app(app_name, env.controller)
+          except Exception as delete_error:
+            raise RuntimeError(f"Failed to delete from {table_name} due to malformed database schema. Tried deleting database file but failed. Original error: {str(adb_error)}, Delete error: {str(delete_error)}")
+        else:
+          raise
     else:
       raise
 

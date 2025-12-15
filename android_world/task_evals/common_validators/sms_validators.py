@@ -267,8 +267,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
         adb_utils.get_current_activity(env.controller)[0]
     )
     in_correct_app = current_package in (
-        "com.simplemobiletools.smsmessenger",
-        "com.google.android.apps.messaging"
+        "com.simplemobiletools.smsmessenger"
     )
     if _check_if_stuck_at_sending(env):
       raise ValueError(

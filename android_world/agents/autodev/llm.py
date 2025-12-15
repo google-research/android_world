@@ -54,7 +54,9 @@ class AutoDevLLM:
                             {
                                 "type": "text",
                                 "text": system_prompt,
-                                "cache_control": {"type": "ephemeral"},
+                                "cache_control": {
+                                    "type": "ephemeral",
+                                    "ttl": "1h"},
                             }
                         ],
                     }
@@ -128,8 +130,16 @@ class AutoDevLLM:
         user_message: Optional[str],
         screenshot: np.ndarray,
         tools: Optional[List[Dict[str, Any]]] = None,
+        transcription: Optional[str] = None,
     ) -> ChatResponse:
-        """Send a message and get response, optionally with tool calls."""
+        """Send a message and get response, optionally with tool calls.
+        
+        Args:
+            user_message: Optional user message/goal
+            screenshot: Screenshot as numpy array
+            tools: Optional list of tools available
+            transcription: Optional pre-transcribed text from the screen
+        """
         # Prepare user message content
         tools_for_call = list(tools) if tools is not None else []
 
@@ -137,6 +147,14 @@ class AutoDevLLM:
 
         if user_message:  # only add if not None/empty
             parts.append({"type": "text", "text": user_message})
+        
+        # Add transcription if available
+        if transcription:
+            parts.append({
+                "type": "text",
+                "text": f"<screen_transcription>\n{transcription}\n</screen_transcription>"
+            })
+        
         image_data = self._encode_image(screenshot)
         parts.append(
             {

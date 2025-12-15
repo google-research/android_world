@@ -1,10 +1,12 @@
 import json
 import os
-from typing import Optional
+import time
+from typing import Optional, Dict, Any
 
 import cv2
 import numpy as np
 from dotenv import load_dotenv
+from android_env.components import errors
 
 from android_world.agents import base_agent
 from android_world.agents.autodev import executor_tools
@@ -16,6 +18,7 @@ from android_world.agents.autodev.prompts import (
     EXECUTOR_SYSTEM_PROMPT,
     PLANNER_SYSTEM_PROMPT,
 )
+from android_world.agents.autodev.transcription import transcribe_screen
 from android_world.agents.autodev.util import (
     get_all_executor_tools_dict,
     get_all_planner_tools_dict,
@@ -28,7 +31,7 @@ from android_world.env.json_action import JSONAction
 # Load environment variables from .env file
 load_dotenv()
 
-MAX_EXECUTOR_STEPS = 10
+MAX_EXECUTOR_STEPS = 5
 
 
 def _get_task_difficulty(task_name: Optional[str]) -> Optional[str]:
@@ -78,10 +81,9 @@ def _get_planner_model(task_difficulty: Optional[str]) -> str:
         Model name string for the planner LLM
     """
     if task_difficulty in ("easy", "medium"):
-        # Use Sonnet for easy/medium tasks (can switch to "openai/gpt-5.1" if preferred)
-        return "anthropic/claude-sonnet-4-5-20250929"
+        # return "anthropic/claude-sonnet-4-5-20250929"
+        return "openai/gpt-5.2"
     else:
-        # Use Gemini for hard tasks (or if difficulty is unknown)
         return "gemini/gemini-3-pro-preview"
 
 
@@ -131,6 +133,16 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         self.target_height = 0
         self.executor_registry = get_executor_registry()
         self._is_done = False
+        
+        # Navigation state tracking for deterministic behavior
+        self.navigation_state = {
+            "seen_items": set(),  # Track items/dates seen in transcriptions
+            "scroll_history": [],  # Track scroll directions and what was visible
+            "visited_screens": [],  # Track screens/navigation paths
+            "last_visible_dates": [],  # Track dates visible in last transcription
+            "scroll_direction": None,  # "up", "down", or None
+            "scroll_count": 0,  # Count of scrolls in current search
+        }
     
     def _log_print(self, message: str) -> None:
         """Print message and also log to file if logging is enabled."""
@@ -158,6 +170,115 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
             return resized
         return screenshot
 
+    def _extract_visible_items_from_transcription(self, transcription: Optional[str]) -> Dict[str, Any]:
+        """Extract visible items, dates, and content from transcription for state tracking."""
+        if not transcription:
+            return {"dates": [], "items": [], "text": ""}
+        
+        # Extract dates (various formats)
+        import re
+        dates = []
+        date_patterns = [
+            r'\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b',  # Day names
+            r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+',  # Month Day
+            r'\b\d{1,2}/\d{1,2}/\d{2,4}\b',  # MM/DD/YYYY
+            r'\bOct\s+\d+\b',  # Oct 13
+        ]
+        
+        for pattern in date_patterns:
+            matches = re.findall(pattern, transcription, re.IGNORECASE)
+            dates.extend(matches)
+        
+        # Extract list items (lines that look like tasks/items)
+        lines = transcription.split('\n')
+        items = [line.strip() for line in lines if line.strip() and len(line.strip()) > 3]
+        
+        return {
+            "dates": list(set(dates)),
+            "items": items[:20],  # Limit to first 20 items
+            "text": transcription[:500],  # First 500 chars for comparison
+        }
+    
+    def _has_seen_content(self, transcription: Optional[str]) -> bool:
+        """Check if we've seen this content before (to avoid revisiting)."""
+        if not transcription:
+            return False
+        
+        visible = self._extract_visible_items_from_transcription(transcription)
+        
+        # Check if we've seen these dates/items before
+        for date in visible["dates"]:
+            if date in self.navigation_state["seen_items"]:
+                return True
+        
+        # Check if transcription text is similar to previous ones
+        text_hash = hash(visible["text"])
+        if text_hash in self.navigation_state.get("seen_text_hashes", set()):
+            return True
+        
+        return False
+    
+    def _update_navigation_state(self, transcription: Optional[str], action: str):
+        """Update navigation state after an action."""
+        if not transcription:
+            return
+        
+        visible = self._extract_visible_items_from_transcription(transcription)
+        
+        # Add dates/items to seen set
+        for date in visible["dates"]:
+            self.navigation_state["seen_items"].add(date)
+        
+        # Track scroll history
+        if action.startswith("scroll"):
+            self.navigation_state["scroll_history"].append({
+                "direction": action,
+                "visible_dates": visible["dates"],
+                "visible_items_count": len(visible["items"]),
+            })
+            self.navigation_state["scroll_count"] += 1
+        else:
+            # Reset scroll count on non-scroll action
+            self.navigation_state["scroll_count"] = 0
+        
+        # Track text hashes to detect revisiting
+        if "seen_text_hashes" not in self.navigation_state:
+            self.navigation_state["seen_text_hashes"] = set()
+        text_hash = hash(visible["text"])
+        self.navigation_state["seen_text_hashes"].add(text_hash)
+    
+    def _determine_scroll_strategy(self, target_date: Optional[str], transcription: Optional[str]) -> str:
+        """Determine systematic scroll strategy based on target and current state."""
+        if not transcription or not target_date:
+            return "scroll_down"  # Default
+        
+        visible = self._extract_visible_items_from_transcription(transcription)
+        visible_dates = visible["dates"]
+        
+        # If we've scrolled too much, try opposite direction
+        if self.navigation_state["scroll_count"] >= 5:
+            last_direction = self.navigation_state.get("scroll_direction", "down")
+            return "scroll_up" if last_direction == "down" else "scroll_down"
+        
+        # If we've seen this content before, we're going in circles
+        if self._has_seen_content(transcription):
+            return "stop_scrolling"  # Signal to try alternative
+        
+        # Binary search strategy for dates:
+        # If target is Oct 13 and we see "Oct 15", scroll down (older)
+        # If target is Oct 13 and we see "Oct 10", scroll up (newer)
+        # This requires date parsing logic (simplified here)
+        
+        # For now, use simple heuristic:
+        # If we've been scrolling down and haven't found it, try up
+        if self.navigation_state["scroll_count"] >= 3:
+            if self.navigation_state.get("scroll_direction") == "down":
+                return "scroll_up"
+            else:
+                return "scroll_down"
+        
+        return "scroll_down"  # Default
+
     def step(self, goal: str) -> base_agent.AgentInteractionResult:
         """
         This is the main agent loop.
@@ -182,10 +303,25 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         state = self.get_post_transition_state()
         screenshot = self._resize_screenshot_to_logical_size(state.pixels.copy())
         
+        # Pre-transcribe screen using Haiku
+        transcription = transcribe_screen(screenshot)
+        if transcription:
+            self._log_print(f"📝 Screen transcribed ({len(transcription)} chars)")
+            
+            # Update navigation state
+            self._update_navigation_state(transcription, "screenshot")
+            
+            # Check if we've seen this content (avoid revisiting)
+            if self._has_seen_content(transcription):
+                self._log_print("⚠️  Warning: This content was seen before - may be revisiting")
+        else:
+            self._log_print("⚠️  Screen transcription failed or empty")
+        
         planned_step = self.planner_llm.chat(
             goal if self._step_count == 1 else None,
             screenshot,
             tools=self.planner_tools_dict,
+            transcription=transcription,
         )
 
         # Show simplified planner step info (not full JSON)
@@ -479,6 +615,73 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                 status="success",
                                 planner_tool_call_id=planner_tool_call["id"],
                             )
+                    except errors.AdbControllerError as e:
+                        error_str = str(e).lower()
+                        if "device" in error_str and ("not found" in error_str or "offline" in error_str) or "unavailable" in error_str:
+                            self._log_print("⚠️  Emulator disconnected. Attempting to reconnect...")
+                            try:
+                                self.env.controller.refresh_env()
+                                time.sleep(2.0)
+                                self._log_print("✓ Reconnected. Retrying action...")
+                                json_action = self.executor_registry[fname](**args)
+                                self.env.execute_action(json_action)
+                                executor_llm.add_tool_result(exec_call["id"], "Done (after reconnection)")
+                                tool_results.append(
+                                    {"tool_call_id": exec_call["id"], "result": "Done (after reconnection)", "status": "success"}
+                                )
+                                if self.enable_logging:
+                                    current_state = self.get_post_transition_state()
+                                    current_screenshot = self._resize_screenshot_to_logical_size(current_state.pixels.copy())
+                                    self.logger.log_executor_step(
+                                        session_id=self.current_executor_session_id,
+                                        step_number=executor_step_count,
+                                        query=query,
+                                        thinking=execution_step.get("content", ""),
+                                        tool_calls=execution_step["tool_calls"],
+                                        tool_results=tool_results,
+                                        screenshot=current_screenshot,
+                                        dimensions={
+                                            "width": self.target_width,
+                                            "height": self.target_height,
+                                        },
+                                        status="success",
+                                        planner_tool_call_id=planner_tool_call["id"],
+                                    )
+                            except Exception as retry_error:
+                                error_msg = f"Emulator disconnected and reconnection failed: {str(retry_error)}"
+                                executor_llm.add_tool_result(exec_call["id"], error_msg)
+                                tool_results.append(
+                                    {"tool_call_id": exec_call["id"], "result": error_msg, "status": "failed"}
+                                )
+                                if self.enable_logging:
+                                    try:
+                                        error_state = self.get_post_transition_state()
+                                        error_screenshot = self._resize_screenshot_to_logical_size(error_state.pixels.copy())
+                                    except:
+                                        error_screenshot = None
+                                    self.logger.log_executor_step(
+                                        session_id=self.current_executor_session_id,
+                                        step_number=executor_step_count,
+                                        query=query,
+                                        thinking=execution_step.get("content", ""),
+                                        tool_calls=execution_step["tool_calls"],
+                                        tool_results=tool_results,
+                                        screenshot=error_screenshot,
+                                        dimensions={
+                                            "width": self.target_width,
+                                            "height": self.target_height,
+                                        },
+                                        status="failed",
+                                        error_message=error_msg,
+                                        planner_tool_call_id=planner_tool_call["id"],
+                                    )
+                                self.planner_llm.add_tool_result(
+                                    planner_tool_call["id"],
+                                    json.dumps({"status": "failed", "error": error_msg}),
+                                )
+                                return
+                        else:
+                            raise
                     except Exception as e:
                         error_msg = f"Error executing {fname}: {str(e)}"
                         executor_llm.add_tool_result(exec_call["id"], error_msg)

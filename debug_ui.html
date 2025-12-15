@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android World Debug UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 400px;
+            background: #1a1a1a;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f0f0f;
+        }
+
+        .screenshot-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screenshot-container {
+            position: relative;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screenshot-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+
+        .action-overlay {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .click-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #00ff00;
+            border-radius: 50%;
+            background: rgba(0, 255, 0, 0.2);
+            transform: translate(-50%, -50%);
+            animation: pulse 1s infinite;
+        }
+
+        .swipe-path {
+            position: absolute;
+            stroke: #00ff00;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 5,5;
+            animation: dash 1s linear infinite;
+        }
+
+        .swipe-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid #00ff00;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: -10; }
+        }
+
+        .step-item {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .step-item:hover {
+            background: #2a2a2a;
+            border-color: #555;
+        }
+
+        .step-item.active {
+            background: #1e3a5f;
+            border-color: #4a90e2;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: #4a90e2;
+            font-size: 14px;
+        }
+
+        .step-time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .step-thinking {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .step-tool-calls {
+            margin-top: 12px;
+        }
+
+        .tool-call {
+            background: #1a1a1a;
+            border-left: 3px solid #4a90e2;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tool-call-name {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 4px;
+        }
+
+        .tool-call-args {
+            color: #aaa;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .executor-steps {
+            margin-top: 12px;
+            padding-left: 16px;
+            border-left: 2px solid #333;
+        }
+
+        .executor-step {
+            background: #1f1f1f;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .executor-step:hover {
+            background: #2a2a2a;
+            border-color: #4a90e2;
+        }
+
+        .executor-step.active {
+            background: #1e3a5f;
+            border-color: #4a90e2;
+        }
+
+        .executor-query {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .executor-tool-call {
+            background: #151515;
+            padding: 6px 10px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .file-input-container {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .file-input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 8px;
+            background: #252525;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        .file-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .load-button {
+            width: 100%;
+            padding: 10px;
+            background: #4a90e2;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .load-button:hover {
+            background: #5aa0f2;
+        }
+
+        .load-button:disabled {
+            background: #333;
+            cursor: not-allowed;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .status-success {
+            background: #2d5a2d;
+            color: #90ee90;
+        }
+
+        .status-error {
+            background: #5a2d2d;
+            color: #ee9090;
+        }
+
+        .status-failed {
+            background: #5a4d2d;
+            color: #eecc90;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-size: 14px;
+        }
+
+        .action-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 10;
+        }
+
+        .action-info-title {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 4px;
+        }
+
+        .action-info-detail {
+            color: #ccc;
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="file-input-container">
+                <label class="file-input-label">Test Run Directory:</label>
+                <input type="text" id="runDirInput" class="file-input" placeholder="/path/to/test_runs/TaskName_YYYYMMDD_HHMMSS">
+                <button class="load-button" onclick="loadData()">Load Run</button>
+                <button class="load-button" onclick="browseRuns()" style="margin-top: 8px; background: #666;">Browse Runs</button>
+                <div id="runsList" style="margin-top: 12px; max-height: 200px; overflow-y: auto; display: none;"></div>
+            </div>
+            <div id="stepsContainer"></div>
+        </div>
+        <div class="main-content">
+            <div class="screenshot-panel" id="screenshotPanel">
+                <div class="empty-state">Select a step to view screenshot</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let plannerSteps = [];
+        let executorSessions = {};
+        let basePath = '';
+        let executorStepsByToolCall = {};
+
+        async function loadData() {
+            const runDir = document.getElementById('runDirInput').value.trim();
+            if (!runDir) {
+                alert('Please enter a test run directory path');
+                return;
+            }
+
+            basePath = runDir;
+            
+            try {
+                const plannerUrl = runDir.startsWith('http') 
+                    ? `${runDir}/planner_steps.json`
+                    : `${runDir}/planner_steps.json`;
+                const executorUrl = runDir.startsWith('http')
+                    ? `${runDir}/executor_sessions.json`
+                    : `${runDir}/executor_sessions.json`;
+
+                const plannerResponse = await fetch(plannerUrl);
+                if (!plannerResponse.ok) throw new Error('Failed to load planner_steps.json');
+                plannerSteps = await plannerResponse.json();
+
+                const executorResponse = await fetch(executorUrl);
+                if (!executorResponse.ok) throw new Error('Failed to load executor_sessions.json');
+                executorSessions = await executorResponse.json();
+
+                executorStepsByToolCall = {};
+                for (const sessionId in executorSessions) {
+                    const steps = executorSessions[sessionId];
+                    steps.forEach(step => {
+                        if (step.planner_tool_call_id) {
+                            if (!executorStepsByToolCall[step.planner_tool_call_id]) {
+                                executorStepsByToolCall[step.planner_tool_call_id] = [];
+                            }
+                            executorStepsByToolCall[step.planner_tool_call_id].push(step);
+                        }
+                    });
+                }
+
+                renderSteps();
+            } catch (error) {
+                alert(`Error loading data: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function renderSteps() {
+            const container = document.getElementById('stepsContainer');
+            container.innerHTML = '';
+
+            plannerSteps.forEach((step, stepIndex) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step-item';
+                stepDiv.dataset.stepIndex = stepIndex;
+                stepDiv.onclick = () => selectPlannerStep(stepIndex);
+
+                const statusClass = step.status === 'success' ? 'status-success' : 
+                                   step.status === 'error' ? 'status-error' : 'status-failed';
+                const statusText = step.status || 'unknown';
+
+                stepDiv.innerHTML = `
+                    <div class="step-header">
+                        <span class="step-number">Step ${step.step_number}</span>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <span class="step-time">${formatTime(step.timestamp)}</span>
+                    </div>
+                    ${step.thinking ? `<div class="step-thinking">${escapeHtml(step.thinking)}</div>` : ''}
+                    <div class="step-tool-calls">
+                        ${step.tool_calls ? step.tool_calls.map(tc => `
+                            <div class="tool-call">
+                                <div class="tool-call-name">${tc.function.name}</div>
+                                <div class="tool-call-args">${escapeHtml(JSON.stringify(JSON.parse(tc.function.arguments || '{}'), null, 2))}</div>
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                `;
+
+                const executorStepsDiv = document.createElement('div');
+                executorStepsDiv.className = 'executor-steps';
+                
+                step.tool_calls?.forEach(toolCall => {
+                    const executorSteps = findExecutorStepsForToolCall(toolCall.id);
+                    if (executorSteps.length > 0) {
+                        const toolCallHeader = document.createElement('div');
+                        toolCallHeader.style.fontSize = '11px';
+                        toolCallHeader.style.color = '#888';
+                        toolCallHeader.style.marginBottom = '4px';
+                        toolCallHeader.style.fontWeight = 'bold';
+                        toolCallHeader.textContent = `→ ${toolCall.function.name} (${executorSteps.length} step${executorSteps.length !== 1 ? 's' : ''})`;
+                        executorStepsDiv.appendChild(toolCallHeader);
+                    }
+                    
+                    executorSteps.forEach((execStep, execIndex) => {
+                        const execDiv = document.createElement('div');
+                        execDiv.className = 'executor-step';
+                        execDiv.dataset.stepIndex = stepIndex;
+                        execDiv.dataset.execIndex = execIndex;
+                        execDiv.dataset.toolCallId = toolCall.id;
+                        execDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            selectExecutorStep(stepIndex, execIndex, toolCall.id);
+                        };
+
+                        const toolCallSummary = execStep.tool_calls ? execStep.tool_calls.map(etc => {
+                            try {
+                                const args = typeof etc.function.arguments === 'string' 
+                                    ? JSON.parse(etc.function.arguments || '{}')
+                                    : (etc.function.arguments || {});
+                                if (etc.function.name === 'tap' || etc.function.name === 'click') {
+                                    return `${etc.function.name}(${args.x}, ${args.y})`;
+                                } else if (etc.function.name === 'swipe' || etc.function.name === 'scroll') {
+                                    return `${etc.function.name}(${args.direction || ''})`;
+                                }
+                                return etc.function.name;
+                            } catch {
+                                return etc.function.name;
+                            }
+                        }).join(', ') : '';
+
+                        execDiv.innerHTML = `
+                            <div style="font-size: 10px; color: #666; margin-bottom: 4px;">Step ${execStep.step_number}</div>
+                            ${execStep.query ? `<div class="executor-query">${escapeHtml(execStep.query.substring(0, 100) + (execStep.query.length > 100 ? '...' : ''))}</div>` : ''}
+                            ${toolCallSummary ? `<div class="executor-tool-call">${escapeHtml(toolCallSummary)}</div>` : ''}
+                        `;
+                        executorStepsDiv.appendChild(execDiv);
+                    });
+                });
+
+                stepDiv.appendChild(executorStepsDiv);
+                container.appendChild(stepDiv);
+            });
+        }
+
+        function findExecutorStepsForToolCall(toolCallId) {
+            return executorStepsByToolCall[toolCallId] || [];
+        }
+
+        function selectPlannerStep(stepIndex) {
+            document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-step-index="${stepIndex}"].step-item`)?.classList.add('active');
+
+            const step = plannerSteps[stepIndex];
+            if (step.screenshot_path) {
+                displayScreenshot(step.screenshot_path, null, null);
+            }
+        }
+
+        function selectExecutorStep(stepIndex, execIndex, toolCallId) {
+            document.querySelectorAll('.executor-step').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-tool-call-id="${toolCallId}"][data-exec-index="${execIndex}"]`)?.classList.add('active');
+            
+            document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-step-index="${stepIndex}"].step-item`)?.classList.add('active');
+
+            const executorSteps = findExecutorStepsForToolCall(toolCallId);
+            const execStep = executorSteps[execIndex];
+            if (execStep && execStep.screenshot_path) {
+                displayScreenshot(execStep.screenshot_path, execStep.tool_calls, execStep.dimensions);
+            } else if (execStep) {
+                const panel = document.getElementById('screenshotPanel');
+                panel.innerHTML = '<div class="empty-state">No screenshot available for this step</div>';
+            }
+        }
+
+        function displayScreenshot(screenshotPath, toolCalls, dimensions) {
+            const panel = document.getElementById('screenshotPanel');
+            panel.innerHTML = '';
+
+            const container = document.createElement('div');
+            container.className = 'screenshot-container';
+
+            const img = document.createElement('img');
+            img.className = 'screenshot-img';
+            img.src = `${basePath}/${screenshotPath}`;
+            img.onload = () => {
+                const imgRect = img.getBoundingClientRect();
+                const imgWidth = dimensions?.width || img.naturalWidth;
+                const imgHeight = dimensions?.height || img.naturalHeight;
+                const scaleX = imgRect.width / imgWidth;
+                const scaleY = imgRect.height / imgHeight;
+
+                if (toolCalls && toolCalls.length > 0) {
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.style.position = 'absolute';
+                    svg.style.left = '0';
+                    svg.style.top = '0';
+                    svg.style.width = `${imgRect.width}px`;
+                    svg.style.height = `${imgRect.height}px`;
+                    svg.style.pointerEvents = 'none';
+                    svg.setAttribute('viewBox', `0 0 ${imgRect.width} ${imgRect.height}`);
+
+                    const actionInfo = [];
+
+                    toolCalls.forEach((tc, index) => {
+                        try {
+                            const args = typeof tc.function.arguments === 'string' 
+                                ? JSON.parse(tc.function.arguments || '{}')
+                                : (tc.function.arguments || {});
+                            const toolName = tc.function.name;
+
+                            if (toolName === 'click' || toolName === 'tap') {
+                                if (args.x !== undefined && args.y !== undefined) {
+                                    const x = args.x * scaleX;
+                                    const y = args.y * scaleY;
+                                    
+                                    const marker = document.createElement('div');
+                                    marker.className = 'click-marker';
+                                    marker.style.left = `${x}px`;
+                                    marker.style.top = `${y}px`;
+                                    marker.style.zIndex = '100';
+                                    container.appendChild(marker);
+
+                                    actionInfo.push(`${toolName} at (${args.x}, ${args.y})`);
+                                }
+                            } else if (toolName === 'swipe') {
+                                const direction = args.direction || '';
+                                const centerX = imgRect.width / 2;
+                                const centerY = imgRect.height / 2;
+                                const swipeLength = Math.min(imgRect.width, imgRect.height) * 0.3;
+                                
+                                let startX = args.x !== undefined ? args.x * scaleX : centerX;
+                                let startY = args.y !== undefined ? args.y * scaleY : centerY;
+                                let endX = startX;
+                                let endY = startY;
+
+                                if (direction === 'up') {
+                                    endY = startY - swipeLength;
+                                } else if (direction === 'down') {
+                                    endY = startY + swipeLength;
+                                } else if (direction === 'left') {
+                                    endX = startX - swipeLength;
+                                } else if (direction === 'right') {
+                                    endX = startX + swipeLength;
+                                }
+
+                                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                line.setAttribute('x1', startX);
+                                line.setAttribute('y1', startY);
+                                line.setAttribute('x2', endX);
+                                line.setAttribute('y2', endY);
+                                line.setAttribute('stroke', '#00ff00');
+                                line.setAttribute('stroke-width', '3');
+                                line.setAttribute('stroke-dasharray', '5,5');
+                                svg.appendChild(line);
+
+                                const startCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                                startCircle.setAttribute('cx', startX);
+                                startCircle.setAttribute('cy', startY);
+                                startCircle.setAttribute('r', '8');
+                                startCircle.setAttribute('fill', '#00ff00');
+                                startCircle.setAttribute('opacity', '0.7');
+                                svg.appendChild(startCircle);
+
+                                const arrow = document.createElement('div');
+                                arrow.className = 'swipe-arrow';
+                                arrow.style.left = `${endX}px`;
+                                arrow.style.top = `${endY}px`;
+                                arrow.style.zIndex = '100';
+                                
+                                const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                                arrow.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                                container.appendChild(arrow);
+
+                                actionInfo.push(`swipe ${direction} from (${Math.round(startX/scaleX)}, ${Math.round(startY/scaleY)})`);
+                            } else if (toolName === 'scroll') {
+                                const direction = args.direction || '';
+                                const centerX = imgRect.width / 2;
+                                const centerY = imgRect.height / 2;
+                                const scrollLength = Math.min(imgRect.width, imgRect.height) * 0.4;
+                                
+                                let startX = args.x !== undefined ? args.x * scaleX : centerX;
+                                let startY = args.y !== undefined ? args.y * scaleY : centerY;
+                                let endX = startX;
+                                let endY = startY;
+
+                                if (direction === 'up' || direction === 'down') {
+                                    endY = direction === 'up' ? startY - scrollLength : startY + scrollLength;
+                                } else if (direction === 'left' || direction === 'right') {
+                                    endX = direction === 'left' ? startX - scrollLength : startX + scrollLength;
+                                }
+
+                                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                line.setAttribute('x1', startX);
+                                line.setAttribute('y1', startY);
+                                line.setAttribute('x2', endX);
+                                line.setAttribute('y2', endY);
+                                line.setAttribute('stroke', '#00aaff');
+                                line.setAttribute('stroke-width', '3');
+                                line.setAttribute('stroke-dasharray', '5,5');
+                                svg.appendChild(line);
+
+                                const startCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                                startCircle.setAttribute('cx', startX);
+                                startCircle.setAttribute('cy', startY);
+                                startCircle.setAttribute('r', '8');
+                                startCircle.setAttribute('fill', '#00aaff');
+                                startCircle.setAttribute('opacity', '0.7');
+                                svg.appendChild(startCircle);
+
+                                const arrow = document.createElement('div');
+                                arrow.className = 'swipe-arrow';
+                                arrow.style.left = `${endX}px`;
+                                arrow.style.top = `${endY}px`;
+                                arrow.style.borderTopColor = '#00aaff';
+                                arrow.style.zIndex = '100';
+                                
+                                const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                                arrow.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                                container.appendChild(arrow);
+
+                                actionInfo.push(`scroll ${direction}${args.x !== undefined ? ` at (${args.x}, ${args.y})` : ''}`);
+                            } else {
+                                actionInfo.push(toolName);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing tool call:', e, tc);
+                            actionInfo.push(tc.function.name || 'unknown');
+                        }
+                    });
+
+                    if (svg.children.length > 0) {
+                        container.appendChild(svg);
+                    }
+
+                    if (actionInfo.length > 0) {
+                        const info = document.createElement('div');
+                        info.className = 'action-info';
+                        info.innerHTML = `
+                            <div class="action-info-title">Actions:</div>
+                            ${actionInfo.map(a => `<div class="action-info-detail">${escapeHtml(a)}</div>`).join('')}
+                        `;
+                        container.appendChild(info);
+                    }
+                }
+            };
+
+            container.appendChild(img);
+            panel.appendChild(container);
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function browseRuns() {
+            const runsList = document.getElementById('runsList');
+            if (runsList.style.display === 'none') {
+                try {
+                    const response = await fetch('/list_runs');
+                    if (!response.ok) throw new Error('Failed to load runs list');
+                    const runs = await response.json();
+                    
+                    if (runs.length === 0) {
+                        runsList.innerHTML = '<div style="color: #888; padding: 8px; font-size: 12px;">No test runs found</div>';
+                    } else {
+                        runsList.innerHTML = runs.map(run => `
+                            <div style="padding: 8px; margin-bottom: 4px; background: #252525; border-radius: 4px; cursor: pointer; border: 1px solid #333;"
+                                 onclick="selectRun('${run.path}')"
+                                 onmouseover="this.style.background='#2a2a2a'"
+                                 onmouseout="this.style.background='#252525'">
+                                <div style="font-weight: bold; color: #4a90e2; font-size: 12px;">${escapeHtml(run.name)}</div>
+                                <div style="font-size: 11px; color: #888; margin-top: 4px;">${escapeHtml(run.goal || 'No goal')}</div>
+                                <div style="font-size: 10px; color: #666; margin-top: 2px;">
+                                    ${run.success ? '<span style="color: #90ee90;">✓ Success</span>' : '<span style="color: #ee9090;">✗ Failed</span>'}
+                                    ${run.start_time ? ` • ${new Date(run.start_time).toLocaleString()}` : ''}
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                    runsList.style.display = 'block';
+                } catch (error) {
+                    runsList.innerHTML = `<div style="color: #ee9090; padding: 8px; font-size: 12px;">Error: ${escapeHtml(error.message)}</div>`;
+                    runsList.style.display = 'block';
+                }
+            } else {
+                runsList.style.display = 'none';
+            }
+        }
+
+        function selectRun(runPath) {
+            const baseUrl = window.location.origin;
+            document.getElementById('runDirInput').value = `${baseUrl}${runPath}`;
+            document.getElementById('runsList').style.display = 'none';
+            loadData();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.id === 'runDirInput') {
+                loadData();
+            }
+        });
+    </script>
+</body>
+</html>

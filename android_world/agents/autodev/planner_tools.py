@@ -161,17 +161,6 @@ def answer(text: str):
     pass
 
 
-def extract_data(data: str):
-    """
-    Extract data from the current screen. It will not perform any action, just return JSON formatted data from the current
-    screen. This is not an input action.
-
-    If you have to extract data from a list that doesn't fit on the screen, extract & scroll one by one.
-
-    You may ask the executor to scroll exactly 1 viewport
-    """
-
-
 def finish_task(success: bool):
     """
     Declare that the agent considers the task complete and wishes to terminate.
