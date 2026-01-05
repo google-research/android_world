@@ -82,9 +82,12 @@ def _get_planner_model(task_difficulty: Optional[str]) -> str:
     """
     if task_difficulty in ("easy", "medium"):
         # return "anthropic/claude-sonnet-4-5-20250929"
-        return "openai/gpt-5.2"
+        return "anthropic/claude-haiku-4-5-20251001"
+        # return "openai/gpt-5.2"
     else:
         return "gemini/gemini-3-pro-preview"
+        # return "anthropic/claude-haiku-4-5-20251001"
+        # return "anthropic/claude-sonnet-4-5-20250929"
 
 
 class AutoDev(base_agent.EnvironmentInteractingAgent):
@@ -133,7 +136,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         self.target_height = 0
         self.executor_registry = get_executor_registry()
         self._is_done = False
-        
+
         # Navigation state tracking for deterministic behavior
         self.navigation_state = {
             "seen_items": set(),  # Track items/dates seen in transcriptions
@@ -302,9 +305,11 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
 
         state = self.get_post_transition_state()
         screenshot = self._resize_screenshot_to_logical_size(state.pixels.copy())
-        
+
         # Pre-transcribe screen using Haiku
         transcription = transcribe_screen(screenshot)
+        navigation_warnings = []
+        
         if transcription:
             self._log_print(f"📝 Screen transcribed ({len(transcription)} chars)")
             
@@ -313,9 +318,25 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
             
             # Check if we've seen this content (avoid revisiting)
             if self._has_seen_content(transcription):
-                self._log_print("⚠️  Warning: This content was seen before - may be revisiting")
+                warning = "⚠️  CRITICAL: This content was seen before - you are revisiting the same screen. STOP scrolling and try a different approach (tap on items, use search, or try alternative navigation)."
+                self._log_print(warning)
+                navigation_warnings.append(warning)
+            
+            # Add scroll count warning
+            scroll_count = self.navigation_state.get("scroll_count", 0)
+            if scroll_count >= 5:
+                warning = f"⚠️  WARNING: You have scrolled {scroll_count} times. If you haven't found your target, STOP scrolling and try alternative strategies (tap items to view details, use search, or try different navigation)."
+                navigation_warnings.append(warning)
         else:
             self._log_print("⚠️  Screen transcription failed or empty")
+        
+        # Add navigation warnings to transcription
+        if navigation_warnings:
+            warning_text = "\n\n".join(navigation_warnings)
+            if transcription:
+                transcription = f"{transcription}\n\n<system_warnings>\n{warning_text}\n\n🚨 ACTION REQUIRED: You MUST stop scrolling and take a different action. Read the transcription above to extract data, or try a different approach.\n</system_warnings>"
+            else:
+                transcription = f"<system_warnings>\n{warning_text}\n\n🚨 ACTION REQUIRED: You MUST stop scrolling and take a different action.\n</system_warnings>"
         
         planned_step = self.planner_llm.chat(
             goal if self._step_count == 1 else None,
@@ -353,17 +374,22 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                     else []
                 }
 
+            # Ensure tool_calls is always a list, not None
+            tool_calls = planned_step.get("tool_calls") or []
+
             self.logger.log_planner_step(
                 step_number=self._step_count,
                 user_input=goal if self._step_count == 1 else None,
                 thinking=planned_step.get("content", ""),
-                tool_calls=planned_step.get("tool_calls", []),
+                tool_calls=tool_calls,
                 screenshot=screenshot,
                 todo_list_state=todo_state,
             )
 
-        if planned_step["tool_calls"]:
-            for tool_call in planned_step["tool_calls"]:
+        # Safely handle tool_calls - ensure it's a list
+        tool_calls_list = planned_step.get("tool_calls") or []
+        if tool_calls_list:
+            for tool_call in tool_calls_list:
                 try:
                     if tool_call["function"]["name"] == "go_back":
                         self.env.execute_action(JSONAction(action_type="navigate_back"))
@@ -551,7 +577,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                 },
                                 status="success",
                                 planner_tool_call_id=planner_tool_call["id"],
-                            )
+                        )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
                             json.dumps(args),
@@ -581,7 +607,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                                 },
                                 status="success",
                                 planner_tool_call_id=planner_tool_call["id"],
-                            )
+                        )
                         self.planner_llm.add_tool_result(
                             planner_tool_call["id"],
                             json.dumps(args),
