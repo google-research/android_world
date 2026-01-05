@@ -52,6 +52,34 @@ def gesture(intent: str):
     pass
 
 
+def swipe_coords(start_x: int, start_y: int, end_x: int, end_y: int, intent: str = ""):
+    """
+    Perform a swipe gesture from exact start coordinates to exact end coordinates.
+    This gives you precise control over the swipe path, which is especially useful for:
+    - Scrolling specific distances
+    - Swiping on specific UI elements
+    - Horizontal scrolling in category rows
+    - Precise navigation gestures
+
+    IMPORTANT: Coordinates are in the logical screen space (scaled coordinates).
+    The planner should analyze the screenshot and transcription to determine the exact
+    coordinates of where to start and end the swipe.
+
+    Examples:
+      - Swipe from center-left to center-right: swipe_coords(100, 1200, 800, 1200, "scroll category row right")
+      - Swipe down from top: swipe_coords(540, 200, 540, 1800, "scroll down to see more items")
+      - Swipe up from bottom: swipe_coords(540, 2000, 540, 400, "scroll up to see previous items")
+
+    Parameters:
+        start_x (int): X coordinate where the swipe starts
+        start_y (int): Y coordinate where the swipe starts
+        end_x (int): X coordinate where the swipe ends
+        end_y (int): Y coordinate where the swipe ends
+        intent (str): Optional description of what this swipe is trying to accomplish
+    """
+    pass
+
+
 def scroll(intent: str):
     """
     It is preferable that you call scan_for_element() tool call and let the executor make sense of what to do.

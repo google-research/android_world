@@ -175,27 +175,35 @@ def execute_adb_action(
 
     elif action.action_type == "swipe":  # Inverse of scroll.
         screen_width, screen_height = screen_size
-        mid_x, mid_y = 0.5 * screen_width, 0.5 * screen_height
-        direction = action.direction
-        if direction == "down":
-            start_x, start_y = mid_x, 0
-            end_x, end_y = mid_x, screen_height
-        elif direction == "up":
-            start_x, start_y = mid_x, screen_height
-            end_x, end_y = mid_x, 0
-        elif direction == "left":
-            start_x, start_y = 0, mid_y
-            end_x, end_y = screen_width, mid_y
-        elif direction == "right":
-            start_x, start_y = screen_width, mid_y
-            end_x, end_y = 0, mid_y
-        else:
-            print("Invalid direction")
-            return
-        if action.x:
+        
+        if hasattr(action, 'end_x') and hasattr(action, 'end_y'):
             start_x = action.x
-        if action.y:
             start_y = action.y
+            end_x = action.end_x
+            end_y = action.end_y
+        else:
+            mid_x, mid_y = 0.5 * screen_width, 0.5 * screen_height
+            direction = action.direction
+            if direction == "down":
+                start_x, start_y = mid_x, 0
+                end_x, end_y = mid_x, screen_height
+            elif direction == "up":
+                start_x, start_y = mid_x, screen_height
+                end_x, end_y = mid_x, 0
+            elif direction == "left":
+                start_x, start_y = 0, mid_y
+                end_x, end_y = screen_width, mid_y
+            elif direction == "right":
+                start_x, start_y = screen_width, mid_y
+                end_x, end_y = 0, mid_y
+            else:
+                print("Invalid direction")
+                return
+            if action.x:
+                start_x = action.x
+            if action.y:
+                start_y = action.y
+        
         command = adb_utils.generate_swipe_command(
             int(start_x), int(start_y), int(end_x), int(end_y), 500
         )

@@ -126,6 +126,39 @@ def swipe(
     return JSONAction(action_type="swipe", direction=direction, x=scaled_x, y=scaled_y)
 
 
+def swipe_coords(
+    start_x: int, start_y: int, end_x: int, end_y: int
+) -> JSONAction:
+    """Create a swipe action with explicit start and end coordinates.
+    
+    This gives precise control over the swipe path. The coordinates are in logical
+    screen space and will be scaled appropriately.
+    
+    Args:
+        start_x: X coordinate where the swipe starts
+        start_y: Y coordinate where the swipe starts
+        end_x: X coordinate where the swipe ends
+        end_y: Y coordinate where the swipe ends
+    
+    Example:
+        >>> swipe_coords(100, 1200, 800, 1200)
+        # Swipes horizontally from (100, 1200) to (800, 1200)
+    """
+    scaled_start_x = int(int(start_x) / SCALE)
+    scaled_start_y = int(int(start_y) / SCALE)
+    scaled_end_x = int(int(end_x) / SCALE)
+    scaled_end_y = int(int(end_y) / SCALE)
+    
+    action = JSONAction(
+        action_type="swipe",
+        x=scaled_start_x,
+        y=scaled_start_y,
+    )
+    action.end_x = scaled_end_x
+    action.end_y = scaled_end_y
+    return action
+
+
 def input_text(
     text: str,
     x: Optional[int] = None,

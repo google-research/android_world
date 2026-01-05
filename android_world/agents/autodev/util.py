@@ -60,6 +60,14 @@ def tool_call_to_query(tool_call: ToolCall) -> str:
         intent = arguments.get("intent", "")
         return f"Perform a swipe gesture to {intent}. Analyze the current screen and determine the appropriate start and end coordinates for this swipe action."
 
+    elif function_name == "swipe_coords":
+        start_x = arguments.get("start_x", 0)
+        start_y = arguments.get("start_y", 0)
+        end_x = arguments.get("end_x", 0)
+        end_y = arguments.get("end_y", 0)
+        intent = arguments.get("intent", "")
+        return f"Perform a swipe gesture from coordinates ({start_x}, {start_y}) to ({end_x}, {end_y}). {intent}"
+
     elif function_name == "scroll":
         intent = arguments.get("intent", "")
         base_query = f"Perform a scroll gesture to {intent}. Analyze the current screen and determine the appropriate coordinates for this scroll action."

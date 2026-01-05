@@ -554,10 +554,13 @@ class TestRunLogger:
                 if step.user_input:
                     f.write(f"  Input: {step.user_input}\n")
                 f.write(f"  Time: {step.timestamp}\n")
-                f.write(f"  Tool Calls: {len(step.tool_calls)}\n")
+                
+                # Safely handle None tool_calls
+                tool_calls = step.tool_calls if step.tool_calls is not None else []
+                f.write(f"  Tool Calls: {len(tool_calls)}\n")
 
                 # Handle both dict and object tool_calls
-                for tc in step.tool_calls:
+                for tc in tool_calls:
                     if isinstance(tc, dict):
                         name = tc.get("function", {}).get("name", "unknown")
                     else:
