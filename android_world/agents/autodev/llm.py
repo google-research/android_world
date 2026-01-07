@@ -172,6 +172,16 @@ class AutoDevLLM:
             parts.append({"type": "text", "text": self.todo_list.get_system_reminder()})
         # Always add scratchpad reminder (like todos, it shows empty state message if empty)
         parts.append({"type": "text", "text": self.scratchpad.get_system_reminder()})
+
+        # Add cache_control to the last text block for Anthropic models
+        # This enables prompt caching for the conversation prefix
+        if self.is_anthropic:
+            # Find the last text block and add cache_control
+            for i in range(len(parts) - 1, -1, -1):
+                if parts[i].get("type") == "text":
+                    parts[i]["cache_control"] = {"type": "ephemeral"}
+                    break
+
         self.messages.append({"role": "user", "content": parts})
 
         kwargs: Dict[str, Any] = {
