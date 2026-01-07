@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from PIL import Image
 
 from .todo_list import TodoList
+from .scratchpad import Scratchpad
 
 load_dotenv()
 
@@ -39,6 +40,7 @@ class AutoDevLLM:
         model: str = "gpt-4",
         system_prompt: str = "",
         todo_list_enabled: bool = False,
+        scratchpad: Optional[Scratchpad] = None,
         max_retries: int = 5,
         retry_delay: float = 2.0,
     ) -> None:
@@ -56,7 +58,7 @@ class AutoDevLLM:
                                 "text": system_prompt,
                                 "cache_control": {
                                     "type": "ephemeral",
-                                    "ttl": "1h"},
+                                    "ttl": "5m"},
                             }
                         ],
                     }
@@ -65,6 +67,7 @@ class AutoDevLLM:
                 self.messages.append({"role": "system", "content": system_prompt})
         self.todo_list_enabled = todo_list_enabled
         self.todo_list = TodoList()
+        self.scratchpad = scratchpad if scratchpad is not None else Scratchpad()
         self.max_retries = max_retries
         self.retry_delay = retry_delay
 
@@ -167,6 +170,8 @@ class AutoDevLLM:
         )
         if self.todo_list_enabled:
             parts.append({"type": "text", "text": self.todo_list.get_system_reminder()})
+        # Always add scratchpad reminder (like todos, it shows empty state message if empty)
+        parts.append({"type": "text", "text": self.scratchpad.get_system_reminder()})
         self.messages.append({"role": "user", "content": parts})
 
         kwargs: Dict[str, Any] = {
@@ -176,6 +181,9 @@ class AutoDevLLM:
         }
         if self.todo_list_enabled:
             tools_for_call.append(TodoList.get_tool())
+        # Always add scratchpad tools
+        tools_for_call.append(Scratchpad.get_create_tool())
+        tools_for_call.append(Scratchpad.get_fetch_tool())
         if tools_for_call:
             wrapped_tools = []
             for t in tools_for_call:

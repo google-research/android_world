@@ -96,7 +96,7 @@ def scroll(
 
 def swipe(
     direction: str, x: Optional[int] = None, y: Optional[int] = None
-) -> JSONAction:
+    ) -> JSONAction:
     """Create a swipe action in the specified direction.
     You may scroll tiny amounts by using swipe instead.
     For example, to scroll down, swipe the screen up from the upper half of the screen.
@@ -120,7 +120,7 @@ def swipe(
         raise ValueError(
             f"Direction must be one of {valid_directions}, got: {direction}"
         )
-
+    
     scaled_x = int(int(x) / SCALE) if x is not None else None
     scaled_y = int(int(y) / SCALE) if y is not None else None
     return JSONAction(action_type="swipe", direction=direction, x=scaled_x, y=scaled_y)
@@ -150,7 +150,7 @@ def swipe_coords(
     scaled_end_y = int(int(end_y) / SCALE)
     
     action = JSONAction(
-        action_type="swipe",
+        action_type="swipe", 
         x=scaled_start_x,
         y=scaled_start_y,
     )

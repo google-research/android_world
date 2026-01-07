@@ -11,6 +11,7 @@ from android_env.components import errors
 from android_world.agents import base_agent
 from android_world.agents.autodev import executor_tools
 from android_world.agents.autodev.llm import AutoDevLLM, ToolCall
+from android_world.agents.autodev.scratchpad import Scratchpad
 
 # Import the logging system
 from android_world.agents.autodev.logging_system import TestRunLogger, serialize_tool_call
@@ -31,7 +32,7 @@ from android_world.env.json_action import JSONAction
 # Load environment variables from .env file
 load_dotenv()
 
-MAX_EXECUTOR_STEPS = 5
+MAX_EXECUTOR_STEPS = 10
 
 
 def _get_task_difficulty(task_name: Optional[str]) -> Optional[str]:
@@ -84,6 +85,7 @@ def _get_planner_model(task_difficulty: Optional[str]) -> str:
         # return "anthropic/claude-sonnet-4-5-20250929"
         return "anthropic/claude-haiku-4-5-20251001"
         # return "openai/gpt-5.2"
+        # return "gemini/gemini-3-pro-preview"
     else:
         return "gemini/gemini-3-pro-preview"
         # return "anthropic/claude-haiku-4-5-20251001"
@@ -126,8 +128,10 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         self.scale = scale
         # Set the global scale in executor_tools
         executor_tools.SCALE = scale
+        # Initialize shared scratchpad
+        self.scratchpad = Scratchpad()
         self.planner_llm = AutoDevLLM(
-            planner_model, PLANNER_SYSTEM_PROMPT, True
+            planner_model, PLANNER_SYSTEM_PROMPT, True, scratchpad=self.scratchpad
         )
 
         self.planner_tools_dict = get_all_planner_tools_dict()
@@ -209,15 +213,22 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         
         visible = self._extract_visible_items_from_transcription(transcription)
         
-        # Check if we've seen these dates/items before
-        for date in visible["dates"]:
-            if date in self.navigation_state["seen_items"]:
-                return True
-        
-        # Check if transcription text is similar to previous ones
+        # Check if transcription text hash was seen before (exact match)
         text_hash = hash(visible["text"])
-        if text_hash in self.navigation_state.get("seen_text_hashes", set()):
+        seen_hashes = self.navigation_state.get("seen_text_hashes", set())
+        
+        # Only return True if we've seen this EXACT hash before (not just similar content)
+        if text_hash in seen_hashes:
             return True
+        
+        # For recipe/expense apps: check if we've seen the same items (first few items match)
+        # This helps detect when we're stuck scrolling through the same content
+        if visible["items"]:
+            first_items = visible["items"][:5]  # First 5 items
+            seen_items = self.navigation_state.get("seen_items", set())
+            # If all first items were seen before, likely stuck
+            if len(first_items) > 0 and all(item in seen_items for item in first_items):
+                return True
         
         return False
     
@@ -228,9 +239,14 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         
         visible = self._extract_visible_items_from_transcription(transcription)
         
-        # Add dates/items to seen set
+        # Add dates to seen set
         for date in visible["dates"]:
             self.navigation_state["seen_items"].add(date)
+        
+        # Add items to seen set (for recipe/expense apps)
+        for item in visible["items"][:10]:  # Track first 10 items
+            if len(item) > 5:  # Only track meaningful items
+                self.navigation_state["seen_items"].add(item)
         
         # Track scroll history
         if action.startswith("scroll"):
@@ -244,7 +260,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
             # Reset scroll count on non-scroll action
             self.navigation_state["scroll_count"] = 0
         
-        # Track text hashes to detect revisiting
+        # Track text hashes to detect revisiting (exact matches)
         if "seen_text_hashes" not in self.navigation_state:
             self.navigation_state["seen_text_hashes"] = set()
         text_hash = hash(visible["text"])
@@ -313,14 +329,14 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         if transcription:
             self._log_print(f"📝 Screen transcribed ({len(transcription)} chars)")
             
-            # Update navigation state
-            self._update_navigation_state(transcription, "screenshot")
-            
-            # Check if we've seen this content (avoid revisiting)
+            # Check if we've seen this content BEFORE updating state (avoid revisiting)
             if self._has_seen_content(transcription):
                 warning = "⚠️  CRITICAL: This content was seen before - you are revisiting the same screen. STOP scrolling and try a different approach (tap on items, use search, or try alternative navigation)."
                 self._log_print(warning)
                 navigation_warnings.append(warning)
+            
+            # Update navigation state AFTER checking (so we track what we've seen)
+            self._update_navigation_state(transcription, "screenshot")
             
             # Add scroll count warning
             scroll_count = self.navigation_state.get("scroll_count", 0)
@@ -428,6 +444,25 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                         res = self.planner_llm.todo_list.update(args["todos"])
                         self._log_print(self.planner_llm.todo_list.pretty_print())
                         self.planner_llm.add_tool_result(tool_call["id"], json.dumps(res))
+                    elif tool_call["function"]["name"] == "createItem":
+                        args = tool_call["function"]["arguments"]
+                        if isinstance(args, str):
+                            args = json.loads(args)
+                        
+                        res = self.scratchpad.handle_create_args(args)
+                        self._log_print(f"📝 Scratchpad: Created item '{res.get('key')}' - {res.get('title')}")
+                        self.planner_llm.add_tool_result(tool_call["id"], json.dumps(res))
+                    elif tool_call["function"]["name"] == "fetchItem":
+                        args = tool_call["function"]["arguments"]
+                        if isinstance(args, str):
+                            args = json.loads(args)
+                        
+                        res = self.scratchpad.handle_fetch_args(args)
+                        if res.get("success"):
+                            self._log_print(f"📖 Scratchpad: Fetched item '{res.get('key')}' - {res.get('title')}")
+                        else:
+                            self._log_print(f"⚠️ Scratchpad: Key '{res.get('key')}' not found")
+                        self.planner_llm.add_tool_result(tool_call["id"], json.dumps(res))
                     else:
                         self.execute_step(tool_call)
                 except Exception as e:
@@ -473,7 +508,7 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
 
         """
         executor_llm = AutoDevLLM(
-            "anthropic/claude-sonnet-4-5-20250929", EXECUTOR_SYSTEM_PROMPT + DIMENSIONS
+            "anthropic/claude-sonnet-4-5-20250929", EXECUTOR_SYSTEM_PROMPT + DIMENSIONS, scratchpad=self.scratchpad
         )
 
         # Start new executor session for logging
@@ -613,6 +648,29 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                             json.dumps(args),
                         )
                         return
+                    
+                    # 3) Scratchpad operations
+                    if fname == "createItem":
+                        res = self.scratchpad.handle_create_args(args)
+                        self._log_print(f"📝 Executor Scratchpad: Created '{res.get('key')}' - {res.get('title')}")
+                        executor_llm.add_tool_result(exec_call["id"], json.dumps(res))
+                        tool_results.append(
+                            {"tool_call_id": exec_call["id"], "result": json.dumps(res), "status": "success"}
+                        )
+                        continue
+                    
+                    if fname == "fetchItem":
+                        res = self.scratchpad.handle_fetch_args(args)
+                        if res.get("success"):
+                            self._log_print(f"📖 Executor Scratchpad: Fetched '{res.get('key')}' - {res.get('title')}")
+                        else:
+                            self._log_print(f"⚠️ Executor Scratchpad: Key '{res.get('key')}' not found")
+                        executor_llm.add_tool_result(exec_call["id"], json.dumps(res))
+                        tool_results.append(
+                            {"tool_call_id": exec_call["id"], "result": json.dumps(res), "status": "success"}
+                        )
+                        continue
+                    
                     try:
                         json_action = self.executor_registry[fname](**args)
                         self._log_print(f"  {json_action}")
@@ -771,6 +829,69 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
         
         # If we reach here, max executor steps were reached without completion
         self._log_print(f"❌ EXECUTOR ERROR: Max executor steps ({MAX_EXECUTOR_STEPS}) reached for query: {query}")
+        
+        # Collect all executor steps for summary
+        all_steps_summary = []
+        if self.enable_logging and self.current_executor_session_id:
+            executor_steps = self.logger.executor_sessions.get(self.current_executor_session_id, [])
+            for step in executor_steps:
+                step_desc = f"Step {step.step_number}: "
+                if step.tool_calls:
+                    tool_names = []
+                    for tc in step.tool_calls:
+                        if isinstance(tc, dict):
+                            name = tc.get("function", {}).get("name", "unknown")
+                        else:
+                            name = getattr(tc, "function", {}).get("name", "unknown") if hasattr(tc, "function") else "unknown"
+                        tool_names.append(name)
+                    step_desc += f"Tried tools: {', '.join(tool_names)}. "
+                if step.thinking:
+                    step_desc += f"Thinking: {step.thinking[:200]}"
+                if step.error_message:
+                    step_desc += f" Error: {step.error_message}"
+                all_steps_summary.append(step_desc)
+        
+        # Get current screen state for summary
+        current_state = self.get_post_transition_state()
+        current_transcription = transcribe_screen(current_state)
+        
+        # Make final executor LLM call to summarize all attempts (NO TOOLS - text only)
+        summary_prompt = f"""You have reached the maximum number of steps ({MAX_EXECUTOR_STEPS}) while trying to: {query}
+
+You took the following steps:
+{chr(10).join(all_steps_summary) if all_steps_summary else "No steps logged"}
+
+Current screen transcription:
+{current_transcription[:1000] if current_transcription else "No transcription available"}
+
+Please provide a comprehensive summary of:
+1. All the steps you took (what actions you performed)
+2. What you tried to accomplish
+3. What didn't work and why
+4. What you observed on the screen
+5. Any suggestions for alternative approaches
+
+Do NOT make any tool calls - just provide a detailed text summary explaining everything you attempted and why it didn't work."""
+
+        try:
+            # Create a new executor LLM instance with NO TOOLS for summary
+            summary_executor_llm = AutoDevLLM(
+                "anthropic/claude-sonnet-4-5-20250929", 
+                EXECUTOR_SYSTEM_PROMPT + DIMENSIONS, 
+                scratchpad=self.scratchpad
+            )
+            summary_response = summary_executor_llm.chat(
+                summary_prompt,
+                screenshot=None,  # No screenshot needed for summary
+                tools={},  # NO TOOLS - just text response
+            )
+            executor_summary = summary_response.get("content") or ""
+            if not executor_summary:
+                executor_summary = f"Executor took {executor_step_count} steps trying: {query}. All attempts failed."
+        except Exception as summary_error:
+            self._log_print(f"⚠️  Failed to generate executor summary: {summary_error}")
+            executor_summary = f"Failed to generate summary. Executor took {executor_step_count} steps trying: {query}. All attempts failed."
+        
         if self.enable_logging:
             error_state = self.get_post_transition_state()
             error_screenshot = self._resize_screenshot_to_logical_size(error_state.pixels.copy())
@@ -778,9 +899,9 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                 session_id=self.current_executor_session_id,
                 step_number=executor_step_count,
                 query=query,
-                thinking="Max executor steps reached.",
+                thinking=f"Max executor steps reached. Summary: {executor_summary[:500]}",
                 tool_calls=[],
-                tool_results=[{"error": "Max executor steps reached", "status": "failed"}],
+                tool_results=[{"error": "Max executor steps reached", "status": "failed", "summary": executor_summary}],
                 screenshot=error_screenshot,
                 dimensions={
                     "width": self.target_width,
@@ -790,9 +911,17 @@ class AutoDev(base_agent.EnvironmentInteractingAgent):
                 error_message=f"Max executor steps ({MAX_EXECUTOR_STEPS}) reached",
                 planner_tool_call_id=planner_tool_call["id"],
             )
+        
+        # Send comprehensive feedback to planner
         self.planner_llm.add_tool_result(
             planner_tool_call["id"],
-            json.dumps({"status": "failed", "error": "Max executor steps reached"}),
+            json.dumps({
+                "status": "failed",
+                "error": f"Max executor steps ({MAX_EXECUTOR_STEPS}) reached",
+                "summary": executor_summary,
+                "steps_taken": executor_step_count,
+                "query": query
+            }),
         )
 
     def reset(self, go_home: bool = False) -> None:

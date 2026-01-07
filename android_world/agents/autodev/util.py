@@ -85,7 +85,7 @@ def tool_call_to_query(tool_call: ToolCall) -> str:
         return "Navigate back to the previous screen using the system back button or an appropriate back UI element visible on the screen."
 
     elif function_name == "clear_text":
-        return "Clear all text from the currently focused input field. Select all text and delete it, or use the clear button if available."
+        return "Clear all text from the currently focused input field. Use input_text(text='', clear_text=True) or input_text(text='new text', clear_text=True) to clear and optionally replace the text. DO NOT use long_press to select text manually."
 
     elif function_name == "type_text":
         text = arguments.get("text", "")

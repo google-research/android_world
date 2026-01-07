@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 
-def transcribe_screen(screenshot: np.ndarray, model: str = "anthropic/claude-haiku-4-5-20251001") -> Optional[str]:
+def transcribe_screen(screenshot: np.ndarray, model: str = "gemini/gemini-3-pro-preview") -> Optional[str]:
     """Transcribe text content from a screenshot using Haiku.
     
     Args:
@@ -39,7 +39,7 @@ def transcribe_screen(screenshot: np.ndarray, model: str = "anthropic/claude-hai
                 "content": [
                     {
                         "type": "text",
-                        "text": "Transcribe all text visible on this screen. Include all UI elements, labels, buttons, text fields, and any other readable content. Be thorough and complete."
+                        "text": "Transcribe all text visible on this screen. Include all UI elements, labels, buttons, text fields, and any other readable content and mention them as icons , buttons, text fields, etc. Be thorough and complete."
                     },
                     {
                         "type": "image_url",
