@@ -149,6 +149,7 @@ class JSONAction:
 
     Args:
       skip_none: Whether to skip none values.
+
     Returns:
       A dict representation of the action.
     """
