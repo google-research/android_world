@@ -431,6 +431,7 @@ class RecipeAddMultipleRecipesFromMarkor(_RecipeAddMultipleRecipes):
   complexity = 6
   n_rows = 3
   n_rows_noise = 10
+  app_names = (_APP_NAME, 'markor')
 
   @property
   def goal(self) -> str:

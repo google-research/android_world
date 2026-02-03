@@ -331,6 +331,7 @@ class ExpenseAddMultipleFromMarkor(_ExpenseAddMultiple):
   complexity = 6
   n_rows = 2
   n_rows_noise = 100
+  app_names = (_APP_NAME, 'markor')
 
   @property
   def goal(self) -> str:
