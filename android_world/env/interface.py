@@ -1,4 +1,4 @@
-# Copyright 2025 The android_world Authors.
+# Copyright 2026 The android_world Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -231,8 +231,20 @@ class AsyncAndroidEnv(AsyncEnv):
     return self._controller
 
   def reset(self, go_home: bool = False) -> State:
+    """Resets the environment and optionally navigates to the home screen.
+
+    Args:
+      go_home: If True, presses the home button before resetting the
+        environment.
+
+    Returns:
+      The state of the environment after resetting.
+
+    Raises:
+      RuntimeError: If go_home is True and pressing home button fails.
+    """
     if go_home:
-      adb_utils.press_home_button(self.controller)
+      adb_utils.check_ok(adb_utils.press_home_button(self.controller))
     self.interaction_cache = ''
 
     return _process_timestep(self.controller.reset())
