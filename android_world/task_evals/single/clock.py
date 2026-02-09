@@ -106,6 +106,18 @@ def _close_clock_app(env: interface.AsyncEnv):
       adb_utils.extract_package_name(adb_utils.get_adb_activity("clock")),
       env.controller,
   )
+  adb_utils.close_app(
+      "as",
+      env.controller,
+  )
+  adb_utils.clear_app_data(
+      adb_utils.extract_package_name(adb_utils.get_adb_activity("as")),
+      env.controller,
+  )
+  adb_utils.close_app(
+       "as",
+      env.controller,
+  )
 
 
 class _ClockEval(task_eval.TaskEval):
