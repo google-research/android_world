@@ -10,6 +10,6 @@ internal class UniqueIdsGenerator<A : Any> {
   private val uniqueIdsByNode = ConcurrentHashMap<A, Int>()
 
   fun getUniqueId(a: A): Int {
-    return uniqueIdsByNode.computeIfAbsent(a, Function { _: A -> nextId.getAndIncrement() })
+    return uniqueIdsByNode.computeIfAbsent(a, Function { _: A -> nextId.getAndIncrement() })!!
   }
 }
