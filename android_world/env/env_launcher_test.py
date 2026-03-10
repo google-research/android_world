@@ -56,7 +56,7 @@ class EnvLauncherTest(absltest.TestCase):
             ),
         )
     )
-    mock_controller.assert_called_with(mock_android_env)
+    mock_controller.assert_called_with(mock_android_env, a11y_method=None)
     mock_async_android_env.assert_called_with(mock_controller.return_value)
 
 
