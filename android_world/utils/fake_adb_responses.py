@@ -26,9 +26,7 @@ from android_world.utils import file_utils
 def create_successful_generic_response(output: str) -> adb_pb2.AdbResponse:
   return adb_pb2.AdbResponse(
       status=adb_pb2.AdbResponse.Status.OK,
-      generic=adb_pb2.AdbResponse.GenericResponse(
-          output=output.encode("utf-8")
-      ),
+      output=output.encode("utf-8"),
   )
 
 

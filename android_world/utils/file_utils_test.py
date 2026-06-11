@@ -44,14 +44,14 @@ class FilesTest(parameterized.TestCase):
     mock.patch.stopall()
 
   def test_check_directory_exists(self):
-    self.mock_issue_generic_request.return_value.generic.output.decode.return_value = (
+    self.mock_issue_generic_request.return_value.output.decode.return_value = (
         'Exists'
     )
     result = file_utils.check_directory_exists('/existing/path', self.mock_env)
     self.assertTrue(result)
 
     # Test case where directory does not exist
-    self.mock_issue_generic_request.return_value.generic.output.decode.return_value = (
+    self.mock_issue_generic_request.return_value.output.decode.return_value = (
         'Does not exist'
     )
     result = file_utils.check_directory_exists(
@@ -78,14 +78,12 @@ class FilesTest(parameterized.TestCase):
     mock_check_directory_exists.return_value = True
     self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
         status=adb_pb2.AdbResponse.Status.OK,
-        generic=adb_pb2.AdbResponse.GenericResponse(
-            output=bytes(
-                '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
-                f' +0000 {file_names[0]}\n'
-                '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
-                f' +0000 {file_names[1]}',
-                'utf-8',
-            )
+        output=bytes(
+            '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
+            f' +0000 {file_names[0]}\n'
+            '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
+            f' +0000 {file_names[1]}',
+            'utf-8',
         ),
     )
 
@@ -218,12 +216,10 @@ class FilesTest(parameterized.TestCase):
     mock_check_directory_exists.return_value = True
     self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
         status=adb_pb2.AdbResponse.Status.OK,
-        generic=adb_pb2.AdbResponse.GenericResponse(
-            output=bytes(
-                '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
-                ' +0000 test.txt',
-                'utf-8',
-            )
+        output=bytes(
+            '-rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000'
+            ' +0000 test.txt',
+            'utf-8',
         ),
     )
     file_list = file_utils.get_file_list_with_metadata(
@@ -243,11 +239,9 @@ class FilesTest(parameterized.TestCase):
   def test_check_file_content(self):
     self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
         status=adb_pb2.AdbResponse.Status.OK,
-        generic=adb_pb2.AdbResponse.GenericResponse(
-            output=bytes(
-                'test content.',
-                'utf-8',
-            )
+        output=bytes(
+            'test content.',
+            'utf-8',
         ),
     )
 

@@ -54,7 +54,7 @@ class TestContactsUtils(absltest.TestCase):
     """Test listing all contacts."""
     mock_env = mock.create_autospec(env_interface.AndroidEnvInterface)
     adb_response = adb_pb2.AdbResponse()
-    adb_response.generic.output = """
+    adb_response.output = """
       Row: 0 display_name=Jane Doe, number=1 (234) 567-89
       Row: 0 display_name=Chen, number=98765
     """.encode("utf-8")

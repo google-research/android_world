@@ -119,7 +119,7 @@ def clear_directory(
   res = adb_utils.issue_generic_request(
       ["shell", "ls", "-1", directory_path], env
   )
-  folder_contents = res.generic.output.decode().replace("\r", "").strip()
+  folder_contents = res.output.decode().replace("\r", "").strip()
 
   if folder_contents:
     adb_utils.check_ok(
@@ -252,7 +252,7 @@ def check_file_or_folder_exists(
   if not res.status:
     raise RuntimeError("ADB command failed.")
 
-  all_paths = set(res.generic.output.decode().replace("\r", "").split("\n"))
+  all_paths = set(res.output.decode().replace("\r", "").split("\n"))
 
   full_target_path = convert_to_posix_path(base_path, target)
   return full_target_path in all_paths
@@ -282,9 +282,9 @@ def check_file_exists(
   fi
   """
   response = adb_utils.issue_generic_request(["shell", bash_script], env)
-  if "Exists" in response.generic.output.decode("utf-8"):
+  if "Exists" in response.output.decode("utf-8"):
     return True
-  elif "Does not exist" in response.generic.output.decode("utf-8"):
+  elif "Does not exist" in response.output.decode("utf-8"):
     return False
   else:
     raise errors.AdbControllerError("Unexpected output from file check")
@@ -350,7 +350,7 @@ def tmp_directory_from_device(
       with open(
           convert_to_posix_path(tmp_directory, file.file_name), "wb"
       ) as f:
-        f.write(pull_response.pull.content)
+        f.write(pull_response.output)
 
     yield tmp_directory
 
@@ -406,7 +406,7 @@ def tmp_file_from_device(
     adb_utils.check_ok(pull_response)
 
     with open(local_file, "wb") as f:
-      f.write(pull_response.pull.content)
+      f.write(pull_response.output)
 
     yield local_file
   finally:
@@ -525,7 +525,7 @@ def get_file_list_with_metadata(
     # follows,
     #  -rw-rw---- 1 u0_a158 media_rw 0 2023-11-28 23:17:43.176000000 +0000 1.txt
     # We loop through all the files and collect regular files with metadata.
-    for file_details in ls_response.generic.output.decode("utf-8").split("\n"):
+    for file_details in ls_response.output.decode("utf-8").split("\n"):
       # In shell output, the first character is used to indicate file type and
       # "-" means the file is a regular file.
       if file_details.startswith("-"):
@@ -578,7 +578,7 @@ def check_file_content(
     res = adb_utils.issue_generic_request(
         ["shell", "cat", file_full_path], env, timeout_sec
     )
-    res_content = res.generic.output.decode().replace("\r", "")
+    res_content = res.output.decode().replace("\r", "")
     if exact_match:
       return res_content == content
     return fuzzy_match_lib.fuzzy_match(res_content.strip(), content)

@@ -39,25 +39,21 @@ class TestMarkorCreateNoteAndSms(test_utils.AdbEvalTestBase):
   def test_MarkorCreateNoteAndSms_is_successful(self):
     # From shell date +%s
     mock_response_time = adb_pb2.AdbResponse()
-    mock_response_time.generic.output = '{}'.format(
-        str(int(time.time()))
-    ).encode()
+    mock_response_time.output = '{}'.format(str(int(time.time()))).encode()
 
     # Create mock adb response for 'cat' command
     mock_response_cat = adb_pb2.AdbResponse()
-    mock_response_cat.generic.output = b'Hello World'
+    mock_response_cat.output = b'Hello World'
 
     # From shell date +%s
     mock_response_time = adb_pb2.AdbResponse()
-    mock_response_time.generic.output = '{}'.format(
-        str(int(time.time()))
-    ).encode()
+    mock_response_time.output = '{}'.format(str(int(time.time()))).encode()
 
     # Make stale message.
     one_day_s = 24 * 60 * 60
     mock_response_sms0 = adb_pb2.AdbResponse()
     date0_ms = str(int((time.time() - one_day_s) * 1000))
-    mock_response_sms0.generic.output = (
+    mock_response_sms0.output = (
         'Row: 0, address=1234567890, body=Hello World, service_center=NULL,'
         ' date={}'.format(
             date0_ms
@@ -67,7 +63,7 @@ class TestMarkorCreateNoteAndSms(test_utils.AdbEvalTestBase):
     # Successful message.
     mock_response_sms1 = adb_pb2.AdbResponse()
     date1_ms = str(int(time.time() * 1000))
-    mock_response_sms1.generic.output = (
+    mock_response_sms1.output = (
         'Row: 0, address=1234567890, body=Hello World, service_center=NULL,'
         ' date={}'.format(
             date1_ms
@@ -99,25 +95,21 @@ class TestMarkorCreateNoteAndSms(test_utils.AdbEvalTestBase):
   def test_MarkorCreateNoteAndSms_partial_success(self):
     # From shell date +%s
     mock_response_time = adb_pb2.AdbResponse()
-    mock_response_time.generic.output = '{}'.format(
-        str(int(time.time()))
-    ).encode()
+    mock_response_time.output = '{}'.format(str(int(time.time()))).encode()
 
     # Create mock adb response for 'cat' command
     mock_response_cat = adb_pb2.AdbResponse()
-    mock_response_cat.generic.output = b'Hello World'
+    mock_response_cat.output = b'Hello World'
 
     # From shell date +%s
     mock_response_time = adb_pb2.AdbResponse()
-    mock_response_time.generic.output = '{}'.format(
-        str(int(time.time()))
-    ).encode()
+    mock_response_time.output = '{}'.format(str(int(time.time()))).encode()
 
     # Make stale message.
     one_day_s = 24 * 60 * 60
     mock_response_sms0 = adb_pb2.AdbResponse()
     date0_ms = str(int((time.time() - one_day_s) * 1000))
-    mock_response_sms0.generic.output = (
+    mock_response_sms0.output = (
         'Row: 0, address=1234567890, body=Hello World, service_center=NULL,'
         ' date={}'.format(
             date0_ms
@@ -126,9 +118,7 @@ class TestMarkorCreateNoteAndSms(test_utils.AdbEvalTestBase):
 
     # No message found response.
     mock_response_sms1 = adb_pb2.AdbResponse()
-    mock_response_sms1.generic.output = (
-        'No result found.'.encode()
-    )
+    mock_response_sms1.output = 'No result found.'.encode()
 
     self.mock_issue_generic_request.side_effect = [
         mock_response_time,

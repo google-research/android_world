@@ -39,7 +39,7 @@ class TestCreateFile(test_utils.AdbEvalTestBase):
     self.mock_check_file_or_folder_exists.return_value = True
 
     mock_response_cat = adb_pb2.AdbResponse()
-    mock_response_cat.generic.output = b"Hello World"
+    mock_response_cat.output = b"Hello World"
     self.mock_issue_generic_request.return_value = mock_response_cat
 
     env = mock.MagicMock()
@@ -68,7 +68,7 @@ class TestDeleteFile(test_utils.AdbEvalTestBase):
       self,
   ):
     response_ls_deleted = adb_pb2.AdbResponse()
-    response_ls_deleted.generic.output = b"another_note.md\n"
+    response_ls_deleted.output = b"another_note.md\n"
     self.mock_check_file_or_folder_exists.side_effect = [
         True,  # File exists.
         False,  # File doesn't exist.
@@ -88,7 +88,7 @@ class TestDeleteFile(test_utils.AdbEvalTestBase):
   def test_is_successful_subfolder(self):
     # Create mock adb response for 'ls' command when note is deleted
     mock_response_ls_deleted = adb_pb2.AdbResponse()
-    mock_response_ls_deleted.generic.output = b"another_note.md\n"
+    mock_response_ls_deleted.output = b"another_note.md\n"
     self.mock_check_file_or_folder_exists.side_effect = [
         True,  # File exists.
         False,  # File doesn't exist.
@@ -109,9 +109,7 @@ class TestDeleteFile(test_utils.AdbEvalTestBase):
   def test_is_not_successful(self):
     # Create mock adb response for 'ls' command when note still exists
     mock_response_ls_still_exists = adb_pb2.AdbResponse()
-    mock_response_ls_still_exists.generic.output = (
-        b"test_note.md\nanother_note.md\n"
-    )
+    mock_response_ls_still_exists.output = b"test_note.md\nanother_note.md\n"
     self.mock_check_file_or_folder_exists.side_effect = [
         True,  # File exists.
         True,  # File still exists.
@@ -143,7 +141,7 @@ class TestMoveFile(test_utils.AdbEvalTestBase):
   def test_is_successful(self):
     # Create mock adb response for 'ls' command when note is deleted
     mock_response_ls_deleted = adb_pb2.AdbResponse()
-    mock_response_ls_deleted.generic.output = b"another_note.md\n"
+    mock_response_ls_deleted.output = b"another_note.md\n"
 
     self.mock_check_file_or_folder_exists.side_effect = [
         True,  # Source file exists.
@@ -166,9 +164,7 @@ class TestMoveFile(test_utils.AdbEvalTestBase):
   def test_is_not_successful(self):
     # Create mock adb response for 'ls' command when note still exists
     mock_response_ls_still_exists = adb_pb2.AdbResponse()
-    mock_response_ls_still_exists.generic.output = (
-        b"test_note.md\nanother_note.md\n"
-    )
+    mock_response_ls_still_exists.output = b"test_note.md\nanother_note.md\n"
 
     self.mock_check_file_or_folder_exists.side_effect = [
         True,  # Source file exists.

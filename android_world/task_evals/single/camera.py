@@ -60,9 +60,9 @@ class CameraTakeVideo(_Camera):
         ["shell", "ls", device_constants.VIDEOS_DATA],
         env.controller,
     )
-    logging.info("before_videos: %s", contents.generic.output.decode())
+    logging.info("before_videos: %s", contents.output.decode())
     self.before_videos = set(
-        contents.generic.output.decode().replace("\r", "").split("\n")
+        contents.output.decode().replace("\r", "").split("\n")
     )
     logging.info("num before_videos: %s", self.before_videos)
 
@@ -72,10 +72,8 @@ class CameraTakeVideo(_Camera):
         ["shell", "ls", device_constants.VIDEOS_DATA],
         env.controller,
     )
-    logging.info("before_videos: %s", contents.generic.output.decode())
-    after_videos = set(
-        contents.generic.output.decode().replace("\r", "").split("\n")
-    )
+    logging.info("before_videos: %s", contents.output.decode())
+    after_videos = set(contents.output.decode().replace("\r", "").split("\n"))
     logging.info("num after_videos: %s", after_videos)
     logging.info(
         "number of after_videos - number of before_videos: %s",
@@ -105,9 +103,9 @@ class CameraTakePhoto(_Camera):
     contents = adb_utils.issue_generic_request(
         ["shell", "ls", device_constants.PHOTOS_DATA], env.controller
     )
-    logging.info("before_photos: %s", contents.generic.output.decode())
+    logging.info("before_photos: %s", contents.output.decode())
     self.before_photos = set(
-        contents.generic.output.decode().replace("\r", "").split("\n")
+        contents.output.decode().replace("\r", "").split("\n")
     )
     logging.info("num before_photos: %s", self.before_photos)
 
@@ -116,10 +114,8 @@ class CameraTakePhoto(_Camera):
     contents = adb_utils.issue_generic_request(
         ["shell", "ls", device_constants.PHOTOS_DATA], env.controller
     )
-    logging.info("after_photos: %s", contents.generic.output.decode())
-    after_photos = set(
-        contents.generic.output.decode().replace("\r", "").split("\n")
-    )
+    logging.info("after_photos: %s", contents.output.decode())
+    after_photos = set(contents.output.decode().replace("\r", "").split("\n"))
     logging.info("num after_photos: %s", after_photos)
     logging.info(
         "number of after_photos - number of before_photos: %s",

@@ -77,13 +77,9 @@ def parse_message(row: str) -> dict[str, str]:
 
 def _decode_messages_from_response(response: adb_pb2.AdbResponse) -> list[str]:
   """Decodes the ADB response into a list of messages."""
-  if (
-      response.generic.output.decode()
-      .replace("\r", "")
-      .startswith("No result found.")
-  ):
+  if response.output.decode().replace("\r", "").startswith("No result found."):
     return []
-  messages = response.generic.output.split(b"\nRow:")
+  messages = response.output.split(b"\nRow:")
   for i, m in enumerate(messages):
     if i > 0:
       messages[i] = b"Row:" + m
@@ -229,7 +225,7 @@ class SimpleSMSSendSms(task_eval.TaskEval):
     adb_output = adb_utils.issue_generic_request(
         ["shell", "date", "+%s"], env
     )  # Fetch UNIX timestamp from Android
-    return int(adb_output.generic.output.strip()) * 1000
+    return int(adb_output.output.strip()) * 1000
 
   def initialize_task(self, env: interface.AsyncEnv) -> None:
     super().initialize_task(env)

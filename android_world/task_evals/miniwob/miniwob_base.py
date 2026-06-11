@@ -32,9 +32,7 @@ def _extract_data(
   """Issues broadcast and extracts data with retries."""
   for _ in range(3):
     raw = adb_utils.send_android_intent("broadcast", action, env)
-    result = adb_utils.extract_broadcast_data(
-        raw.generic.output.decode("utf-8")
-    )
+    result = adb_utils.extract_broadcast_data(raw.output.decode("utf-8"))
     if result is not None:
       return result
     time.sleep(1)  # App still needs to load.

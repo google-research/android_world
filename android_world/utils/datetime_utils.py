@@ -171,9 +171,9 @@ def advance_system_time(
   # Get current system time by parsing the output of running adb shell date
   # which looks like "Sun Oct 15 17:04:16 UTC 2023".
   current_time = datetime.datetime.strptime(
-      adb_utils.issue_generic_request(
-          ['shell', 'date'], env
-      ).generic.output.decode().strip(),
+      adb_utils.issue_generic_request(['shell', 'date'], env)
+      .output.decode()
+      .strip(),
       '%a %b %d %H:%M:%S %Z %Y',
   )
 

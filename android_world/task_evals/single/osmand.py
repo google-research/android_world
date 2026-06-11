@@ -326,7 +326,7 @@ def _clear_tracks(env: env_interface.AndroidEnvInterface):
   if response.status != adb_pb2.AdbResponse.OK:
     raise RuntimeError(
         f'ADB command failed with status {response.status}:'
-        f' {response.generic.output.decode()}.'
+        f' {response.output.decode()}.'
     )
 
 

@@ -100,9 +100,9 @@ def list_contacts(
 
   return list(
       parse(
-          adb_utils.issue_generic_request(
-              adb_command, env
-          ).generic.output.decode("utf-8")
+          adb_utils.issue_generic_request(adb_command, env).output.decode(
+              "utf-8"
+          )
       )
   )
 

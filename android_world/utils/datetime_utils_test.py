@@ -61,9 +61,7 @@ class AdbDatetimeManagerTest(absltest.TestCase):
     env_mock = mock.create_autospec(env_interface.AndroidEnvInterface)
     mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
         status=adb_pb2.AdbResponse.Status.OK,
-        generic=adb_pb2.AdbResponse.GenericResponse(
-            output=bytes('Sun Oct 15 17:04:16 UTC 2023\n', 'utf-8')
-        ),
+        output=bytes('Sun Oct 15 17:04:16 UTC 2023\n', 'utf-8'),
     )
     datetime_utils.advance_system_time(datetime.timedelta(hours=2), env_mock)
     mock_issue_generic_request.assert_has_calls([

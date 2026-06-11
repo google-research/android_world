@@ -179,7 +179,7 @@ class TestSimpleSmsReplyMostRecent(test_utils.AdbEvalTestBase):
     new_message = 'New message'
     mock_sent_message = adb_pb2.AdbResponse()
     date_ms = str(int(time.time() * 1000))
-    mock_sent_message.generic.output = (
+    mock_sent_message.output = (
         'Row: 0, address={}, body={}, service_center=NULL, date={}'.format(
             self.most_recent_number, new_message, date_ms
         ).encode()
@@ -281,7 +281,7 @@ class TestSimpleSmsReply(test_utils.AdbEvalTestBase):
     # Add successful message
     mock_sent_message = adb_pb2.AdbResponse()
     date_ms = str(int(time.time() * 1000))
-    mock_sent_message.generic.output = (
+    mock_sent_message.output = (
         'Row: 0, address={}, body={}, service_center=NULL, date={}'.format(
             self.relevant_number, new_message, date_ms
         ).encode()

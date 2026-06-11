@@ -48,7 +48,7 @@ Phone Id=0
   mForegroundCallState=0"""
     # Setup
     mock_dumpsys_response = adb_pb2.AdbResponse()
-    mock_dumpsys_response.generic.output = dumpsys_content.encode('utf-8')
+    mock_dumpsys_response.output = dumpsys_content.encode('utf-8')
     self.mock_issue_generic_request.return_value = mock_dumpsys_response
 
     # Act
@@ -65,7 +65,7 @@ Phone Id=0
   mForegroundCallState=0"""
     # Setup
     mock_dumpsys_response = adb_pb2.AdbResponse()
-    mock_dumpsys_response.generic.output = dumpsys_content.encode('utf-8')
+    mock_dumpsys_response.output = dumpsys_content.encode('utf-8')
     self.mock_issue_generic_request.return_value = mock_dumpsys_response
 
     # Act
@@ -76,13 +76,13 @@ Phone Id=0
 
   def test_call_emulator(self):
     mock_response = adb_pb2.AdbResponse()
-    mock_response.generic.output = b'Success'
+    mock_response.output = b'Success'
     self.mock_issue_generic_request.return_value = mock_response
 
     phone_number = '+123456789'
     result = adb_utils.call_emulator(self.mock_env, phone_number)
 
-    self.assertEqual(result.generic.output.decode(), 'Success')
+    self.assertEqual(result.output.decode(), 'Success')
 
   @mock.patch.object(adb_utils, 'get_call_state', autospec=True)
   def test_end_call_if_active(self, mock_get_call_state):
@@ -97,38 +97,38 @@ Phone Id=0
 
   def test_call_phone_number(self):
     mock_response = adb_pb2.AdbResponse()
-    mock_response.generic.output = b'Success'
+    mock_response.output = b'Success'
     self.mock_issue_generic_request.return_value = mock_response
 
     phone_number = '123456789'
     result = adb_utils.call_phone_number(self.mock_env, phone_number)
 
-    self.assertEqual(result.generic.output.decode(), 'Success')
+    self.assertEqual(result.output.decode(), 'Success')
 
   def test_text_emulator(self):
     mock_response = adb_pb2.AdbResponse()
-    mock_response.generic.output = b'Success'
+    mock_response.output = b'Success'
     self.mock_issue_generic_request.return_value = mock_response
 
     phone_number = '+123456789'
     message = 'Hello, world!'
     result = adb_utils.text_emulator(self.mock_env, phone_number, message)
 
-    self.assertEqual(result.generic.output.decode(), 'Success')
+    self.assertEqual(result.output.decode(), 'Success')
 
 
 class AdbSettingsTest(AdbTestSetup):
 
   def test_set_default_app(self):
     mock_response = adb_pb2.AdbResponse()
-    mock_response.generic.output = b'Success'
+    mock_response.output = b'Success'
     self.mock_issue_generic_request.return_value = mock_response
 
     setting_key = 'sms_default_application'
     package_name = 'com.example.app'
     result = adb_utils.set_default_app(self.mock_env, setting_key, package_name)
 
-    self.assertEqual(result.generic.output.decode(), 'Success')
+    self.assertEqual(result.output.decode(), 'Success')
 
   def test_successful_put_operation(self):
     self.mock_env.execute_adb_call.return_value = adb_pb2.AdbResponse()

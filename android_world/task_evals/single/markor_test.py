@@ -30,7 +30,7 @@ class TestMarkorEditNote(test_utils.AdbEvalTestBase):
   def test_is_successful_edit_header(self):
     self.mock_create_file.return_value = 'Original Content'
     edited_content = adb_pb2.AdbResponse()
-    edited_content.generic.output = b'Header\nOriginal Content'
+    edited_content.output = b'Header\nOriginal Content'
     self.mock_issue_generic_request.return_value = edited_content
     env = mock.create_autospec(interface.AsyncEnv)
     params = {
@@ -51,7 +51,7 @@ class TestMarkorEditNote(test_utils.AdbEvalTestBase):
     self.mock_create_file.return_value = 'Original Content'
 
     edited_content = adb_pb2.AdbResponse()
-    edited_content.generic.output = b'Original Content\nFooter'
+    edited_content.output = b'Original Content\nFooter'
 
     self.mock_issue_generic_request.return_value = edited_content
 
@@ -76,7 +76,7 @@ class TestMarkorEditNote(test_utils.AdbEvalTestBase):
     self.mock_create_file.return_value = 'Original Content'
 
     mock_edited_content = adb_pb2.AdbResponse()
-    mock_edited_content.generic.output = b'Replacement Text'
+    mock_edited_content.output = b'Replacement Text'
 
     self.mock_issue_generic_request.return_value = mock_edited_content
 
@@ -101,7 +101,7 @@ class TestMarkorEditNote(test_utils.AdbEvalTestBase):
     self.mock_create_file.return_value = 'Original Content'
 
     mock_edited_content = adb_pb2.AdbResponse()
-    mock_edited_content.generic.output = b'Original Content'
+    mock_edited_content.output = b'Original Content'
 
     self.mock_issue_generic_request.return_value = mock_edited_content
 
@@ -279,7 +279,7 @@ class TestMarkorMergeNotes(test_utils.AdbEvalTestBase):
 
     self.mock_check_file_or_folder_exists.return_value = True
     merged_content = adb_pb2.AdbResponse()
-    merged_content.generic.output = (
+    merged_content.output = (
         b'file1 content.\n\nfile2 content.\n\nfile3 content.\n'
     )
     self.mock_issue_generic_request.side_effect = [
@@ -296,7 +296,7 @@ class TestMarkorChangeNoteContent(test_utils.AdbEvalTestBase):
     env = mock.create_autospec(interface.AsyncEnv)
     self.mock_check_file_or_folder_exists.side_effect = [True, False, True]
     new_content = adb_pb2.AdbResponse()
-    new_content.generic.output = b'new content'
+    new_content.output = b'new content'
     self.mock_issue_generic_request.return_value = new_content
 
     task = markor.MarkorChangeNoteContent({
@@ -314,7 +314,7 @@ class TestMarkorAddNoteHeader(test_utils.AdbEvalTestBase):
     env = mock.create_autospec(interface.AsyncEnv)
     self.mock_check_file_or_folder_exists.side_effect = [True, False, True]
     new_content = adb_pb2.AdbResponse()
-    new_content.generic.output = b'header to add\n\noriginal content\n'
+    new_content.output = b'header to add\n\noriginal content\n'
     self.mock_issue_generic_request.return_value = new_content
 
     task = markor.MarkorAddNoteHeader({

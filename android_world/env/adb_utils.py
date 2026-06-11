@@ -203,7 +203,7 @@ def check_ok(response: adb_pb2.AdbResponse, message=None) -> None:
     else:
       raise RuntimeError(
           f'ADB command failed with status {response.status}:'
-          f' {response.generic.output.decode()}.'
+          f' {response.output.decode()}.'
       )
 
 
@@ -238,7 +238,7 @@ def start_activity(
     logging.error('Failed to launch activity: %r', activity)
     return response
 
-  logging.debug('Launch package output %r', response.generic.output)
+  logging.debug('Launch package output %r', response.output)
   return response
 
 
@@ -719,7 +719,7 @@ def close_recents(env: env_interface.AndroidEnvInterface):
   response = issue_generic_request('shell dumpsys activity recents', env)
   if response.status != adb_pb2.AdbResponse.Status.OK:
     return
-  recents_ids = re.findall(r'id=(\d+)', response.generic.output.decode())
+  recents_ids = re.findall(r'id=(\d+)', response.output.decode())
   for recents_id in recents_ids:
     issue_generic_request(['shell', 'am', 'stack', 'remove', recents_id], env)
 
@@ -910,7 +910,7 @@ def get_api_level(env: env_interface.AndroidEnvInterface) -> int:
   )
   if version.status != adb_pb2.AdbResponse.Status.OK:
     raise RuntimeError('Failed to get API level.')
-  return int(version.generic.output)
+  return int(version.output)
 
 
 def _toggle_svc(
@@ -1081,10 +1081,10 @@ def check_airplane_mode(env: env_interface.AndroidEnvInterface) -> bool:
   if response.status != adb_pb2.AdbResponse.Status.OK:
     raise RuntimeError(
         f'ADB command failed with status {response.status}:'
-        f' {response.generic.output.decode()}.'
+        f' {response.output.decode()}.'
     )
 
-  return response.generic.output.decode().replace('\r', '').strip('\n') == '1'
+  return response.output.decode().replace('\r', '').strip('\n') == '1'
 
 
 def extract_broadcast_data(raw_output: str) -> Optional[str]:
@@ -1155,7 +1155,7 @@ def get_clipboard_contents(env: env_interface.AndroidEnvInterface) -> str:
   if res.status != adb_pb2.AdbResponse.Status.OK:
     raise RuntimeError('Failed to get clipboard content.')
 
-  output_str = res.generic.output.decode('utf-8')
+  output_str = res.output.decode('utf-8')
   result = _extract_clipper_output(output_str)
 
   press_back_button(env)
@@ -1221,7 +1221,7 @@ def set_clipboard_contents(
   output_str = issue_generic_request(
       ['shell', 'am', 'broadcast', '-a', 'clipper.set', '-e', 'text', content],
       env,
-  ).generic.output.decode('utf-8')
+  ).output.decode('utf-8')
   _extract_clipper_output(output_str)
   press_back_button(env)
 
@@ -1288,7 +1288,7 @@ def get_call_state(
   adb_args = ['shell', 'dumpsys', 'telephony.registry']
   response = issue_generic_request(adb_args, env, timeout_sec)
 
-  output = response.generic.output.decode('utf-8')
+  output = response.output.decode('utf-8')
   state_match = re.search(r'mCallState=(\d)', output)
 
   state = 'UNKNOWN'
@@ -1540,7 +1540,7 @@ def get_all_settings(env: env_interface.AndroidEnvInterface) -> dict[str, str]:
   settings = {}
   for adb_command in adb_commands:
     response = issue_generic_request(adb_command, env)
-    lines = response.generic.output.decode().split('\n')
+    lines = response.output.decode().split('\n')
     for line in lines:
       if not line:
         continue
@@ -1602,9 +1602,7 @@ def get_screen_size(env: env_interface.AndroidEnvInterface) -> tuple[int, int]:
   """
   adb_command = ['shell', 'wm size']
   adb_response = issue_generic_request(adb_command, env)
-  return _parse_screen_size_response(
-      adb_response.generic.output.decode('utf-8')
-  )
+  return _parse_screen_size_response(adb_response.output.decode('utf-8'))
 
 
 def get_logical_screen_size(
@@ -1627,7 +1625,7 @@ def get_logical_screen_size(
       'shell dumpsys input | grep logicalFrame', env
   )
   if response.status:
-    raw_output = response.generic.output.decode('utf-8')
+    raw_output = response.output.decode('utf-8')
     pattern = r'logicalFrame=\[0, 0, (\d+), (\d+)\]'
     matches = re.findall(pattern, raw_output)
     for m in matches:
@@ -1654,7 +1652,7 @@ def get_physical_frame_boundary(
       'shell dumpsys input | grep physicalFrame', env
   )
   if response.status:
-    raw_output = response.generic.output.decode('utf-8')
+    raw_output = response.output.decode('utf-8')
     pattern = r'physicalFrame=\[(\d+), (\d+), (\d+), (\d+)\]'
     matches = re.findall(pattern, raw_output)
     for m in matches:
@@ -1690,7 +1688,7 @@ def get_orientation(
       'shell dumpsys window | grep mCurrentRotation', env
   )
   if response.status:
-    raw_output = response.generic.output.decode('utf-8')
+    raw_output = response.output.decode('utf-8')
     pattern = r'mCurrentRotation=ROTATION_(\d+)'
     matches = re.findall(pattern, raw_output)
     for m in matches:
@@ -1763,7 +1761,7 @@ def set_root_if_needed(
   """
   response = issue_generic_request(['shell', 'whoami'], env, timeout_sec)
 
-  if response.generic.output.decode('utf-8').strip() == 'root':
+  if response.output.decode('utf-8').strip() == 'root':
     return response
 
   return issue_generic_request(['root'], env, timeout_sec)
@@ -1777,4 +1775,4 @@ def uiautomator_dump(env, timeout_sec: Optional[float] = 30) -> str:
   read_args = 'shell cat /sdcard/window_dump.xml'
   response = issue_generic_request(read_args, env, timeout_sec=timeout_sec)
 
-  return response.generic.output.decode('utf-8')
+  return response.output.decode('utf-8')
