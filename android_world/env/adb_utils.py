@@ -62,6 +62,7 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
     'audio recorder': (
         'com.dimowner.audiorecorder/com.dimowner.audiorecorder.app.welcome.WelcomeActivity'
     ),
+    'nexuslauncher': 'com.google.android.apps.nexuslauncher',
     'google drive|gdrive|drive': (
         'com.google.android.apps.docs/.drive.startup.StartupActivity'
     ),
@@ -88,6 +89,7 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
         'com.google.android.apps.googlevoice/com.google.android.apps.googlevoice.SplashActivity'
     ),
     'clock': 'com.google.android.deskclock/com.android.deskclock.DeskClock',
+    'as': 'com.google.android.as' ,
     'google search|google': (
         'com.google.android.googlequicksearchbox/com.google.android.googlequicksearchbox.SearchActivity'
     ),
