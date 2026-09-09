@@ -80,7 +80,7 @@ class SaveCopyOfReceiptTaskEvalTest(absltest.TestCase):
       env: interface.AsyncEnv,
   ):
     _touch_temp_file(eval_task.params["file_name"])
-    env.controller.execute_adb_call.side_effect = list(
+    env.controller.execute_adb_call.side_effect = list(  # pyrefly: ignore[missing-attribute]
         itertools.chain(
             fake_adb_responses.create_taskeval_initialize_responses(
                 len(eval_task.app_names)
