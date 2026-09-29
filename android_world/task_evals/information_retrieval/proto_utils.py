@@ -14,7 +14,7 @@
 
 """Utils for manipulating the task and initialization protos."""
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 import datetime
 import random
 import re
@@ -175,9 +175,53 @@ def check_agent_answer(agent_answer: str, task: task_pb2.Task) -> bool:
     )
   if len(type_cast_answers) != len(expected_answers):
     return False
-  return all(
-      any(comparator(x, y) for y in expected_answers) for x in type_cast_answers
-  )
+  return _has_one_to_one_match(type_cast_answers, expected_answers, comparator)
+
+
+def _has_one_to_one_match(
+    answers: list[Any],
+    expected_answers: list[Any],
+    comparator: Callable[[Any, Any], bool],
+) -> bool:
+  """Returns whether each answer can be paired with a distinct expected answer.
+
+  Every expected answer may be used at most once, so repeating one correct item
+  does not satisfy a multi-item expectation. The order of answers is ignored.
+  The comparator can be fuzzy, so a greedy pairing could miss a valid
+  assignment; this uses augmenting paths (bipartite matching) instead.
+
+  Args:
+    answers: The agent's answers, already cast to the expected type.
+    expected_answers: The expected answers.
+    comparator: Returns True when an answer matches an expected answer.
+
+  Returns:
+    True if there is a pairing that matches every answer to a different
+    expected answer.
+  """
+  candidates = [
+      [
+          j
+          for j, expected in enumerate(expected_answers)
+          if comparator(answer, expected)
+      ]
+      for answer in answers
+  ]
+  # matched_answer[j] is the index of the answer paired with expected j.
+  matched_answer: list[int | None] = [None] * len(expected_answers)
+
+  def assign(i: int, visited: set[int]) -> bool:
+    for j in candidates[i]:
+      if j in visited:
+        continue
+      visited.add(j)
+      current = matched_answer[j]
+      if current is None or assign(current, visited):
+        matched_answer[j] = i
+        return True
+    return False
+
+  return all(assign(i, set()) for i in range(len(answers)))
 
 
 def get_expected_answer(
