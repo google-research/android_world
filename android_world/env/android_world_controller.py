@@ -93,7 +93,7 @@ def get_a11y_tree(
   for _ in range(max_retries):
     try:
       forest = env.accumulate_new_extras()['accessibility_tree'][-1]  # pytype:disable=attribute-error
-      return forest
+      return forest  # pyrefly: ignore[bad-return]
     except KeyError:
       logging.warning('Could not get a11y tree, retrying.')
     time.sleep(sleep_duration)
