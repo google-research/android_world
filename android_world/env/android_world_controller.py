@@ -92,7 +92,7 @@ def get_a11y_tree(
   ] = None
   for _ in range(max_retries):
     try:
-      forest = env.accumulate_new_extras()['accessibility_tree'][-1]  # pytype:disable=attribute-error
+      forest = env.accumulate_new_extras()['accessibility_tree'][-1]
       return forest  # pyrefly: ignore[bad-return]
     except KeyError:
       logging.warning('Could not get a11y tree, retrying.')
@@ -195,15 +195,13 @@ class AndroidWorldController(base_wrapper.BaseWrapper):
 
   def refresh_env(self):
     # pylint: disable=protected-access
-    # pytype: disable=attribute-error
     # Reconnect to emulator and reload a11y wrapper in case we lose connection.
     self._env = get_controller(
-        console_port=self.env._coordinator._simulator._config.emulator_launcher.emulator_console_port,
-        adb_path=self.env._coordinator._simulator._config.adb_controller.adb_path,
-        grpc_port=self.env._coordinator._simulator._config.emulator_launcher.grpc_port,
+        console_port=self.env._coordinator._simulator._config.emulator_launcher.emulator_console_port,  # pyrefly: ignore[missing-attribute]
+        adb_path=self.env._coordinator._simulator._config.adb_controller.adb_path,  # pyrefly: ignore[missing-attribute]
+        grpc_port=self.env._coordinator._simulator._config.emulator_launcher.grpc_port,  # pyrefly: ignore[missing-attribute]
     ).env
     # pylint: enable=protected-access
-    # pytype: enable=attribute-error
 
   def _get_a11y_forest(
       self,

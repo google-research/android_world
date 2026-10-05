@@ -178,7 +178,7 @@ class TestSuite(absltest.TestCase):
     tasks = ['Task1']
 
     result = suite_utils._filter_tasks(
-        {  # pyrefly: ignore[bad-argument-type]
+        {
             'Task1': expected,  # pyrefly: ignore[bad-assignment]
             'Task2': [
                 test_utils.FakeCurrentStateEval(

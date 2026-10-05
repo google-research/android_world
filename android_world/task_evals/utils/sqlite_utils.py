@@ -46,7 +46,7 @@ def execute_query(
   rows = []
   for row in raw_rows:
     row = dict(row)
-    rows.append(row_type(**row))  # pytype: disable=bad-return-type
+    rows.append(row_type(**row))
   return rows
 
 

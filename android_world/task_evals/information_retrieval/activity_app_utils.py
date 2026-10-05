@@ -149,7 +149,7 @@ def _generate_random_activities(
   return sqlite_schema_utils.get_random_items(
       num_activities,
       generate_item_fn=_generate_random_activity,
-      filter_fn=lambda x: _check_activity_conditions(x, exclusion_conditions),  # pyrefly: ignore[bad-argument-type]
+      filter_fn=lambda x: _check_activity_conditions(x, exclusion_conditions),
   )
 
 
