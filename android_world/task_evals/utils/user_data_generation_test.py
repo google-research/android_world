@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import tempfile
+from unittest import mock
 from absl.testing import absltest
 from android_world.task_evals.utils import user_data_generation
 from android_world.utils import file_utils
@@ -37,6 +39,58 @@ def get_video_properties(file_path: str) -> tuple[int, float]:
   cap.release()
 
   return total_frames, fps
+
+
+class TestCopyDataToDevice(absltest.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    self.temp_dir = self.enter_context(tempfile.TemporaryDirectory())
+    self.enter_context(
+        mock.patch.object(user_data_generation, "_TMP", self.temp_dir)
+    )
+    self.enter_context(
+        mock.patch.object(user_data_generation.adb_utils, "close_app")
+    )
+
+  def test_overlapping_uploads_keep_separate_files(self):
+    first_env, second_env = mock.Mock(), mock.Mock()
+    paths, contents = [], []
+
+    def copy(local_path, location, controller):
+      paths.append(local_path)
+      self.assertEqual(os.path.basename(local_path), "recipes.txt")
+      self.assertEqual(
+          location, user_data_generation.device_constants.MARKOR_DATA
+      )
+      if controller is first_env.controller:
+        # Complete another upload while the first still needs its local file.
+        user_data_generation.write_to_markor(
+            "second recipe", "recipes.txt", second_env
+        )
+      with open(local_path) as f:
+        contents.append(f.read())
+
+    with mock.patch.object(file_utils, "copy_data_to_device", side_effect=copy):
+      user_data_generation.write_to_markor(
+          "first recipe", "recipes.txt", first_env
+      )
+
+    self.assertEqual(contents, ["second recipe", "first recipe"])
+    self.assertLen(set(paths), 2)
+    self.assertEmpty(os.listdir(self.temp_dir))
+
+  def test_failed_upload_cleans_up_local_file(self):
+    with mock.patch.object(
+        file_utils, "copy_data_to_device", side_effect=RuntimeError("push failed")
+    ) as copy:
+      with self.assertRaisesRegex(RuntimeError, "push failed"):
+        user_data_generation.write_to_markor(
+            "recipe contents", "recipes.txt", mock.Mock()
+        )
+
+    copy.assert_called_once()
+    self.assertEmpty(os.listdir(self.temp_dir))
 
 
 class TestCreateMpegWithMessages(absltest.TestCase):
