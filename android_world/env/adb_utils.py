@@ -1056,10 +1056,15 @@ def install_apk(
 
   Raises:
     ValueError: If apk location does not exist.
+    RuntimeError: If the installation failed.
   """
   if not os.path.exists(apk_location):
     raise ValueError('APK does not exist.')
-  issue_generic_request(['install', apk_location], env, timeout_sec=30.0)
+  response = issue_generic_request(
+      ['install', apk_location], env, timeout_sec=30.0
+  )
+  if response.status != adb_pb2.AdbResponse.Status.OK:
+    raise RuntimeError(f'Failed to install APK {apk_location}: {response}')
 
 
 def check_airplane_mode(env: env_interface.AndroidEnvInterface) -> bool:
