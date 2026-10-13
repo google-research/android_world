@@ -205,7 +205,7 @@ private fun getChildUniqueIds(
 
 fun stringFromNullableCharSequence(cs: CharSequence?): String = cs?.toString() ?: ""
 
-fun convertToRectProto(rect: Rect) = protoRect {
+fun convertToRectProto(rect: Rect): ProtoRect = protoRect {
   left = rect.left
   top = rect.top
   right = rect.right
