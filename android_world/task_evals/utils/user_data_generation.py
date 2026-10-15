@@ -21,6 +21,7 @@ import os
 import random
 import re
 import string
+import tempfile
 from android_env import env_interface
 from android_world.env import adb_utils
 from android_world.env import device_constants
@@ -182,21 +183,16 @@ def write_to_gallery(
 def _copy_data_to_device(
     data: str, file_name: str, location: str, env: interface.AsyncEnv
 ):
-  """Copies data to device by first writing locally, then copying.."""
-  temp_storage_location = file_utils.convert_to_posix_path(_TMP, file_name)
-  with open(temp_storage_location, "w") as temp_file:
-    temp_file.write(data)
+  """Copies data to the device using an isolated temporary directory."""
+  with tempfile.TemporaryDirectory(dir=_TMP) as temp_dir:
+    temp_storage_location = file_utils.convert_to_posix_path(temp_dir, file_name)
+    with open(temp_storage_location, "w") as temp_file:
+      temp_file.write(data)
 
-  file_utils.copy_data_to_device(
-      temp_storage_location,
-      location,
-      env.controller,
-  )
-  try:
-    os.remove(temp_storage_location)
-  except FileNotFoundError:
-    logging.warning(
-        "Local file %s not found, so cannot remove it.", temp_storage_location
+    file_utils.copy_data_to_device(
+        temp_storage_location,
+        location,
+        env.controller,
     )
 
 
