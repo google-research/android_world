@@ -440,7 +440,7 @@ def _draw_text(text: str, font_size: int = 24) -> Image.Image:
   img_width = max_width + 20
   img_height = total_height + 20
 
-  img = Image.new("RGB", (img_width, img_height), color=(255, 255, 255))
+  img = Image.new("RGB", (img_width, img_height), color=(255, 255, 255))  # pyrefly: ignore[bad-argument-type]
   d = ImageDraw.Draw(img)
 
   y_text = 10

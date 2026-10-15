@@ -36,8 +36,8 @@ ERROR_CALLING_LLM = 'Error calling LLM'
 
 def array_to_jpeg_bytes(image: np.ndarray) -> bytes:
   """Converts a numpy array into a byte string for a JPEG image."""
-  image = Image.fromarray(image)
-  return image_to_jpeg_bytes(image)
+  image = Image.fromarray(image)  # pyrefly: ignore[bad-assignment]
+  return image_to_jpeg_bytes(image)  # pyrefly: ignore[bad-argument-type]
 
 
 def image_to_jpeg_bytes(image: Image.Image) -> bytes:
@@ -206,7 +206,7 @@ class GeminiGcpWrapper(LlmWrapper, MultimodalLlmWrapper):
     retry_delay = 1.0
     response = None
     if isinstance(contents, list):
-      contents = self.convert_content(contents)
+      contents = self.convert_content(contents)  # pyrefly: ignore[bad-argument-type]
     while counter > 0:
       try:
         response = self.llm.generate_content(
