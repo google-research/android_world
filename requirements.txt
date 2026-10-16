@@ -1,7 +1,7 @@
 absl-py==2.1.0
 android_env==1.2.3
 dm_env==1.6
-fuzzywuzzy==0.18.0
+thefuzz==0.19.0
 google-generativeai
 grpcio-tools==1.71.0
 protobuf==5.29.5
