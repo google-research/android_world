@@ -22,6 +22,80 @@ from android_world.task_evals.information_retrieval.proto import task_pb2
 from android_world.task_evals.utils import sqlite_schema_utils
 
 
+def _two_event_titles_task() -> task_pb2.Task:
+  """Two distinct calendar events whose titles are the expected answers."""
+  return task_pb2.Task(
+      name='test_task',
+      prompt='Test task',
+      relevant_state=task_pb2.RelevantState(
+          state=state_pb2.State(
+              calendar=state_pb2.Calendar(
+                  events=[
+                      state_pb2.Event(
+                          start_date='October 15 2023',
+                          start_time='10am',
+                          title='Meet with Sam',
+                      ),
+                      state_pb2.Event(
+                          start_date='October 15 2023',
+                          start_time='10am',
+                          title='Dentist appointment',
+                      ),
+                  ]
+              ),
+          ),
+      ),
+      success_criteria=task_pb2.SuccessCriteria(
+          expectations=[
+              task_pb2.Expectation(
+                  field_transformation=task_pb2.FieldTransformation(
+                      field_name='title',
+                      operation=task_pb2.FieldTransformation.Operation.IDENTITY,
+                  ),
+                  match_type=task_pb2.Expectation.MatchType.STRING_MATCH,
+              ),
+          ]
+      ),
+  )
+
+
+def _two_activity_distances_task() -> task_pb2.Task:
+  """Two sports activities whose distances are the expected answers."""
+  return task_pb2.Task(
+      name='test_task',
+      prompt='Test task',
+      relevant_state=task_pb2.RelevantState(
+          state=state_pb2.State(
+              sports_activity_app=state_pb2.SportsActivityApp(
+                  sports_activities=[
+                      state_pb2.SportsActivity(
+                          start_date='October 15 2023',
+                          name='Workout',
+                          total_distance='9895',
+                      ),
+                      state_pb2.SportsActivity(
+                          start_date='October 15 2023',
+                          name='Workout 2',
+                          total_distance='100',
+                      ),
+                  ]
+              ),
+          ),
+      ),
+      success_criteria=task_pb2.SuccessCriteria(
+          expectations=[
+              task_pb2.Expectation(
+                  field_transformation=task_pb2.FieldTransformation(
+                      field_name='total_distance',
+                      operation=task_pb2.FieldTransformation.Operation.IDENTITY,
+                  ),
+                  match_type=task_pb2.Expectation.MatchType.NUMBER_MATCH,
+              ),
+          ]
+      ),
+  )
+
+
 class ProtoUtilsTest(parameterized.TestCase):
 
   @parameterized.parameters([
@@ -1041,6 +1115,50 @@ class ProtoUtilsTest(parameterized.TestCase):
       with self.assertRaises(type(expected)) as exception:
         proto_utils.check_agent_answer(agent_answer, task)
       self.assertEqual(exception.exception.args, expected.args)
+
+  @parameterized.named_parameters(
+      ('distinct_items', 'Dentist appointment, Meet with Sam', True),
+      ('repeated_item', 'Meet with Sam, Meet with Sam', False),
+      (
+          'fuzzy_repeat',
+          'Dentist appointment, Dentist appointment.',
+          False,
+      ),
+      ('one_correct_one_wrong', 'Meet with Sam, Lunch', False),
+  )
+  def test_check_agent_answer_matches_string_items_one_to_one(
+      self, agent_answer: str, expected: bool
+  ):
+    self.assertEqual(
+        expected,
+        proto_utils.check_agent_answer(agent_answer, _two_event_titles_task()),
+    )
+
+  @parameterized.named_parameters(
+      ('distinct_items', '100, 9895', True),
+      ('repeated_item', '9895, 9895', False),
+  )
+  def test_check_agent_answer_matches_number_items_one_to_one(
+      self, agent_answer: str, expected: bool
+  ):
+    self.assertEqual(
+        expected,
+        proto_utils.check_agent_answer(
+            agent_answer, _two_activity_distances_task()
+        ),
+    )
+
+  def test_one_to_one_match_does_not_depend_on_greedy_order(self):
+    # 'a' matches both expected items and 'b' matches only 'x'. Pairing 'a'
+    # with 'x' first would leave 'b' unmatched; a -> y, b -> x is valid.
+    matches = {('a', 'x'), ('a', 'y'), ('b', 'x')}
+    comparator = lambda answer, expected: (answer, expected) in matches
+    self.assertTrue(
+        proto_utils._has_one_to_one_match(['a', 'b'], ['x', 'y'], comparator)
+    )
+    self.assertFalse(
+        proto_utils._has_one_to_one_match(['b', 'b'], ['x', 'y'], comparator)
+    )
 
 
 if __name__ == '__main__':
