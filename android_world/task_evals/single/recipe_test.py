@@ -337,6 +337,24 @@ class BroccoliDeleteDuplicateRecipesTest2(parameterized.TestCase):
 
 class TestRecipeDeleteMultipleRecipesWithConstraint(parameterized.TestCase):
 
+  def setUp(self):
+    super().setUp()
+    self._original_n_rows = (
+        recipe.RecipeDeleteMultipleRecipesWithConstraint.n_rows
+    )
+    self._original_n_rows_noise = (
+        recipe.RecipeDeleteMultipleRecipesWithConstraint.n_rows_noise
+    )
+
+  def tearDown(self):
+    recipe.RecipeDeleteMultipleRecipesWithConstraint.n_rows = (
+        self._original_n_rows
+    )
+    recipe.RecipeDeleteMultipleRecipesWithConstraint.n_rows_noise = (
+        self._original_n_rows_noise
+    )
+    super().tearDown()
+
   @mock.patch.object(random, 'choice', return_value='garlic')
   @mock.patch.object(recipe, '_generate_random_recipe')
   def test_generate_random_params(
@@ -395,6 +413,135 @@ class TestRecipeDeleteMultipleRecipesWithConstraint(parameterized.TestCase):
             ),
             sqlite_schema_utils.Recipe(
                 title='Recipe 7', directions='Also garlic here.'
+            ),
+        ],
+    )
+
+  @mock.patch.object(random, 'choice')
+  @mock.patch.object(sqlite_schema_utils, 'get_random_items')
+  def test_generate_random_params_retries_after_empty_targets(
+      self, mock_get_random_items, mock_choice
+  ):
+    """Empty target sets are retried; do not return a no-op task."""
+    task_cls = recipe.RecipeDeleteMultipleRecipesWithConstraint
+    task_cls.n_rows = 2
+    task_cls.n_rows_noise = 1
+    mock_choice.side_effect = ['spirulina', 'garlic']
+    noise = [sqlite_schema_utils.Recipe(title='Noise 1')]
+    targets = [
+        sqlite_schema_utils.Recipe(
+            title='Recipe 1', directions='Contains garlic.'
+        ),
+        sqlite_schema_utils.Recipe(
+            title='Recipe 2', directions='Also garlic here.'
+        ),
+    ]
+
+    def fake_get_random_items(n, *args, **kwargs):
+      del args, kwargs
+      if n == task_cls.n_rows_noise:
+        return noise
+      if mock_choice.call_count == 1:
+        # Simulate the exotic-ingredient path that previously returned [].
+        raise ValueError(
+            "Something went wrong: generation exhaused. There are total of"
+            " 0 items created; couldn't generate 2 items."
+        )
+      return targets
+
+    mock_get_random_items.side_effect = fake_get_random_items
+
+    params = task_cls.generate_random_params()
+
+    self.assertEqual(params['ingredient'], 'garlic')
+    self.assertEqual(params[sqlite_validators.ROW_OBJECTS], targets)
+    self.assertNotEmpty(params[sqlite_validators.ROW_OBJECTS])
+    self.assertEqual(params[sqlite_validators.NOISE_ROW_OBJECTS], noise)
+
+  @mock.patch.object(random, 'choice', return_value='spirulina')
+  @mock.patch.object(sqlite_schema_utils, 'get_random_items')
+  def test_generate_random_params_raises_if_targets_always_empty(
+      self, mock_get_random_items, unused_mock_choice
+  ):
+    task_cls = recipe.RecipeDeleteMultipleRecipesWithConstraint
+    task_cls.n_rows = 2
+    task_cls.n_rows_noise = 1
+
+    def fake_get_random_items(n, *args, **kwargs):
+      del args, kwargs
+      if n == task_cls.n_rows_noise:
+        return [sqlite_schema_utils.Recipe(title='Noise 1')]
+      # Force the vacuous empty-target path that used to be returned to callers.
+      return []
+
+    mock_get_random_items.side_effect = fake_get_random_items
+
+    with self.assertRaisesRegex(ValueError, 'non-empty target set'):
+      task_cls.generate_random_params()
+
+  @mock.patch.object(random, 'choice', return_value='Parmesan')
+  @mock.patch.object(recipe, '_generate_random_recipe')
+  def test_generate_random_params_matches_mixed_case_ingredient(
+      self, mock_generate_random_recipe, unused_mock_choice
+  ):
+    """Mixed-case ingredients still select matching directions as targets."""
+    recipe.RecipeDeleteMultipleRecipesWithConstraint.n_rows = 2
+    recipe.RecipeDeleteMultipleRecipesWithConstraint.n_rows_noise = 2
+    noise_candidates = [
+        sqlite_schema_utils.Recipe(title='Recipe 1', directions='Stir a lot'),
+        sqlite_schema_utils.Recipe(
+            title='Chicken Alfredo Pasta',
+            directions='Serve with a sprinkle of Parmesan cheese.',
+        ),
+        sqlite_schema_utils.Recipe(
+            title='Pesto Pasta with Peas',
+            directions='Add Parmesan cheese before serving.',
+        ),
+        sqlite_schema_utils.Recipe(
+            title='Recipe 4', directions='Add anchovies'
+        ),
+    ]
+    target_candidates = [
+        sqlite_schema_utils.Recipe(
+            title='Chicken Alfredo Pasta',
+            directions='Serve with a sprinkle of Parmesan cheese.',
+        ),
+        sqlite_schema_utils.Recipe(title='Recipe 5', directions='Stir a lot'),
+        sqlite_schema_utils.Recipe(
+            title='Pesto Pasta with Peas',
+            directions='Add Parmesan cheese before serving.',
+        ),
+    ]
+    mock_generate_random_recipe.side_effect = (
+        noise_candidates + target_candidates
+    )
+
+    params = (
+        recipe.RecipeDeleteMultipleRecipesWithConstraint.generate_random_params()
+    )
+
+    self.assertEqual(params['ingredient'], 'Parmesan')
+    self.assertEqual(
+        params[sqlite_validators.NOISE_ROW_OBJECTS],
+        [
+            sqlite_schema_utils.Recipe(
+                title='Recipe 1', directions='Stir a lot'
+            ),
+            sqlite_schema_utils.Recipe(
+                title='Recipe 4', directions='Add anchovies'
+            ),
+        ],
+    )
+    self.assertEqual(
+        params[sqlite_validators.ROW_OBJECTS],
+        [
+            sqlite_schema_utils.Recipe(
+                title='Chicken Alfredo Pasta',
+                directions='Serve with a sprinkle of Parmesan cheese.',
+            ),
+            sqlite_schema_utils.Recipe(
+                title='Pesto Pasta with Peas',
+                directions='Add Parmesan cheese before serving.',
             ),
         ],
     )

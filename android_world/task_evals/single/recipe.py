@@ -136,6 +136,8 @@ class RecipeDeleteMultipleRecipesWithConstraint(_RecipeDeleteMultipleRecipes):
   complexity = 4
   n_rows = 3
   n_rows_noise = 29
+  # Retry budget when sampling an ingredient that matches no recipes.
+  _MAX_GENERATION_ATTEMPTS = 20
 
   @property
   def goal(self) -> str:
@@ -152,32 +154,45 @@ class RecipeDeleteMultipleRecipesWithConstraint(_RecipeDeleteMultipleRecipes):
 
   @classmethod
   def generate_random_params(cls) -> dict[str, Any]:
-    """Generate random parameters for a remove recipe task."""
-    ingredient = random.choice(_COMMON_INGREDIENTS)
-    noise = sqlite_schema_utils.get_random_items(
-        cls.n_rows_noise,
-        _generate_random_recipe,
-        replacement=False,
-        filter_fn=lambda r: ingredient not in r.directions.lower(),
-    )
-    targets = []
-    n_rows = cls.n_rows
-    while n_rows > 0:
+    """Generate random parameters for a remove recipe task.
+
+    Raises:
+      ValueError: If a non-empty target set cannot be generated.
+    """
+    for _ in range(cls._MAX_GENERATION_ATTEMPTS):
+      ingredient = random.choice(_COMMON_INGREDIENTS)
+      # Compare case-insensitively so mixed-case ingredients (e.g. "Parmesan")
+      # still match directions that were lowercased for filtering.
+      ingredient_lower = ingredient.lower()
+      noise = sqlite_schema_utils.get_random_items(
+          cls.n_rows_noise,
+          _generate_random_recipe,
+          replacement=False,
+          filter_fn=lambda r, ing=ingredient_lower: (
+              ing not in r.directions.lower()
+          ),
+      )
       try:
         targets = sqlite_schema_utils.get_random_items(
-            n_rows,
+            cls.n_rows,
             _generate_random_recipe,
             replacement=False,
-            filter_fn=lambda r: ingredient in r.directions.lower(),
+            filter_fn=lambda r, ing=ingredient_lower: (
+                ing in r.directions.lower()
+            ),
         )
-        break
       except ValueError:
-        n_rows -= 1
-    return {
-        sqlite_validators.ROW_OBJECTS: targets,
-        sqlite_validators.NOISE_ROW_OBJECTS: noise,
-        'ingredient': ingredient,
-    }
+        continue
+      if targets:
+        return {
+            sqlite_validators.ROW_OBJECTS: targets,
+            sqlite_validators.NOISE_ROW_OBJECTS: noise,
+            'ingredient': ingredient,
+        }
+    raise ValueError(
+        'Could not generate a non-empty target set of recipes for'
+        ' RecipeDeleteMultipleRecipesWithConstraint.'
+    )
 
 
 class RecipeDeleteDuplicateRecipes(
