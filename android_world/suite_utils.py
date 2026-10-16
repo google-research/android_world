@@ -33,9 +33,9 @@ from android_world.env import adb_utils
 from android_world.env import interface
 from android_world.task_evals import task_eval
 from android_world.task_evals.miniwob import miniwob_base
-from fuzzywuzzy import process
 import numpy as np
 import pandas as pd
+from thefuzz import process
 
 # A fixed seed to use when use identical parameters but seed is not set.
 _FIXED_SEED = 123
@@ -109,7 +109,7 @@ def create_suite(
     seed: int | None = None,
     tasks: list[str] | None = None,
     use_identical_params: bool = False,
-    env: interface.AsyncEnv | None = None
+    env: interface.AsyncEnv | None = None,
 ) -> Suite:
   """Creates task suite.
 
