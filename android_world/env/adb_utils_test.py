@@ -255,6 +255,14 @@ class TestExtractBroadcastData(absltest.TestCase):
     result = adb_utils.extract_broadcast_data(raw_output)
     self.assertIsNone(result)
 
+  def test_data_containing_data_marker_is_not_truncated(self):
+    raw_output = (
+        'Broadcast completed: result=-1,'
+        ' data="https://example.com/login?redirect=data=42"\n'
+    )
+    result = adb_utils.extract_broadcast_data(raw_output)
+    self.assertEqual(result, 'https://example.com/login?redirect=data=42')
+
   def test_unexpected_output_raises_error(self):
     raw_output = 'Unexpected output format'
     with self.assertRaises(ValueError):
