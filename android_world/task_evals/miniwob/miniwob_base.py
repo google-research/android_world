@@ -56,7 +56,9 @@ def get_episode_reward(env: env_interface.AndroidEnvInterface) -> float:
     raise ValueError("Could not extract reward; something went wrong.")
   if not reward:  # Episode is not terminated.
     return 0.0
-  return float(int(reward))
+  # MiniWoB reports partial float rewards as strings, e.g. "0.868...",
+  # which `int()` cannot parse.
+  return float(reward)
 
 
 def is_episode_terminated(env: interface.AsyncEnv) -> bool:

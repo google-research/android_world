@@ -66,6 +66,32 @@ class Testintents(absltest.TestCase):
     )
     mock_extract.assert_called_once()
 
+  def test_get_episode_reward_fractional(
+      self, mock_send_intent, mock_extract
+  ):
+    # Tasks such as MiniWobBisectAngle report partial credit as a float
+    # string; it must be returned as-is instead of crashing in int().
+    mock_env = mock.Mock()
+    mock_send_intent.return_value = mock.Mock(
+        generic=mock.Mock(output=b"encoded reward")
+    )
+    mock_extract.return_value = "0.8680475871297262"
+
+    reward = miniwob_base.get_episode_reward(mock_env)
+    self.assertEqual(reward, 0.8680475871297262)
+
+  def test_get_episode_reward_decimal_string(
+      self, mock_send_intent, mock_extract
+  ):
+    mock_env = mock.Mock()
+    mock_send_intent.return_value = mock.Mock(
+        generic=mock.Mock(output=b"encoded reward")
+    )
+    mock_extract.return_value = "1.0"
+
+    reward = miniwob_base.get_episode_reward(mock_env)
+    self.assertEqual(reward, 1.0)
+
   def test_get_episode_reward_not_terminated(
       self, mock_send_intent, mock_extract
   ):
