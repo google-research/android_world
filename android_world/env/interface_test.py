@@ -55,11 +55,35 @@ class InterfaceTest(absltest.TestCase):
         for elem in changing_ui_elements
     ]
     env._get_state = mock.MagicMock(side_effect=states)
-    self.assertEqual(
-        env._get_stable_state(
-            stability_threshold=3, sleep_duration=0.1, timeout=0.41
+    # Drive a fake clock so the number of loop iterations is deterministic;
+    # with real time, the iteration count (and thus the returned state)
+    # depends on the machine's sleep granularity.
+    clock = [0.0]
+    with (
+        mock.patch("time.time", side_effect=lambda: clock[0]),
+        mock.patch(
+            "time.sleep",
+            side_effect=lambda sec: clock.__setitem__(0, clock[0] + sec),
         ),
-        states[5],
+    ):
+      result = env._get_stable_state(
+          stability_threshold=3, sleep_duration=0.1, timeout=0.41
+      )
+    self.assertIs(result, states[5])
+
+  def test_ui_stability_returns_state_when_no_checks_run(self):
+    # With stability_threshold=1, or whenever the deadline has already passed
+    # before the first loop check (a slow _get_state can cause this), the loop
+    # body never runs and the already-fetched prior state must be returned.
+    state = interface.State(
+        ui_elements=[representation_utils.UIElement(text="Element0")],
+        pixels=np.zeros([1, 2, 3]),
+        forest=None,
+    )
+    env = interface.AsyncAndroidEnv(mock.MagicMock())
+    env._get_state = mock.MagicMock(return_value=state)
+    self.assertIs(
+        env._get_stable_state(stability_threshold=1, timeout=1.0), state
     )
 
   @mock.patch("time.sleep", return_value=None)
