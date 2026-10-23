@@ -70,6 +70,9 @@ class SetupTest(absltest.TestCase):
   @mock.patch.object(app_snapshot, "save_snapshot")
   def test_setup_apps(self, mock_save_snapshot, mock_install_apk, unused_tools):
     env = mock.create_autospec(interface.AsyncEnv)
+    env.controller.execute_adb_call.return_value = adb_pb2.AdbResponse(
+        status=adb_pb2.AdbResponse.Status.OK
+    )
     mock_app_setups = {
         app_class: mock.patch.object(app_class, "setup").start()
         for app_class in setup._APPS

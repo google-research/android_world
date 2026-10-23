@@ -287,19 +287,26 @@ class InstallApkTest(AdbTestSetup):
 
   @mock.patch.object(os.path, 'exists', return_value=True)
   def test_install_apk_success(self, unused_mock_exists):
-    self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
+    self.mock_env.execute_adb_call.return_value = adb_pb2.AdbResponse(
         status=adb_pb2.AdbResponse.Status.OK
     )
 
     adb_utils.install_apk('/path/to/app.apk', self.mock_env)
 
-    self.mock_issue_generic_request.assert_called_once_with(
-        ['install', '/path/to/app.apk'], self.mock_env, timeout_sec=30.0
+    self.mock_env.execute_adb_call.assert_called_once_with(
+        adb_pb2.AdbRequest(
+            install_apk=adb_pb2.AdbRequest.InstallApk(
+                filesystem=adb_pb2.AdbRequest.InstallApk.Filesystem(
+                    path='/path/to/app.apk'
+                )
+            ),
+            timeout_sec=30.0,
+        )
     )
 
   @mock.patch.object(os.path, 'exists', return_value=True)
   def test_install_apk_failure_raises_runtime_error(self, unused_mock_exists):
-    self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
+    self.mock_env.execute_adb_call.return_value = adb_pb2.AdbResponse(
         status=adb_pb2.AdbResponse.Status.ADB_ERROR
     )
 
@@ -314,7 +321,7 @@ class InstallApkTest(AdbTestSetup):
   ):
     with self.assertRaisesRegex(ValueError, 'APK does not exist.'):
       adb_utils.install_apk('/path/to/missing.apk', self.mock_env)
-    self.mock_issue_generic_request.assert_not_called()
+    self.mock_env.execute_adb_call.assert_not_called()
 
 
 if __name__ == '__main__':

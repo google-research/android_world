@@ -1060,8 +1060,15 @@ def install_apk(
   """
   if not os.path.exists(apk_location):
     raise ValueError('APK does not exist.')
-  response = issue_generic_request(
-      ['install', apk_location], env, timeout_sec=30.0
+  response = env.execute_adb_call(
+      adb_pb2.AdbRequest(
+          install_apk=adb_pb2.AdbRequest.InstallApk(
+              filesystem=adb_pb2.AdbRequest.InstallApk.Filesystem(
+                  path=apk_location
+              )
+          ),
+          timeout_sec=30.0,
+      )
   )
   if response.status != adb_pb2.AdbResponse.Status.OK:
     raise RuntimeError(f'Failed to install APK {apk_location}: {response}')
