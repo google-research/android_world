@@ -16,6 +16,7 @@ from unittest import mock
 
 from absl.testing import absltest
 from android_env.components import errors
+from android_env.proto import adb_pb2
 from android_world.env import adb_utils
 from android_world.env import interface
 from android_world.env import tools
@@ -55,7 +56,13 @@ class SetupTest(absltest.TestCase):
   def setUp(self):
     super().setUp()
     self.mock_issue_generic_request = self.enter_context(
-        mock.patch.object(adb_utils, "issue_generic_request")
+        mock.patch.object(
+            adb_utils,
+            "issue_generic_request",
+            return_value=adb_pb2.AdbResponse(
+                status=adb_pb2.AdbResponse.Status.OK
+            ),
+        )
     )
 
   @mock.patch.object(tools, "AndroidToolController")

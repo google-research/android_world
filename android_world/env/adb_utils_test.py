@@ -14,6 +14,7 @@
 
 """Tests for adb_utils."""
 
+import os
 from unittest import mock
 
 from absl.testing import absltest
@@ -280,6 +281,40 @@ class TestScreenUtils(absltest.TestCase):
         'Screen size information not found in adb response',
         str(context.exception),
     )
+
+
+class InstallApkTest(AdbTestSetup):
+
+  @mock.patch.object(os.path, 'exists', return_value=True)
+  def test_install_apk_success(self, unused_mock_exists):
+    self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
+        status=adb_pb2.AdbResponse.Status.OK
+    )
+
+    adb_utils.install_apk('/path/to/app.apk', self.mock_env)
+
+    self.mock_issue_generic_request.assert_called_once_with(
+        ['install', '/path/to/app.apk'], self.mock_env, timeout_sec=30.0
+    )
+
+  @mock.patch.object(os.path, 'exists', return_value=True)
+  def test_install_apk_failure_raises_runtime_error(self, unused_mock_exists):
+    self.mock_issue_generic_request.return_value = adb_pb2.AdbResponse(
+        status=adb_pb2.AdbResponse.Status.ADB_ERROR
+    )
+
+    with self.assertRaisesRegex(
+        RuntimeError, 'Failed to install APK /path/to/app.apk'
+    ):
+      adb_utils.install_apk('/path/to/app.apk', self.mock_env)
+
+  @mock.patch.object(os.path, 'exists', return_value=False)
+  def test_install_apk_missing_file_raises_value_error(
+      self, unused_mock_exists
+  ):
+    with self.assertRaisesRegex(ValueError, 'APK does not exist.'):
+      adb_utils.install_apk('/path/to/missing.apk', self.mock_env)
+    self.mock_issue_generic_request.assert_not_called()
 
 
 if __name__ == '__main__':
