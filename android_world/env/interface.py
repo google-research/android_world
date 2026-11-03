@@ -264,6 +264,7 @@ class AsyncAndroidEnv(AsyncEnv):
       raise ValueError('Stability threshold must be a positive integer.')
 
     stable_checks = 1
+    current_state = self._prior_state
     start_time = time.time()
     deadline = start_time + timeout
 
@@ -287,7 +288,7 @@ class AsyncAndroidEnv(AsyncEnv):
           time.sleep(sleep_time)
       # If remaining_sleep <= 0, proceed immediately to the next iteration
 
-    return current_state  # pylint: disable=undefined-variable
+    return current_state
 
   def get_state(self, wait_to_stabilize: bool = False) -> State:
     if wait_to_stabilize:
