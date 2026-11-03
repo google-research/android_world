@@ -1,6 +1,6 @@
 # Credits to https://github.com/amrsa1/Android-Emulator-image
 
-FROM openjdk:18-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 ENV DEBIAN_FRONTEND=noninteractive
 
