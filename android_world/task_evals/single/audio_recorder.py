@@ -114,8 +114,13 @@ class AudioRecorderRecordAudioWithFileName(_AudioRecorder):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     file_name = self.params["file_name"]
+    # `file_name` already carries the `.m4a` extension: it is produced by
+    # `generate_modified_file_name(random.choice(name) + ".m4a")`, which
+    # preserves the extension. Appending another `.m4a` made the verifier look
+    # for a double-extension file (`<name>.m4a.m4a`) that never exists, so the
+    # task could never pass.
     exists = file_utils.check_file_or_folder_exists(
-        file_name + ".m4a", self.create_file_task.data_directory, env.controller
+        file_name, self.create_file_task.data_directory, env.controller
     )
     if not exists:
       logging.info("%s not found", file_name)

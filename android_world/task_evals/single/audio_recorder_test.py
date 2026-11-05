@@ -81,6 +81,13 @@ class AudioRecorderTest(test_utils.AdbEvalTestBase):
     self.mock_check_file_or_folder_exists.return_value = True
     result = task.is_successful(self.mock_env)
     self.assertEqual(result, 1)
+    # `file_name` already includes its extension, so the verifier must look for
+    # the name as-is (regression test for the double-`.m4a` bug).
+    self.mock_check_file_or_folder_exists.assert_called_once_with(
+        "random_file_name",
+        task.create_file_task.data_directory,
+        self.mock_env.controller,
+    )
 
 
 if __name__ == "__main__":
