@@ -244,7 +244,7 @@ class Expense(SQLiteRow):
 
   @property
   def amount_dollars(self) -> str:
-    return f'${self.amount / 100}'
+    return f'${self.amount / 100:.2f}'
 
   @property
   def category_name(self) -> str:
