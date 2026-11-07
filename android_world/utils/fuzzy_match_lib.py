@@ -14,11 +14,10 @@
 
 """Utility functions for fuzzy matching."""
 
-import difflib
+from thefuzz import fuzz
 
 
-# Threshold for determining if two strings are equal using
-# difflib.SequenceMatcher(...).ratio().
+# Threshold for determining if two strings are equal.
 _MIN_DIFF_SIMILARITY = 0.9
 
 
@@ -38,14 +37,20 @@ def fuzzy_match(text1: str, text2: str, ignore_case: bool = True) -> bool:
   text1 = str(text1)
   text2 = str(text2)
 
-  def text_similarity(text1: str, text2: str, ignore_case: bool) -> float:
-    """Computes similiarity between two texts."""
-    if ignore_case:
-      text1 = text1.lower()
-      text2 = text2.lower()
+  if ignore_case:
+    text1 = text1.lower()
+    text2 = text2.lower()
 
-    return difflib.SequenceMatcher(None, text1, text2).ratio()
-  return (
-      text_similarity(text1, text2, ignore_case=ignore_case)
-      >= _MIN_DIFF_SIMILARITY
-  )
+  if not text1 or not text2:
+    return False
+
+  # Take the best of full-string and substring similarity. `ratio()` alone is
+  # sensitive to length differences, so a value carrying a short suffix/prefix
+  # (e.g. "Urgent" vs "Urgent. Reimbursable.") falls below the threshold even
+  # though the core text is a clean substring; `partial_ratio()` returns 100 for
+  # that pair. `partial_ratio()` alone, conversely, undershoots a mid-string
+  # insertion ("Elm St" vs "Elm Street"). The max is substring-friendly without
+  # regressing existing matches.
+  return max(
+      fuzz.ratio(text1, text2), fuzz.partial_ratio(text1, text2)
+  ) >= _MIN_DIFF_SIMILARITY * 100
