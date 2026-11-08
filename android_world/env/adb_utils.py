@@ -1108,12 +1108,15 @@ def extract_broadcast_data(raw_output: str) -> Optional[str]:
   Returns:
     Extracted data as a string, or None if the result is 0.
   """
-  if 'Broadcast completed: result=-1, data=' in raw_output:
-    return raw_output.split('data=')[1].strip('"\r\n')
-  elif 'Broadcast completed: result=0' in raw_output:
+  # Use full validated marker to avoid splitting at earlier data= lines
+  # (e.g., Broadcasting: Intent { ... data=uri}). Find the completed line.
+  marker = 'Broadcast completed: result=-1, data='
+  idx = raw_output.find(marker)
+  if idx != -1:
+    return raw_output[idx + len(marker):].rstrip().strip('"')
+  if 'Broadcast completed: result=0' in raw_output:
     return None
-  else:
-    raise ValueError(f'Unexpected broadcast output: {raw_output}')
+  raise ValueError(f'Unexpected broadcast output: {raw_output}')
 
 
 def _extract_clipper_output(raw_output: str) -> str:
