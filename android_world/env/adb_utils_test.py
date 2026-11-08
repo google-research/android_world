@@ -263,6 +263,15 @@ class TestExtractBroadcastData(absltest.TestCase):
     result = adb_utils.extract_broadcast_data(raw_output)
     self.assertEqual(result, 'https://example.com/login?redirect=data=42')
 
+  def test_preamble_with_data_in_intent_is_ignored(self):
+    raw_output = (
+        'Broadcasting: Intent { act=android.intent.action.MAIN'
+        ' dat=content://auth/path data=uri }\n'
+        'Broadcast completed: result=-1, data="the_payload"\n'
+    )
+    result = adb_utils.extract_broadcast_data(raw_output)
+    self.assertEqual(result, 'the_payload')
+
   def test_unexpected_output_raises_error(self):
     raw_output = 'Unexpected output format'
     with self.assertRaises(ValueError):
