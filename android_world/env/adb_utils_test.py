@@ -260,6 +260,18 @@ class TestExtractBroadcastData(absltest.TestCase):
     with self.assertRaises(ValueError):
       adb_utils.extract_broadcast_data(raw_output)
 
+  def test_preamble_with_data_uri_in_intent_not_truncated(self):
+    # Regression: ensure earlier 'Broadcasting: ... data=uri' lines don't
+    # cause truncation when using split(data=). The payload itself contains
+    # a data= parameter that must be preserved.
+    preamble = (
+        "Broadcasting: Intent { action=android.intent.action.MAIN data=uri }\n"
+        "Broadcast completed: result=-1, data=\"redirect=data=42&foo=bar\"\n"
+    )
+    expected_result = 'redirect=data=42&foo=bar'
+    result = adb_utils.extract_broadcast_data(preamble)
+    self.assertEqual(result, expected_result)
+
 
 class TestScreenUtils(absltest.TestCase):
 
