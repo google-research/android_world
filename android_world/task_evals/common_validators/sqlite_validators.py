@@ -121,6 +121,7 @@ def validate_rows_addition_integrity(
     reference_rows: list[sqlite_schema_utils.RowType],
     compare_fields: list[str],
     free_form_fields: list[str] | None = None,
+    substring_fields: list[str] | None = None,
 ) -> bool:
   """Validates that specific rows have been added correctly without side effects.
 
@@ -136,6 +137,9 @@ def validate_rows_addition_integrity(
     compare_fields: Which fields to use for comparison for each row.
     free_form_fields: Free-form, text fields where fuzzy matching will be used
       for comparison.
+    substring_fields: Free-form text fields where a substring relationship is
+      also accepted as a match. These must be used sparingly, only where the
+      candidate legitimately extends the reference (e.g. an appended marker).
 
   Returns:
       bool: True if the rows were added correctly and other rows remained
@@ -145,6 +149,8 @@ def validate_rows_addition_integrity(
     raise ValueError("compare_fields must not be empty.")
   if not free_form_fields:
     free_form_fields = []
+  if not substring_fields:
+    substring_fields = []
 
   def db_row_matches_reference(
       reference_row: sqlite_schema_utils.RowType,
@@ -153,8 +159,15 @@ def validate_rows_addition_integrity(
     for field in compare_fields:
       reference_value = getattr(reference_row, field)
       candidate_value = getattr(row, field)
+      # Substring-tolerant matching for the narrow set of fields where the
+      # candidate may carry an extra prefix/suffix (e.g. expense note).
+      if field in substring_fields:
+        if not fuzzy_match_lib.fuzzy_match_substring(
+            reference_value, candidate_value
+        ):
+          return False
       # Fuzzy match for text fields.
-      if field in free_form_fields:
+      elif field in free_form_fields:
         if not fuzzy_match_lib.fuzzy_match(reference_value, candidate_value):
           return False
       else:

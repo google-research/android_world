@@ -282,6 +282,9 @@ class _ExpenseAddMultiple(_Expense, sqlite_validators.AddMultipleRows):
             'name',
             'note',
         ],
+        substring_fields=[
+            'note',
+        ],
     )
 
   @classmethod
