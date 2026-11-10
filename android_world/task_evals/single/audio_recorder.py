@@ -114,13 +114,17 @@ class AudioRecorderRecordAudioWithFileName(_AudioRecorder):
   def is_successful(self, env: interface.AsyncEnv) -> float:
     super().is_successful(env)
     file_name = self.params["file_name"]
+    data_dir = self.create_file_task.data_directory
     # `file_name` already carries the `.m4a` extension: it is produced by
     # `generate_modified_file_name(random.choice(name) + ".m4a")`, which
-    # preserves the extension. Appending another `.m4a` made the verifier look
-    # for a double-extension file (`<name>.m4a.m4a`) that never exists, so the
-    # task could never pass.
+    # preserves the extension via `os.path.splitext`. The goal text shows that
+    # extension, so a well-behaved agent may either omit it in the rename dialog
+    # (the app appends `.m4a` -> `<name>.m4a`) or type it literally (the app
+    # appends another `.m4a` -> `<name>.m4a.m4a`). Accept both spellings.
     exists = file_utils.check_file_or_folder_exists(
-        file_name, self.create_file_task.data_directory, env.controller
+        file_name, data_dir, env.controller
+    ) or file_utils.check_file_or_folder_exists(
+        file_name + ".m4a", data_dir, env.controller
     )
     if not exists:
       logging.info("%s not found", file_name)
