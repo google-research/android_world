@@ -70,17 +70,52 @@ class AudioRecorderTest(test_utils.AdbEvalTestBase):
     self.assertEqual(result, 1)
 
   def test_audio_recorder_with_file_is_successful(self):
-    self.mock_check_file_or_folder_exists.return_value = False
+    # `file_name` already carries its `.m4a` extension. An agent that omits the
+    # extension in the rename dialog makes the app save `<name>.m4a`, which the
+    # verifier finds on its first lookup.
+    self.mock_check_file_or_folder_exists.return_value = True
     params = {
-        "file_name": "random_file_name",
+        "file_name": "random_file_name.m4a",
         "text": "",  # Unused.
     }
     task = audio_recorder.AudioRecorderRecordAudioWithFileName(params)
     task.initialize_task(self.mock_env)
 
-    self.mock_check_file_or_folder_exists.return_value = True
     result = task.is_successful(self.mock_env)
     self.assertEqual(result, 1)
+    self.mock_check_file_or_folder_exists.assert_called_once_with(
+        "random_file_name.m4a",
+        task.create_file_task.data_directory,
+        self.mock_env.controller,
+    )
+
+  def test_audio_recorder_with_file_double_extension_is_successful(self):
+    # An agent that types the extension literally (the goal text shows `.m4a`)
+    # makes the app append another `.m4a`, saving `<name>.m4a.m4a`. The verifier
+    # must accept that spelling too (regression test for the double-`.m4a` bug).
+    self.mock_check_file_or_folder_exists.side_effect = [False, True]
+    params = {
+        "file_name": "random_file_name.m4a",
+        "text": "",  # Unused.
+    }
+    task = audio_recorder.AudioRecorderRecordAudioWithFileName(params)
+    task.initialize_task(self.mock_env)
+
+    result = task.is_successful(self.mock_env)
+    self.assertEqual(result, 1)
+    self.assertEqual(self.mock_check_file_or_folder_exists.call_count, 2)
+
+  def test_audio_recorder_with_file_not_found(self):
+    self.mock_check_file_or_folder_exists.return_value = False
+    params = {
+        "file_name": "random_file_name.m4a",
+        "text": "",  # Unused.
+    }
+    task = audio_recorder.AudioRecorderRecordAudioWithFileName(params)
+    task.initialize_task(self.mock_env)
+
+    result = task.is_successful(self.mock_env)
+    self.assertEqual(result, 0)
 
 
 if __name__ == "__main__":
