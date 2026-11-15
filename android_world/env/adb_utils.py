@@ -162,7 +162,9 @@ _PATTERN_TO_ACTIVITY = immutabledict.immutabledict({
         'de.dennisguse.opentracks/de.dennisguse.opentracks.TrackListActivity'
     ),
     'joplin|joplin app': 'net.cozic.joplin/.MainActivity',
-    'vlc|vlc app|vlc player': 'org.videolan.vlc/.gui.MainActivity',
+    # Launcher entry. Starting .gui.MainActivity directly never starts VLC's
+    # media library, so the app sits on "Loading.." and playlists can't save.
+    'vlc|vlc app|vlc player': 'org.videolan.vlc/.StartActivity',
     'retro music|retro|retro player': (
         'code.name.monkey.retromusic/.activities.MainActivity'
     ),
