@@ -465,6 +465,11 @@ def clear_internal_storage(env: interface.AsyncEnv) -> None:
       "1",
       "-type",
       "f",  # Regular file.
+      # Keep app-private external files (Android/data, Android/obb). Deleting
+      # them wipes app assets, e.g. OsmAnd's offline maps and VLC's media
+      # library files.
+      "!", "-path", '"*/Android/data/*"',
+      "!", "-path", '"*/Android/obb/*"',
       "-delete",
   ]
   adb_utils.issue_generic_request(adb_command, env.controller)
