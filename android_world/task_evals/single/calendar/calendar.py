@@ -377,7 +377,7 @@ class SimpleCalendarDeleteEventsOnRelativeDay(SimpleCalendarDeleteEvents):
 
   template = (
       "In Simple Calendar Pro, delete all events scheduled for this"
-      " {day_of_week}."
+      " {day_of_week}. Assume the week starts from Sunday."
   )
 
   @classmethod
